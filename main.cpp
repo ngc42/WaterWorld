@@ -16,7 +16,7 @@
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(800, 400), "Galactic");
+    sf::RenderWindow window(sf::VideoMode(800, 400), "Galactic", sf::Style::Titlebar);
     Manager manager(600, 400, 5, 1);
 
     InfoScreen infoscreen(600, /* 0, */ 200, 400, std::bind(ship_message_function,
@@ -68,6 +68,7 @@ int main()
             else if(event.type == sf::Event::KeyPressed)
             {
                 std::cout << "Key pressed" << std::endl;
+                window.close();
             }
 
             else if (event.type == sf::Event::Closed)
