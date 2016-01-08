@@ -1,3 +1,8 @@
+/* This file is part of WaterWorld.
+ * License GPL Version 3, see file "LICENSE" for details
+ * Author Eike Lange
+ */
+
 #ifndef WATEROBJECT_H
 #define WATEROBJECT_H
 
@@ -23,6 +28,12 @@ struct  WaterObject
     sf::Color color() const { return m_color; }
 
 
+    /* *********************************** */
+    /* Data begins here                    */
+    /* *********************************** */
+
+
+protected:
     unsigned int m_id;
     unsigned int m_owner;
     sf::Vector2f m_pos;

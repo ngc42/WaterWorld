@@ -1,3 +1,8 @@
+/* This file is part of WaterWorld.
+ * License GPL Version 3, see file "LICENSE" for details
+ * Author Eike Lange
+ */
+
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <functional> // std::bind
@@ -6,12 +11,6 @@
 #include "ship.h"
 #include "screens.h"
 #include "manager.h"
-#include <functional>
-
-
-
-
-
 
 
 int main()
@@ -19,10 +18,12 @@ int main()
     sf::RenderWindow window(sf::VideoMode(800, 400), "Galactic", sf::Style::Titlebar);
     Manager manager(600, 400, 5, 1);
 
-    InfoScreen infoscreen(600, /* 0, */ 200, 400, std::bind(ship_message_function,
-                                                            manager,
-                                                            std::placeholders::_1,
-                                                            std::placeholders::_2));
+    InfoScreen infoscreen(
+                600, /* 0, */ 200, 400,
+                std::bind(ship_message_function,
+                          manager,
+                          std::placeholders::_1,
+                          std::placeholders::_2));
     while (window.isOpen())
     {
         sf::Event event;
@@ -46,9 +47,9 @@ int main()
                     {
                         if(iInfo.owner == 1) /* Human player */
                         {
-                            TShipInfoCommands infoCommands;
-                            manager.shipInfoCommandsByIsleInfo(infoCommands, iInfo);
-                            infoscreen.showHumanIsle(iInfo, infoCommands);
+                            TShipInfos infos;
+                            manager.shipInfosByIsleInfo(infos, iInfo);
+                            infoscreen.showHumanIsle(iInfo, infos);
                         }
                         else /* other player or empty isle */
                             infoscreen.showIsle(iInfo);

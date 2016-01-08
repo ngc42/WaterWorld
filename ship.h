@@ -1,3 +1,8 @@
+/* This file is part of WaterWorld.
+ * License GPL Version 3, see file "LICENSE" for details
+ * Author Eike Lange
+ */
+
 #ifndef SHIP_H
 #define SHIP_H
 
@@ -15,7 +20,6 @@ struct ShipInfo
     TShipPosType posType;
     unsigned int isleId;        // if not on ocean
 };
-
 
 
 struct Ship : WaterObject
@@ -64,6 +68,12 @@ public:
                inY > (myPos.y - m_halfWidth) and
                inY < (myPos.y + m_halfWidth);
     }
+
+
+    /* *********************************** */
+    /* Data begins here                    */
+    /* *********************************** */
+
 
 private:
     sf::Vector2f m_pos;

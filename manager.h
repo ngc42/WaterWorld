@@ -1,3 +1,8 @@
+/* This file is part of WaterWorld.
+ * License GPL Version 3, see file "LICENSE" for details
+ * Author Eike Lange
+ */
+
 #ifndef MANAGER_H
 #define MANAGER_H
 
@@ -9,9 +14,6 @@
 
 #include "isle.h"
 #include "ship.h"
-
-
-
 
 
 /* Postoffice' job is just to support a friend function. This friend function
@@ -36,15 +38,7 @@ void ship_message_function(Postoffice & receiver, Postoffice::TShipMessageEnum m
 }
 
 
-
-struct ShipInfoCommand
-{
-    ShipInfo shipInfo;
-    // ... commands like setting targets and so on
-
-};
-
-typedef std::vector<ShipInfoCommand> TShipInfoCommands;
+typedef std::vector<ShipInfo> TShipInfos;
 
 
 struct Manager : Postoffice
@@ -171,12 +165,12 @@ struct Manager : Postoffice
     }
 
 
-    bool shipInfoCommandsByIsleInfo(TShipInfoCommands & outShipInfoCommands, IsleInfo inInfo)
+    bool shipInfosByIsleInfo(TShipInfos & outShipInfos, IsleInfo inInfo)
     {
         ShipInfo sInfo;
         if(inInfo.owner != 1) /* just for human players. Enemie ships are not our business */
             return false;
-        outShipInfoCommands.clear();
+        outShipInfos.clear();
         for(Ship *ship: m_ships)
         {
             if(ship->postionType() != TShipPosType::S_OCEAN)
@@ -185,15 +179,13 @@ struct Manager : Postoffice
                 if( (sInfo.owner == 1 /* Human Player */) and
                     (inInfo.id == sInfo.isleId /* same isle */))
                 {
-                    ShipInfoCommand cmd;
-                    cmd.shipInfo = sInfo;
-                    outShipInfoCommands.push_back(cmd);
-                    std::cout << "shipInfoCommandsByIsleInfo() -> append ship" << sInfo.id << std::endl;
+                    outShipInfos.push_back(sInfo);
+                    std::cout << "shipInfosByIsleInfo() -> append ship" << sInfo.id << std::endl;
 
                 }
             }
         }
-        if(outShipInfoCommands.empty())
+        if(outShipInfos.empty())
             return false;
         return true;
     }
@@ -215,11 +207,9 @@ struct Manager : Postoffice
     /* Data begins here                    */
     /* *********************************** */
 
-    std::vector<Isle*> m_isles;
-    std::list<Ship*> m_ships;
-    unsigned int m_lastInsertedId;
-
+    std::vector<Isle*> m_isles;     // all isles
+    std::list<Ship*> m_ships;       // all ships
+    unsigned int m_lastInsertedId;  // every ship or isle gets a unique id. this stores the next one.
 };
-
 
 #endif // MANAGER_H

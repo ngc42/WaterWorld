@@ -17,6 +17,13 @@ struct Isle : WaterObject
 {
 public:
     // constructor
+    /**
+     * @brief Isle - constructs an isle
+     * @param inId - id of this water object
+     * @param inOwner - owner of this isle. no-owner: 0, human: 1, enemy: 2..N
+     * @param inPos - position on ocean
+     * @param inColor - color to render
+     */
     Isle(const unsigned int inId,
          const unsigned int inOwner,
          const sf::Vector2f inPos,
@@ -30,11 +37,18 @@ public:
     }
 
 
-
     // getter
+    /**
+     * @brief shape returns visual, just call window.draw() on it
+     *
+     */
     sf::CircleShape shape() const { return m_shape; }
 
 
+    /**
+     * @brief Returns some basic info. Used inside of infoscreens
+     *
+     */
     IsleInfo info()
     {
         IsleInfo outInfo;
@@ -45,6 +59,11 @@ public:
     }
 
     // setter
+
+    /**
+     * @brief Sets the new owner of the isle
+     *
+     */
     void setOwner(const unsigned int inOwner, const sf::Color inColor)
     {
         m_owner = inOwner;
@@ -54,6 +73,12 @@ public:
 
 
     // tester
+    /**
+     * @brief - tests, if a given point is inside the isle rect
+     * @param inX - x coordinate
+     * @param inY - y coordinate of a point, mouse pointer for example
+     * @return - true, if a given point is inside of an isle square
+     */
     bool pointInIsle(const int inX, const int inY)
     {
         sf::Vector2f myPos = pos();
@@ -64,8 +89,8 @@ public:
 
 
 private:
-    float m_radius; // @fixme: hardcoded here and in ships.{h,cpp}
-    sf::CircleShape m_shape;
+    float m_radius;             // @fixme: hardcoded here and in ships.{h,cpp}
+    sf::CircleShape m_shape;    // display of the isle
 };
 
 #endif // ISLE_H

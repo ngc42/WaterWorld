@@ -1,3 +1,8 @@
+/* This file is part of WaterWorld.
+ * License GPL Version 3, see file "LICENSE" for details
+ * Author Eike Lange
+ */
+
 #ifndef SCREENS_H
 #define SCREENS_H
 
@@ -6,11 +11,10 @@
 #include <algorithm>        // std::min
 #include <functional>
 #include <string>
+
 #include <isle.h>
 #include <ship.h>
 #include <manager.h>
-
-
 
 
 struct ShipListList
@@ -105,22 +109,22 @@ struct ShipListList
 
     void processActionDeleteShip()
     {
-        ShipInfoCommand cmd = m_shipInfoCommands.at(m_highlightedLabel);
-        m_shipMessageFunction(Postoffice::M_DELETE_SHIP, cmd.shipInfo.id);
+        ShipInfo si = m_shipInfos.at(m_highlightedLabel);
+        m_shipMessageFunction(Postoffice::M_DELETE_SHIP, si.id);
     }
 
 
     void processActionSetTargetForShip()
     {
-        ShipInfoCommand cmd = m_shipInfoCommands.at(m_highlightedLabel);
-        m_shipMessageFunction(Postoffice::M_SET_TARGET, cmd.shipInfo.id);
+ShipInfo si = m_shipInfos.at(m_highlightedLabel);
+m_shipMessageFunction(Postoffice::M_SET_TARGET, si.id);
     }
 
 
     void processActionSetPatrol()
     {
-        ShipInfoCommand cmd = m_shipInfoCommands.at(m_highlightedLabel);
-        m_shipMessageFunction(Postoffice::M_PATROL, cmd.shipInfo.id);
+ShipInfo si = m_shipInfos.at(m_highlightedLabel);
+        m_shipMessageFunction(Postoffice::M_PATROL, si.id);
     }
 
 
@@ -188,6 +192,7 @@ struct ShipListList
         m_renderTexture.clear();
         m_renderTexture.draw(m_actionButtons);
         m_renderTexture.draw(m_statusButtons);
+
         for(int i = 0; i < m_numLabelsToShow; i++)
         {
             m_renderTexture.draw(m_statusLabel[i]);
@@ -202,16 +207,15 @@ struct ShipListList
     }
 
 
-    void setShipInfoCommands(TShipInfoCommands inShipInfoCommands)
+    void setShipInfos(TShipInfos inShipInfos)
     {
-        m_shipInfoCommands = inShipInfoCommands;
+        m_shipInfos = inShipInfos;
 
-        m_numLabelsToShow = std::min(MAX_ROWS, (int) m_shipInfoCommands.size());
+        m_numLabelsToShow = std::min(MAX_ROWS, (int) m_shipInfos.size());
         for(int i = 0; i < m_numLabelsToShow; i++)
         {
-            ShipInfoCommand cmd = m_shipInfoCommands.at(i);
-            ShipInfo info = cmd.shipInfo;
-            std::string shipName = "Ship " + std::to_string(info.id);
+            ShipInfo si = m_shipInfos.at(i);
+            std::string shipName = "Ship " + std::to_string(si.id);
             m_nameLabels[i].setString(shipName);
         }
     }
@@ -248,12 +252,11 @@ struct ShipListList
     sf::Text m_techLabels[MAX_ROWS];    // Techlevel
 
     // Displaying ships
-    TShipInfoCommands m_shipInfoCommands;
+    TShipInfos m_shipInfos;
     int m_numLabelsToShow;              // 0..MAX_ROWS-1, min(NumberOfShips, MAX_ROWS)
     int m_highlightedLabel;             // number of highlighted label or -1
     std::function<void(Postoffice::TShipMessageEnum, unsigned int)>
         m_shipMessageFunction;  // message function to Manager
-
 };
 
 
@@ -278,7 +281,6 @@ struct InfoScreen
         m_xPos = inXPos * 1.0f;
         m_screenType = TScreenType::I_NOTHING;
 
-
         m_rectangle.setSize({m_width, m_height});
         m_rectangle.setFillColor(sf::Color(255, 0, 255, 128));
         m_rectangle.setPosition({m_xPos, 0.0f});
@@ -296,12 +298,10 @@ struct InfoScreen
         m_posText.setColor(sf::Color::Yellow);
         m_posText.setPosition({m_xPos + 10.0f, 30.0f});
 
-
         m_idOwnerText.setFont(m_font);
         m_idOwnerText.setCharacterSize(14);
         m_idOwnerText.setColor(sf::Color::Yellow);
         m_idOwnerText.setPosition({m_xPos + 10.0f, 30.0f});
-
 
         /* items for human player's isle */
         m_sectionFont.loadFromFile("FreeMono.ttf");
@@ -313,7 +313,6 @@ struct InfoScreen
         m_listItemHeight = 15.0f;
 
         m_shipListList.init(inXPos + 2, 100, inWidth-4, inHeight - 200, inMessageFunction);
-
     }
 
 
@@ -383,13 +382,13 @@ struct InfoScreen
     }
 
 
-    void showHumanIsle(IsleInfo inIsleInfo, TShipInfoCommands inShipInfoCommands)
+    void showHumanIsle(IsleInfo inIsleInfo, TShipInfos inShipInfos)
     {
         m_rectangle.setFillColor(sf::Color(20, 20, 255, 128));
         m_titleText.setString("Human Isle");
         std::string s = "ID: " + std::to_string(inIsleInfo.id) + ", Owner: Player";
         m_idOwnerText.setString(s);
-        m_shipListList.setShipInfoCommands(inShipInfoCommands);
+        m_shipListList.setShipInfos(inShipInfos);
         m_screenType = TScreenType::I_HUMAN_ISLE;
     }
 
@@ -415,7 +414,6 @@ struct InfoScreen
     float m_xPos;               // position (relative to main screen, see main.cpp)
     float m_width, m_height;    // width, height of this infoscreen
     TScreenType m_screenType;   // current active screen
-
 
     sf::Font m_font;            // font for text items
     sf::Text m_titleText;       // Title of screen
