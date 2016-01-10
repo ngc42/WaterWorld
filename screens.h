@@ -116,14 +116,14 @@ struct ShipListList
 
     void processActionSetTargetForShip()
     {
-ShipInfo si = m_shipInfos.at(m_highlightedLabel);
-m_shipMessageFunction(Postoffice::M_SET_TARGET, si.id);
+        ShipInfo si = m_shipInfos.at(m_highlightedLabel);
+        m_shipMessageFunction(Postoffice::M_SET_TARGET, si.id);
     }
 
 
     void processActionSetPatrol()
     {
-ShipInfo si = m_shipInfos.at(m_highlightedLabel);
+        ShipInfo si = m_shipInfos.at(m_highlightedLabel);
         m_shipMessageFunction(Postoffice::M_PATROL, si.id);
     }
 
@@ -211,12 +211,33 @@ ShipInfo si = m_shipInfos.at(m_highlightedLabel);
     {
         m_shipInfos = inShipInfos;
 
+        // start with fresh labels
+        for(int i = 0; i < MAX_ROWS; i++)
+        {
+            m_nameLabels[i].setColor(sf::Color::White);
+            m_nameLabels[i].setStyle(sf::Text::Regular);
+        }
+
         m_numLabelsToShow = std::min(MAX_ROWS, (int) m_shipInfos.size());
         for(int i = 0; i < m_numLabelsToShow; i++)
         {
             ShipInfo si = m_shipInfos.at(i);
             std::string shipName = "Ship " + std::to_string(si.id);
             m_nameLabels[i].setString(shipName);
+            switch(si.posType)
+            {
+            case TShipPosType::S_PATRUILLE:
+                m_statusLabel[i].setTextureRect({0, 0, 11, 11});
+                break;
+             case TShipPosType::S_TRASH:
+                m_statusLabel[i].setTextureRect({11, 0, 11, 11});
+                break;
+             default:
+                m_statusLabel[i].setTextureRect({33, 0, 11, 11});
+                break;
+            }
+
+
         }
     }
 

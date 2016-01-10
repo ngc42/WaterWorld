@@ -24,7 +24,7 @@ struct Postoffice
 {
     enum TShipMessageEnum { M_DELETE_SHIP, M_SET_TARGET, M_PATROL } ;
 
-    friend void ship_message_function(Postoffice & receiver, TShipMessageEnum msg, unsigned int shipId);
+    friend void ship_message_function(Postoffice * receiver, TShipMessageEnum msg, unsigned int shipId);
 
     // this is what is received by derived classes
     virtual void receive_ship_message(TShipMessageEnum msg, unsigned int shipId) = 0;
@@ -32,9 +32,9 @@ struct Postoffice
 };
 
 /* this is called from whoever wants to send ship messages to Manager */
-void ship_message_function(Postoffice & receiver, Postoffice::TShipMessageEnum msg, unsigned int shipId)
+void ship_message_function(Postoffice * receiver, Postoffice::TShipMessageEnum msg, unsigned int shipId)
 {
-    receiver.receive_ship_message(msg, shipId);
+    receiver->receive_ship_message(msg, shipId);
 }
 
 
@@ -50,6 +50,9 @@ struct Manager : Postoffice
     {
         assert( inNumIsles > inNumEnemies );
         m_lastInsertedId = 0;
+
+        m_shipWithIdWantsANewTarget = 0;
+
         for(unsigned int i = 0; i < inNumIsles; i++)
         {
             m_lastInsertedId++;
@@ -196,9 +199,37 @@ struct Manager : Postoffice
      * @param inMsg - the command (delete ship, ...)
      * @param inShipId - unique id of the ship
      */
-    virtual void receive_ship_message(Postoffice::TShipMessageEnum inMsg, unsigned int inShipId)
+    void receive_ship_message(Postoffice::TShipMessageEnum inMsg, unsigned int inShipId)
     {
         std::cout << "Manager: Receive a message for ship " << inShipId << std::endl;
+        Ship *actionShip = 0;
+        for(Ship *s : m_ships)
+        {
+            if(s->id() == inShipId)
+            {
+                actionShip = s;
+                break;
+            }
+        }
+        switch(inMsg)
+        {
+        case M_DELETE_SHIP:
+            // with nextround(), the ship gets deleted
+            actionShip->setPositionType(TShipPosType::S_TRASH);
+            break;
+        case M_SET_TARGET:
+            if(m_shipWithIdWantsANewTarget == inShipId)
+                m_shipWithIdWantsANewTarget = 0;
+            else
+                this->m_shipWithIdWantsANewTarget = inShipId;
+            std::cout << " --> ship wants new target " <<  this->m_shipWithIdWantsANewTarget << std::endl;
+            // lot of things to do
+            //actionShip.setPositionType(TShipPosType::S_OCEAN);
+            break;
+        case M_PATROL:
+            actionShip->setPositionType(TShipPosType::S_PATRUILLE);
+            break;
+        }
     }
 
 
@@ -210,6 +241,7 @@ struct Manager : Postoffice
     std::vector<Isle*> m_isles;     // all isles
     std::list<Ship*> m_ships;       // all ships
     unsigned int m_lastInsertedId;  // every ship or isle gets a unique id. this stores the next one.
+    unsigned int m_shipWithIdWantsANewTarget;   // > 0, if a ship (with this id) wants a new target
 };
 
 #endif // MANAGER_H

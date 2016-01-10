@@ -8,7 +8,19 @@
 
 #include "waterobject.h"
 
-enum TShipPosType {S_ONISLE, S_PATRUILLE, S_OCEAN};
+
+enum TTargetType {T_SHIP, T_ISLE, T_WATER};
+
+struct Target
+{
+    bool validTarget;
+    TTargetType tType;
+    unsigned int id;  // ship or isle id
+    sf::Vector2f pos;
+};
+
+
+enum TShipPosType {S_ONISLE, S_PATRUILLE, S_OCEAN, S_TRASH};
 
 /* Things we get to know, if we click on a ship */
 struct ShipInfo
@@ -19,13 +31,13 @@ struct ShipInfo
     sf::Vector2f pos;
     TShipPosType posType;
     unsigned int isleId;        // if not on ocean
+    bool hasTarget;
 };
 
 
 struct Ship : WaterObject
 {
 public:
-
     Ship(const unsigned int inId, const unsigned int inOwner, const sf::Vector2f inPos,
          const sf::Color inColor, const TShipPosType inPosType, unsigned int inIsleId)
         :  WaterObject(inId, inOwner, inPos, inColor),
@@ -36,6 +48,7 @@ public:
         m_shape.setSize(sf::Vector2f(2.0f * m_halfWidth, 2.0f * m_halfWidth));
         m_shape.setPosition(inPos.x - m_halfWidth, inPos.y - m_halfWidth);
         m_shape.setFillColor(inColor);
+        m_target.validTarget = false;
     }
 
 
@@ -55,9 +68,16 @@ public:
         outInfo.pos = m_pos;
         outInfo.posType = m_positionType;
         outInfo.isleId = m_onIsleById;
+        outInfo.hasTarget = m_target.validTarget;
         return outInfo;
     }
 
+
+    // setter
+    void setPositionType(TShipPosType inType)
+    {
+        m_positionType = inType;
+    }
 
     // tester
     bool pointInShip(const int inX, const int inY)
@@ -81,6 +101,8 @@ private:
     TShipPosType m_positionType;
     unsigned int m_onIsleById;
     float m_halfWidth;
+
+    Target m_target;
 
 };
 
