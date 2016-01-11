@@ -33,9 +33,6 @@ int main()
     sf::Sprite mouseSprite(mouseNormalTexture);
 
     bool shipWantsTarget = false;
-
-
-
     window.setMouseCursorVisible(false);
 
     while (window.isOpen())
@@ -43,7 +40,8 @@ int main()
         sf::Event event;
         while (window.pollEvent(event))
         {
-            if(event.type == sf::Event::MouseButtonPressed)
+            if(event.type == sf::Event::MouseButtonPressed and
+               event.mouseButton.button == sf::Mouse::Left)
             {
                 bool foundClickTarget = infoscreen.pointInfoscreen(event.mouseButton.x);
 
@@ -129,7 +127,7 @@ int main()
                                              ")" << std::endl;
                                 manager->setTargetForShip(manager->m_shipWithIdWantsANewTarget,
                                                           TTargetType::T_WATER, 0,
-                                                          {event.mouseButton.x, event.mouseButton.y});
+                                                          {1.0f * event.mouseButton.x, 1.0f * event.mouseButton.y});
                                 // clean up
                                 shipWantsTarget = false;
                                 manager->m_shipWithIdWantsANewTarget = 0;
@@ -141,12 +139,15 @@ int main()
                     }
                 }
             }
+            else if(event.type == sf::Event::MouseButtonPressed and
+                    event.mouseButton.button == sf::Mouse::Right)
+            {
+                manager->nextRound();
+            }
             else if(event.type == sf::Event::KeyPressed)
             {
-                std::cout << "Key pressed" << std::endl;
                 window.close();
             }
-
             else if (event.type == sf::Event::Closed)
             {
                 window.close();
@@ -161,7 +162,7 @@ int main()
         // draw ships on ocean
         for(Ship *ship : manager->m_ships)
         {
-            if(ship->postionType() == TShipPosType::S_OCEAN)
+            if(ship->positionType() == TShipPosType::S_OCEAN)
                 window.draw(ship->shape());
         }
 

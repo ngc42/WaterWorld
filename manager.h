@@ -186,6 +186,7 @@ struct Manager : Postoffice
         return false;
     }
 
+
     /**
      * @brief shipInfoByPos: returns ShipInfo if coordinates match a ship on the ocean
      * @param outInfo valid ShipInfo returned to caller, if (inX, inY) is point on ship, else undefined
@@ -197,7 +198,7 @@ struct Manager : Postoffice
     {
         for(Ship *ship: m_ships)
         {
-            if(ship->pointInShip(inX, inY) and (ship->postionType() == TShipPosType::S_OCEAN))
+            if(ship->pointInShip(inX, inY) and (ship->positionType() == TShipPosType::S_OCEAN))
             {
                 outInfo = ship->info();
                 return true;
@@ -215,7 +216,7 @@ struct Manager : Postoffice
         outShipInfos.clear();
         for(Ship *ship: m_ships)
         {
-            if(ship->postionType() != TShipPosType::S_OCEAN)
+            if(ship->positionType() != TShipPosType::S_OCEAN)
             {
                 sInfo = ship->info();
                 if( (sInfo.owner == 1 /* Human Player */) and
@@ -297,7 +298,22 @@ struct Manager : Postoffice
     }
 
 
+    void nextRound()
+    {
+        std::vector<unsigned int> delete_ships;
 
+        for(Ship *s : m_ships)
+        {
+            if( s->nextRound() )
+            {
+                std::cout << "ship arrived at" ;
+                if( s->positionType() == TShipPosType::S_TRASH )
+                {
+                    std::cout << "heaven";
+                }
+            }
+        }
+    }
 
     /* *********************************** */
     /* Data begins here                    */

@@ -6,6 +6,8 @@
 #ifndef SHIP_H
 #define SHIP_H
 
+#include <cmath>
+
 #include "waterobject.h"
 
 
@@ -56,7 +58,7 @@ public:
     sf::RectangleShape shape() const { return m_shape; }
 
 
-    TShipPosType postionType() const { return m_positionType; }
+    TShipPosType positionType() const { return m_positionType; }
 
 
     ShipInfo info()
@@ -114,7 +116,35 @@ public:
     }
 
 
+    bool nextRound()
+    {
+        if(m_positionType == TShipPosType::S_TRASH)
+            return true;    // arrived in heaven;
 
+        if(m_target.validTarget)
+        {
+            // Rod_Steward::Sailing, YouTube::DyIw0gcgfik
+
+            m_positionType = TShipPosType::S_OCEAN;
+            float dx = m_pos.x - m_target.pos.x;
+            float dy = m_pos.y - m_target.pos.y;
+
+            float d = sqrt( dx * dx + dy * dy );
+
+            // @fixme: hardcoded velocity
+            if(d <= 2.0f)
+                return true;
+
+            float ex = dx / d;
+            float ey = dy / d;
+
+            // @fixme: hardcoded velocity
+            m_pos = sf::Vector2f{m_pos.x + 20.0f * ex, m_pos.y + 10.0f * ey};
+
+            std::cout << "sailing..." << std::endl;
+        }
+        return false;
+    }
 
 
     // tester
