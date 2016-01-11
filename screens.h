@@ -226,19 +226,21 @@ struct ShipListList
             m_nameLabels[i].setString(shipName);
             switch(si.posType)
             {
-            case TShipPosType::S_PATRUILLE:
-                m_statusLabel[i].setTextureRect({0, 0, 11, 11});
-                break;
-             case TShipPosType::S_TRASH:
-                m_statusLabel[i].setTextureRect({11, 0, 11, 11});
-                break;
-             default:
-                m_statusLabel[i].setTextureRect({33, 0, 11, 11});
-                break;
+                case TShipPosType::S_PATRUILLE:
+                    m_statusLabel[i].setTextureRect({0, 0, 11, 11});
+                    break;
+                case TShipPosType::S_TRASH:
+                    m_statusLabel[i].setTextureRect({11, 0, 11, 11});
+                    break;
+                default:
+                    if(si.hasTarget)
+                        m_statusLabel[i].setTextureRect({22, 0, 11, 11});
+                    else
+                        m_statusLabel[i].setTextureRect({33, 0, 11, 11});
+                    break;
             }
-
-
         }
+
     }
 
 

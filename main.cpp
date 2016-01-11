@@ -73,7 +73,14 @@ int main()
                             std::cout << "ship with id " << manager->m_shipWithIdWantsANewTarget <<
                                          "wants target isle with id" <<
                                          iInfo.id << std::endl;
+                            // find out isle pos and set this as target for ship
+                            sf::Vector2f p;
+                            if (manager->islePosById(p, iInfo.id))
+                                manager->setTargetForShip(manager->m_shipWithIdWantsANewTarget,
+                                                          TTargetType::T_ISLE, iInfo.id, p);
+                            // clean up
                             shipWantsTarget = false;
+                            manager->m_shipWithIdWantsANewTarget = 0;
                             mouseSprite.setTexture(mouseNormalTexture);
                         }
                         else
@@ -98,7 +105,14 @@ int main()
                             {
                                 std::cout << "ship with id " << manager->m_shipWithIdWantsANewTarget <<
                                              "wants target otherr ship with id " << sInfo.id << std::endl;
+                                //find out ship pos
+                                sf::Vector2f p;
+                                if (manager->shipPosById(p, sInfo.id))
+                                    manager->setTargetForShip(manager->m_shipWithIdWantsANewTarget,
+                                                              TTargetType::T_SHIP, sInfo.id, p);
+                                // clean up
                                 shipWantsTarget = false;
+                                manager->m_shipWithIdWantsANewTarget = 0;
                                 mouseSprite.setTexture(mouseNormalTexture);
 
                             }
@@ -113,7 +127,12 @@ int main()
                                              "wants target water at (" <<
                                              event.mouseButton.x << "; " <<  event.mouseButton.y <<
                                              ")" << std::endl;
+                                manager->setTargetForShip(manager->m_shipWithIdWantsANewTarget,
+                                                          TTargetType::T_WATER, 0,
+                                                          {event.mouseButton.x, event.mouseButton.y});
+                                // clean up
                                 shipWantsTarget = false;
+                                manager->m_shipWithIdWantsANewTarget = 0;
                                 mouseSprite.setTexture(mouseNormalTexture);
                             }
                             else

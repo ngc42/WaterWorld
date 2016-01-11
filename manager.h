@@ -148,6 +148,45 @@ struct Manager : Postoffice
 
 
     /**
+     * @brief islePosById
+     * @param outPos pos of isle with given id
+     * @param inIsleId id of isle to retrive pos
+     * @return true, if inIsleId is valid
+     */
+    bool islePosById(sf::Vector2f  & outPos, const unsigned int inIsleId)
+    {
+        for(Isle *isle : m_isles)
+        {
+            if(isle->id() == inIsleId)
+            {
+                outPos = isle->pos();
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * @brief shipPosById
+     * @param outPos pos of ship with given id
+     * @param inShipId id of ship to retrive pos
+     * @return true, if inShipId is valid
+     */
+    bool shipPosById(sf::Vector2f  & outPos, const unsigned int inShipId)
+    {
+        for(Ship *ship : m_ships)
+        {
+            if(ship->id() == inShipId)
+            {
+                outPos = ship->pos();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @brief shipInfoByPos: returns ShipInfo if coordinates match a ship on the ocean
      * @param outInfo valid ShipInfo returned to caller, if (inX, inY) is point on ship, else undefined
      * @param inX mouse X pos
@@ -231,6 +270,32 @@ struct Manager : Postoffice
             break;
         }
     }
+
+
+    void setTargetForShip(const unsigned int inShipId,  const TTargetType inTargetType,
+                          const unsigned int inTargetId, const sf::Vector2f inTargetPos)
+    {
+        for(Ship *s : m_ships)
+        {
+            if(s->id() == inShipId)
+            {
+                switch(inTargetType)
+                {
+                    case TTargetType::T_ISLE:
+                        s->setTargetIsle(inTargetId, inTargetPos);
+                        break;
+                    case TTargetType::T_SHIP:
+                        s->setTargetShip(inTargetId, inTargetPos);
+                        break;
+                    case TTargetType::T_WATER:
+                        s->setTargetWater(inTargetPos);
+                        break;
+                }
+                break;
+            }
+        }
+    }
+
 
 
 

@@ -79,6 +79,44 @@ public:
         m_positionType = inType;
     }
 
+
+    void setTargetIsle(const unsigned int inTargetIsleId, const sf::Vector2f inPos)
+    {
+        if((inTargetIsleId != m_onIsleById) or (m_positionType == TShipPosType::S_OCEAN))
+        {
+            m_target.id = inTargetIsleId;
+            m_target.pos = inPos;
+            m_target.tType = TTargetType::T_ISLE;
+            m_target.validTarget = true;
+        }
+    }
+
+
+    void setTargetShip(const unsigned int inTargetShipId, const sf::Vector2f inPos)
+    {
+        if(inTargetShipId != m_id)
+        {
+            m_target.id = inTargetShipId;
+            m_target.pos = inPos;
+            m_target.tType = TTargetType::T_SHIP;
+            m_target.validTarget = true;
+        }
+    }
+
+
+    void setTargetWater(const sf::Vector2f inPos)
+    {
+        m_target.id = 0;
+        m_target.pos = inPos;
+        m_target.tType = TTargetType::T_WATER;
+        m_target.validTarget = true;
+
+    }
+
+
+
+
+
     // tester
     bool pointInShip(const int inX, const int inY)
     {
