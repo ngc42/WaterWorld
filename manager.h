@@ -10,7 +10,8 @@
 #include <iostream>
 #include <functional>   // std::function
 #include <list>
-#include "assert.h"
+#include <set>
+#include <assert.h>
 
 #include "isle.h"
 #include "ship.h"
@@ -121,7 +122,7 @@ struct Manager : Postoffice
         unsigned int owner = refIsle->owner();
         sf::Vector2f iPos = refIsle->pos();
         sf::Color color = refIsle->color();
-        Ship *s = new Ship(m_lastInsertedId, owner, iPos, color, TShipPosType::S_ONISLE, refIsle->id());
+        Ship *s = new Ship(m_lastInsertedId, owner, iPos, color, ShipPositionEnum::S_ONISLE, refIsle->id());
         m_ships.push_back(s);
     }
 
@@ -218,7 +219,7 @@ struct Manager : Postoffice
     {
         for(Ship *ship: m_ships)
         {
-            if(ship->pointInShip(inX, inY) and (ship->positionType() == TShipPosType::S_OCEAN))
+            if(ship->pointInShip(inX, inY) and (ship->positionType() == ShipPositionEnum::S_OCEAN))
             {
                 outInfo = ship->info();
                 return true;
@@ -256,7 +257,7 @@ struct Manager : Postoffice
         outShipInfos.clear();
         for(Ship *ship: m_ships)
         {
-            if(ship->positionType() != TShipPosType::S_OCEAN)
+            if(ship->positionType() != ShipPositionEnum::S_OCEAN)
             {
                 sInfo = ship->info();
                 if( (sInfo.owner == 1 /* Human Player */) and
@@ -295,7 +296,7 @@ struct Manager : Postoffice
         {
             case M_DELETE_SHIP:
                 // with nextround(), the ship gets deleted
-                actionShip->setPositionType(TShipPosType::S_TRASH);
+                actionShip->setPositionType(ShipPositionEnum::S_TRASH);
                 break;
             case M_SET_TARGET:
                 if(m_shipWithIdWantsANewTarget == inShipId)
@@ -304,16 +305,16 @@ struct Manager : Postoffice
                     this->m_shipWithIdWantsANewTarget = inShipId;
                 std::cout << " --> ship wants new target " <<  this->m_shipWithIdWantsANewTarget << std::endl;
                 // lot of things to do
-                //actionShip.setPositionType(TShipPosType::S_OCEAN);
+                //actionShip.setPositionType(ShipPositionEnum::S_OCEAN);
                 break;
             case M_PATROL:
-                actionShip->setPositionType(TShipPosType::S_PATRUILLE);
+                actionShip->setPositionType(ShipPositionEnum::S_PATRUILLE);
                 break;
         }
     }
 
 
-    void setTargetForShip(const unsigned int inShipId,  const TTargetType inTargetType,
+    void setTargetForShip(const unsigned int inShipId,  const Target::TargetEnum inTargetType,
                           const unsigned int inTargetId, const sf::Vector2f inTargetPos)
     {
         for(Ship *s : m_ships)
@@ -322,13 +323,13 @@ struct Manager : Postoffice
             {
                 switch(inTargetType)
                 {
-                    case TTargetType::T_ISLE:
+                    case Target::TargetEnum::T_ISLE:
                         s->setTargetIsle(inTargetId, inTargetPos);
                         break;
-                    case TTargetType::T_SHIP:
+                    case Target::TargetEnum::T_SHIP:
                         s->setTargetShip(inTargetId, inTargetPos);
                         break;
-                    case TTargetType::T_WATER:
+                    case Target::TargetEnum::T_WATER:
                         s->setTargetWater(inTargetPos);
                         break;
                 }
@@ -338,13 +339,30 @@ struct Manager : Postoffice
     }
 
 
+    /**
+     * @brief let 2 ships fight against each other.
+     * @param inShip1 - id of ship 1
+     * @param inShip2 - id of ship 2
+     * @return id of the loooooser!!!
+     */
     unsigned int shipFightShip(const unsigned int inShip1, const unsigned int inShip2)
     {
-        return 0;
+
+        ShipInfo sInfo1;
+        ShipInfo sInfo2;
+
+        bool ret = shipInfoById(sInfo1, inShip1) and shipInfoById(sInfo2, inShip2);
+
+        assert(ret);
+        assert( sInfo1.owner != sInfo2.owner );
+
+        // @fixme: winner depending on ship->techlevel, ship->damage, ...
+
+        return (sInfo1.damage <= sInfo2.damage ) ? inShip2 : inShip1;
     }
 
 
-    void landOnTargetIsle(const unsigned int inShipId, const unsigned int inIsleId)
+    void landOnTargetIsle(std::set<unsigned int> & inoutDeleteShips, const unsigned int inShipId, const unsigned int inIsleId)
     {
         Ship *ship = 0;
         Isle *isle = 0;
@@ -382,35 +400,91 @@ struct Manager : Postoffice
         else
         {
             // enemy isle
+            unsigned int loser;
+            for(Ship *s : m_ships)
+            {
+
+                if(s->positionType() == ShipPositionEnum::S_PATRUILLE and s->id() == isle->id())
+                {
+                    // fight against each ship, which patrols the isle
+                    loser = shipFightShip(ship->id(), s->id());
+
+                    if(loser == ship->id())
+                    {
+                        ship->addDamage(2.0f);  // really damage ship so it gets eaten by sea monsters
+                        s->addDamage(0.2f);     // @fixme: damage should be derived from fight
+                        inoutDeleteShips.insert(ship->id());
+                        break;
+                    }
+                    else
+                    {
+                        ship->addDamage(0.2f);  // @fixme: damage should be derived from fight
+                        s->addDamage(2.0f);     // kill
+                        inoutDeleteShips.insert(s->id());
+                        if(ship->positionType() == ShipPositionEnum::S_TRASH)
+                        {
+                            inoutDeleteShips.insert(ship->id());
+                            break;  // ship is winner but dead
+                        }
+                    }
+
+                }
+            }
+
+
+            if(ship->positionType() != ShipPositionEnum::S_TRASH)
+            {
+                // we are still alive and want to fight the isle
+                // @fixme: a bit more logic...
+                if(ship->info().damage < 0.5f)
+                {
+                    std::cout << "DELETE SHIP id=" << ship->id() << std::endl;
+                    ship->addDamage(2.0f);
+                    inoutDeleteShips.insert(ship->id());
+                }
+                else
+                {
+                    // we win
+                    isle->setOwner(ship->owner(), ship->color());
+
+                    // every ship on this isle, which was not on patruille, is now captured.
+                    for(Ship *s : m_ships)
+                    {
+                        if(s->positionType() == ShipPositionEnum::S_ONISLE and s->id() == isle->id())
+                        {
+                            s->setOwner(ship->owner(), ship->color());
+                        }
+                    }
+                }
+            }
 
         }
-
-
     }
 
 
     void nextRound()
     {
-        std::vector<unsigned int> delete_ships;
+        //@fixme: update positions of ship-targets, if type is other_ship.
+
+        std::set<unsigned int> delete_ships;
 
         for(Ship *s : m_ships)
         {
             if( s->nextRound() )
             {
-                std::cout << "ship arrived at " ;
-                if( s->positionType() == TShipPosType::S_TRASH )
+                std::cout << "ship arrived somethere" << std::endl;
+                if( s->positionType() == ShipPositionEnum::S_TRASH )
                 {
-                    std::cout << "heaven" << std::endl;
-                    delete_ships.push_back(s->id());
+                    delete_ships.insert(s->id());
                 }
                 else
                 {
                     switch(s->target().tType)
                     {
-                        case TTargetType::T_ISLE:
-                            landOnTargetIsle(s->id(), s->target().id);
+                        case Target::TargetEnum::T_ISLE:
+                            landOnTargetIsle(delete_ships, s->id(), s->target().id);
                             break;
-                        case TTargetType::T_SHIP:
+                        case Target::TargetEnum::T_SHIP:
                         {
                             ShipInfo sInfo;
                             if(shipInfoById(sInfo, s->target().id))
@@ -421,13 +495,13 @@ struct Manager : Postoffice
                                     loser = shipFightShip(s->id(), s->target().id);
                                     receive_ship_message(Postoffice::M_DELETE_SHIP, loser);
                                     std::cout << "after fight: " << loser << " gets deleted!" << std::endl;
-                                    delete_ships.push_back(loser);
+                                    delete_ships.insert(loser);
                                 }
                             }
                             s->setTargetFinished();
                         }
                             break;
-                        case TTargetType::T_WATER:
+                        case Target::TargetEnum::T_WATER:
                             s->setTargetFinished();
                             break;
                     }
@@ -435,6 +509,41 @@ struct Manager : Postoffice
 
             }
         }
+
+        // one problem is to derefernce targets to deleted ships. But exactly _now_ we
+        // know, which crew gets eaten by the sharks
+        // And again, for every ship....
+
+        if(delete_ships.empty()) return;    // nothing to do
+
+        std::cout << "DELETE SHIPS: There are ships to delete" << std::endl;
+
+        for(Ship *s : m_ships)
+        {
+            if(s->target().validTarget and s->target().tType == Target::TargetEnum::T_SHIP)
+            {
+                std::set<unsigned int>::iterator del_it;
+                for(del_it=delete_ships.begin(); del_it != delete_ships.end(); ++del_it)
+                    if(*del_it == s->target().id)
+                    {
+                        if(s->positionType() == ShipPositionEnum::S_OCEAN)
+                            s->setTargetWater(s->pos());
+                        else if(s->positionType() == ShipPositionEnum::S_ONISLE or
+                                s->positionType() == ShipPositionEnum::S_PATRUILLE)
+                            s->setTargetFinished();
+                        // no need to handle ::S_TRASH here
+                    }
+            }
+        }
+
+        // now, no ship has target other_ship, where other_ship gets deleted
+        // we delete all ::S_TRASH ships now
+        m_ships.remove_if([&](const Ship*s){return s->positionType() == ShipPositionEnum::S_TRASH;});
+
+        for(Ship *s : m_ships)
+            std::cout << "DELETE SHIPS: still alive: " << s->id() << std::endl;
+
+
     }
 
     /* *********************************** */

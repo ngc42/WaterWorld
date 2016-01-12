@@ -75,7 +75,7 @@ int main()
                             sf::Vector2f p;
                             if (manager->islePosById(p, iInfo.id))
                                 manager->setTargetForShip(manager->m_shipWithIdWantsANewTarget,
-                                                          TTargetType::T_ISLE, iInfo.id, p);
+                                                          Target::TargetEnum::T_ISLE, iInfo.id, p);
                             // clean up
                             shipWantsTarget = false;
                             manager->m_shipWithIdWantsANewTarget = 0;
@@ -107,7 +107,7 @@ int main()
                                 sf::Vector2f p;
                                 if (manager->shipPosById(p, sInfo.id))
                                     manager->setTargetForShip(manager->m_shipWithIdWantsANewTarget,
-                                                              TTargetType::T_SHIP, sInfo.id, p);
+                                                              Target::TargetEnum::T_SHIP, sInfo.id, p);
                                 // clean up
                                 shipWantsTarget = false;
                                 manager->m_shipWithIdWantsANewTarget = 0;
@@ -126,7 +126,7 @@ int main()
                                              event.mouseButton.x << "; " <<  event.mouseButton.y <<
                                              ")" << std::endl;
                                 manager->setTargetForShip(manager->m_shipWithIdWantsANewTarget,
-                                                          TTargetType::T_WATER, 0,
+                                                          Target::TargetEnum::T_WATER, 0,
                                                           {1.0f * event.mouseButton.x, 1.0f * event.mouseButton.y});
                                 // clean up
                                 shipWantsTarget = false;
@@ -162,7 +162,7 @@ int main()
         // draw ships on ocean
         for(Ship *ship : manager->m_ships)
         {
-            if(ship->positionType() == TShipPosType::S_OCEAN)
+            if(ship->positionType() == ShipPositionEnum::S_OCEAN)
                 window.draw(ship->shape());
         }
 

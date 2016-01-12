@@ -1,3 +1,8 @@
+/* This file is part of WaterWorld.
+ * License GPL Version 3, see file "LICENSE" for details
+ * Author Eike Lange
+ */
+
 #ifndef ISLE_H
 #define ISLE_H
 
@@ -38,6 +43,7 @@ public:
 
 
     // getter
+
     /**
      * @brief shape returns visual, just call window.draw() on it
      *
@@ -58,6 +64,7 @@ public:
         return outInfo;
     }
 
+
     // setter
 
     /**
@@ -73,6 +80,7 @@ public:
 
 
     // tester
+
     /**
      * @brief - tests, if a given point is inside the isle rect
      * @param inX - x coordinate
@@ -89,7 +97,7 @@ public:
 
 
 private:
-    float m_radius;             // @fixme: hardcoded here and in ships.{h,cpp}
+    float m_radius;             // @fixme: hardcoded here and in ships.h
     sf::CircleShape m_shape;    // display of the isle
 };
 

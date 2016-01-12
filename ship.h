@@ -7,22 +7,22 @@
 #define SHIP_H
 
 #include <cmath>
-
 #include "waterobject.h"
 
 
-enum TTargetType {T_SHIP, T_ISLE, T_WATER};
-
 struct Target
 {
+    enum TargetEnum {T_SHIP, T_ISLE, T_WATER};
     bool validTarget;
-    TTargetType tType;
+    TargetEnum tType;
     unsigned int id;  // ship or isle id
+    // current pos of object. if this means a ship,
+    // the pos should get updated in Manager::nextRound
     sf::Vector2f pos;
 };
 
 
-enum TShipPosType {S_ONISLE, S_PATRUILLE, S_OCEAN, S_TRASH};
+enum ShipPositionEnum {S_ONISLE, S_PATRUILLE, S_OCEAN, S_TRASH};
 
 /* Things we get to know, if we click on a ship */
 struct ShipInfo
@@ -31,19 +31,22 @@ struct ShipInfo
     unsigned int owner;
     sf::Color color;
     sf::Vector2f pos;
-    TShipPosType posType;
+    ShipPositionEnum posType;
     unsigned int isleId;        // if not on ocean
     bool hasTarget;
+    float damage;
 };
+
 
 
 struct Ship : WaterObject
 {
 public:
     Ship(const unsigned int inId, const unsigned int inOwner, const sf::Vector2f inPos,
-         const sf::Color inColor, const TShipPosType inPosType, unsigned int inIsleId)
+         const sf::Color inColor, const ShipPositionEnum inPosType, unsigned int inIsleId)
         :  WaterObject(inId, inOwner, inPos, inColor),
           m_positionType(inPosType), m_onIsleById(inIsleId),
+          m_damage(0.0f),
           m_halfWidth(10.0f)  // @fixme: hard coded
 
     {
@@ -58,10 +61,7 @@ public:
     sf::RectangleShape shape() const { return m_shape; }
 
 
-    TShipPosType positionType() const { return m_positionType; }
-
-
-    ShipInfo info()
+    ShipInfo info() const
     {
         ShipInfo outInfo;
         outInfo.id = m_id;
@@ -71,29 +71,47 @@ public:
         outInfo.posType = m_positionType;
         outInfo.isleId = m_onIsleById;
         outInfo.hasTarget = m_target.validTarget;
+        outInfo.damage = m_damage;
         return outInfo;
     }
 
+    ShipPositionEnum positionType() const { return m_positionType; }
 
-    Target target() const
-    {
-        return m_target;
-    }
+    Target target() const { return m_target; }
+
 
     // setter
-    void setPositionType(TShipPosType inType)
+
+    /**
+     * @brief Sets the new owner of the ship
+     *
+     */
+    void setOwner(const unsigned int inOwner, const sf::Color inColor)
+    {
+        m_owner = inOwner;
+        m_color = inColor;
+        m_shape.setFillColor(inColor);
+        m_target.validTarget = false;
+        m_damage = 0.0f;
+    }
+
+
+    void setPositionType(ShipPositionEnum inType)
     {
         m_positionType = inType;
     }
 
 
+
+
+
     void setTargetIsle(const unsigned int inTargetIsleId, const sf::Vector2f inPos)
     {
-        if((inTargetIsleId != m_onIsleById) or (m_positionType == TShipPosType::S_OCEAN))
+        if((inTargetIsleId != m_onIsleById) or (m_positionType == ShipPositionEnum::S_OCEAN))
         {
             m_target.id = inTargetIsleId;
             m_target.pos = inPos;
-            m_target.tType = TTargetType::T_ISLE;
+            m_target.tType = Target::TargetEnum::T_ISLE;
             m_target.validTarget = true;
         }
     }
@@ -105,7 +123,7 @@ public:
         {
             m_target.id = inTargetShipId;
             m_target.pos = inPos;
-            m_target.tType = TTargetType::T_SHIP;
+            m_target.tType = Target::TargetEnum::T_SHIP;
             m_target.validTarget = true;
         }
     }
@@ -115,7 +133,7 @@ public:
     {
         m_target.id = 0;
         m_target.pos = inPos;
-        m_target.tType = TTargetType::T_WATER;
+        m_target.tType = Target::TargetEnum::T_WATER;
         m_target.validTarget = true;
     }
 
@@ -124,7 +142,7 @@ public:
     {
         m_target.id = 0;
         m_target.pos = {0.0f, 0.0f};
-        m_target.tType = TTargetType::T_WATER;
+        m_target.tType = Target::TargetEnum::T_WATER;
         m_target.validTarget = false;
     }
 
@@ -132,15 +150,23 @@ public:
     void landOnIsle(const unsigned int inIsleId, const sf::Vector2f inPos)
     {
         m_onIsleById = inIsleId;
-        m_positionType = TShipPosType::S_ONISLE;
+        m_positionType = ShipPositionEnum::S_ONISLE;
         m_pos = inPos;
         setTargetFinished();
     }
 
 
+    void addDamage(const float inDamageToAdd)
+    {
+        m_damage = m_damage + inDamageToAdd;
+        if(m_damage >= 1.0 )
+            setPositionType(ShipPositionEnum::S_TRASH);
+    }
+
+
     bool nextRound()
     {
-        if(m_positionType == TShipPosType::S_TRASH)
+        if(m_positionType == ShipPositionEnum::S_TRASH)
         {
             return true;    // arrived in heaven;
         }
@@ -148,7 +174,7 @@ public:
         {
             // Rod_Steward::Sailing, YouTube::DyIw0gcgfik
 
-            m_positionType = TShipPosType::S_OCEAN;
+            m_positionType = ShipPositionEnum::S_OCEAN;
             float dx = m_target.pos.x - m_pos.x;
             float dy = m_target.pos.y - m_pos.y;
 
@@ -163,10 +189,6 @@ public:
 
             // @fixme: hardcoded velocity
             m_pos = sf::Vector2f{m_pos.x + 10.0f * ex, m_pos.y + 10.0f * ey};
-
-            std::cout << "sailing... ex = " << ex << " ey = " << ey << std::endl;
-            std::cout << "           dx = " << dx << " dy = " << dy << std::endl;
-            std::cout << "           mx = " << m_pos.x << " my = " << m_pos.y << std::endl;
 
             // @fixme hardcoded rect
             m_shape.setPosition(m_pos - sf::Vector2f(m_halfWidth, m_halfWidth));
@@ -194,10 +216,10 @@ public:
 
 private:
     sf::RectangleShape m_shape;
-    TShipPosType m_positionType;
+    ShipPositionEnum m_positionType;
     unsigned int m_onIsleById;
+    float m_damage;         // sailing arround, patroling, and fighting increases damage. Repair on isle,
     float m_halfWidth;
-
     Target m_target;
 
 };
