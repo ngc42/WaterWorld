@@ -75,6 +75,11 @@ public:
     }
 
 
+    Target target() const
+    {
+        return m_target;
+    }
+
     // setter
     void setPositionType(TShipPosType inType)
     {
@@ -112,37 +117,61 @@ public:
         m_target.pos = inPos;
         m_target.tType = TTargetType::T_WATER;
         m_target.validTarget = true;
+    }
 
+
+    void setTargetFinished()
+    {
+        m_target.id = 0;
+        m_target.pos = {0.0f, 0.0f};
+        m_target.tType = TTargetType::T_WATER;
+        m_target.validTarget = false;
+    }
+
+
+    void landOnIsle(const unsigned int inIsleId, const sf::Vector2f inPos)
+    {
+        m_onIsleById = inIsleId;
+        m_positionType = TShipPosType::S_ONISLE;
+        m_pos = inPos;
+        setTargetFinished();
     }
 
 
     bool nextRound()
     {
         if(m_positionType == TShipPosType::S_TRASH)
+        {
             return true;    // arrived in heaven;
-
+        }
         if(m_target.validTarget)
         {
             // Rod_Steward::Sailing, YouTube::DyIw0gcgfik
 
             m_positionType = TShipPosType::S_OCEAN;
-            float dx = m_pos.x - m_target.pos.x;
-            float dy = m_pos.y - m_target.pos.y;
+            float dx = m_target.pos.x - m_pos.x;
+            float dy = m_target.pos.y - m_pos.y;
 
             float d = sqrt( dx * dx + dy * dy );
 
             // @fixme: hardcoded velocity
-            if(d <= 2.0f)
+            if(d <= m_halfWidth)
                 return true;
 
             float ex = dx / d;
             float ey = dy / d;
 
             // @fixme: hardcoded velocity
-            m_pos = sf::Vector2f{m_pos.x + 20.0f * ex, m_pos.y + 10.0f * ey};
+            m_pos = sf::Vector2f{m_pos.x + 10.0f * ex, m_pos.y + 10.0f * ey};
 
-            std::cout << "sailing..." << std::endl;
+            std::cout << "sailing... ex = " << ex << " ey = " << ey << std::endl;
+            std::cout << "           dx = " << dx << " dy = " << dy << std::endl;
+            std::cout << "           mx = " << m_pos.x << " my = " << m_pos.y << std::endl;
+
+            // @fixme hardcoded rect
+            m_shape.setPosition(m_pos - sf::Vector2f(m_halfWidth, m_halfWidth));
         }
+
         return false;
     }
 
@@ -164,7 +193,6 @@ public:
 
 
 private:
-    sf::Vector2f m_pos;
     sf::RectangleShape m_shape;
     TShipPosType m_positionType;
     unsigned int m_onIsleById;

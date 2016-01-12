@@ -148,6 +148,26 @@ struct Manager : Postoffice
 
 
     /**
+     * @brief isleInfoById
+     * @param outInfo valid IsleInfo returned to caller, if inIsleId is valid, else undefined
+     * @param inIsleId id of an isle
+     * @return true, if inisleId is valid and we can return infos
+     */
+    bool isleInfoById(IsleInfo & outInfo, const unsigned int inIsleId)
+    {
+        for(Isle *isle : m_isles)
+        {
+            if(isle->id() == inIsleId)
+            {
+                outInfo = isle->info();
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
      * @brief islePosById
      * @param outPos pos of isle with given id
      * @param inIsleId id of isle to retrive pos
@@ -208,6 +228,26 @@ struct Manager : Postoffice
     }
 
 
+    /**
+     * @brief shipInfoById: returns ShipInfo if inShipId is valid
+     * @param outInfo valid ShipInfo returned to caller, if inShipId is valid ship id, else undefined
+     * @param inShipId a valid ship id
+     * @return true, if we can return some data
+     */
+    bool shipInfoById(ShipInfo & outInfo, const unsigned int inShipId)
+    {
+        for(Ship *ship: m_ships)
+        {
+            if(ship->id() == inShipId)
+            {
+                outInfo = ship->info();
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     bool shipInfosByIsleInfo(TShipInfos & outShipInfos, IsleInfo inInfo)
     {
         ShipInfo sInfo;
@@ -253,22 +293,22 @@ struct Manager : Postoffice
         }
         switch(inMsg)
         {
-        case M_DELETE_SHIP:
-            // with nextround(), the ship gets deleted
-            actionShip->setPositionType(TShipPosType::S_TRASH);
-            break;
-        case M_SET_TARGET:
-            if(m_shipWithIdWantsANewTarget == inShipId)
-                m_shipWithIdWantsANewTarget = 0;
-            else
-                this->m_shipWithIdWantsANewTarget = inShipId;
-            std::cout << " --> ship wants new target " <<  this->m_shipWithIdWantsANewTarget << std::endl;
-            // lot of things to do
-            //actionShip.setPositionType(TShipPosType::S_OCEAN);
-            break;
-        case M_PATROL:
-            actionShip->setPositionType(TShipPosType::S_PATRUILLE);
-            break;
+            case M_DELETE_SHIP:
+                // with nextround(), the ship gets deleted
+                actionShip->setPositionType(TShipPosType::S_TRASH);
+                break;
+            case M_SET_TARGET:
+                if(m_shipWithIdWantsANewTarget == inShipId)
+                    m_shipWithIdWantsANewTarget = 0;
+                else
+                    this->m_shipWithIdWantsANewTarget = inShipId;
+                std::cout << " --> ship wants new target " <<  this->m_shipWithIdWantsANewTarget << std::endl;
+                // lot of things to do
+                //actionShip.setPositionType(TShipPosType::S_OCEAN);
+                break;
+            case M_PATROL:
+                actionShip->setPositionType(TShipPosType::S_PATRUILLE);
+                break;
         }
     }
 
@@ -298,6 +338,57 @@ struct Manager : Postoffice
     }
 
 
+    unsigned int shipFightShip(const unsigned int inShip1, const unsigned int inShip2)
+    {
+        return 0;
+    }
+
+
+    void landOnTargetIsle(const unsigned int inShipId, const unsigned int inIsleId)
+    {
+        Ship *ship = 0;
+        Isle *isle = 0;
+        for(Ship *s : m_ships)
+        {
+            if(s->id() == inShipId)
+            {
+                ship = s;
+                break;
+            }
+        }
+        for(Isle *i : m_isles)
+        {
+            if(i->id() == inIsleId)
+            {
+                isle = i;
+                break;
+            }
+        }
+
+        // is my memory still there?
+        assert( ship != 0 and isle != 0 );
+
+        if(ship->owner() == isle->owner())
+        {
+            // own isle
+            ship->landOnIsle(isle->id(), isle->pos());
+        }
+        else if(isle->owner() == 0)
+        {
+            // empty isle
+            ship->landOnIsle(isle->id(), isle->pos());
+            isle->setOwner(ship->owner(), ship->color());
+        }
+        else
+        {
+            // enemy isle
+
+        }
+
+
+    }
+
+
     void nextRound()
     {
         std::vector<unsigned int> delete_ships;
@@ -306,11 +397,42 @@ struct Manager : Postoffice
         {
             if( s->nextRound() )
             {
-                std::cout << "ship arrived at" ;
+                std::cout << "ship arrived at " ;
                 if( s->positionType() == TShipPosType::S_TRASH )
                 {
-                    std::cout << "heaven";
+                    std::cout << "heaven" << std::endl;
+                    delete_ships.push_back(s->id());
                 }
+                else
+                {
+                    switch(s->target().tType)
+                    {
+                        case TTargetType::T_ISLE:
+                            landOnTargetIsle(s->id(), s->target().id);
+                            break;
+                        case TTargetType::T_SHIP:
+                        {
+                            ShipInfo sInfo;
+                            if(shipInfoById(sInfo, s->target().id))
+                            {
+                                if(sInfo.owner != s->owner())
+                                {   // enemies: one of them gets deleted
+                                    unsigned int loser;
+                                    loser = shipFightShip(s->id(), s->target().id);
+                                    receive_ship_message(Postoffice::M_DELETE_SHIP, loser);
+                                    std::cout << "after fight: " << loser << " gets deleted!" << std::endl;
+                                    delete_ships.push_back(loser);
+                                }
+                            }
+                            s->setTargetFinished();
+                        }
+                            break;
+                        case TTargetType::T_WATER:
+                            s->setTargetFinished();
+                            break;
+                    }
+                }
+
             }
         }
     }

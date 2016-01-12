@@ -19,7 +19,8 @@ struct  WaterObject
       : m_id(inId),
         m_owner(inOwner),
         m_pos(inPos),
-        m_color(inColor) {}
+        m_color(inColor)
+    {}
 
     // getter
     unsigned int id() const { return m_id; }
