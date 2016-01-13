@@ -96,7 +96,8 @@ int main()
                     else /* ship or ocean */
                     {
                         ShipInfo sInfo;
-                        foundClickTarget = manager->shipInfoByPos(sInfo, event.mouseButton.x, event.mouseButton.y);
+                        Target sTarget;
+                        foundClickTarget = manager->shipInfoByPos(sInfo, sTarget, event.mouseButton.x, event.mouseButton.y);
                         if(foundClickTarget) /* clicked ship */
                         {
                             if(shipWantsTarget)
@@ -112,10 +113,16 @@ int main()
                                 shipWantsTarget = false;
                                 manager->m_shipWithIdWantsANewTarget = 0;
                                 mouseSprite.setTexture(mouseNormalTexture);
-
                             }
                             else
-                                infoscreen.showShip(sInfo);
+                            {
+                                if(sInfo.owner == 1)
+                                    // human player, show target
+                                    infoscreen.showHumanShip(sInfo, sTarget);
+                                else
+                                    // other player: don't show target
+                                    infoscreen.showShip(sInfo);
+                            }
                         }
                         else /* clicked ocean */
                         {

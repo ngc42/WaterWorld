@@ -285,7 +285,7 @@ struct ShipListList
 
 struct InfoScreen
 {
-    enum TScreenType {I_NOTHING, I_ISLE, I_HUMAN_ISLE, I_WATER, I_SHIP};
+    enum TScreenEnum {I_NOTHING, I_ISLE, I_HUMAN_ISLE, I_WATER, I_SHIP, I_HUMAN_SHIP};
     static const int NUM_ITEMS_IN_SHIPLIST = 10;
 
 
@@ -302,7 +302,7 @@ struct InfoScreen
         m_width = inWidth * 1.0f;
         m_height = inHeight * 1.0f;
         m_xPos = inXPos * 1.0f;
-        m_screenType = TScreenType::I_NOTHING;
+        m_screenType = I_NOTHING;
 
         m_rectangle.setSize({m_width, m_height});
         m_rectangle.setFillColor(sf::Color(255, 0, 255, 128));
@@ -334,8 +334,20 @@ struct InfoScreen
         m_shipListTitle.setString("Shiplist");
         m_shipListTitle.setPosition({m_xPos + 10.0f, 50.0f});
         m_listItemHeight = 15.0f;
-
         m_shipListList.init(inXPos + 2, 100, inWidth-4, inHeight - 200, inMessageFunction);
+
+        /* items for human ship */
+        m_targetTypeLabel.setFont(m_font);
+        m_targetTypeLabel.setCharacterSize(12);
+        m_targetTypeLabel.setColor(sf::Color::Yellow);
+        m_targetTypeLabel.setPosition({m_xPos + 10.0f, 30.0f});
+        m_targetTypeLabel.setString("Target:");
+
+        m_targetTypeText.setFont(m_font);
+        m_targetTypeText.setCharacterSize(12);
+        m_targetTypeText.setColor(sf::Color::Yellow);
+        m_targetTypeText.setPosition({m_xPos + 10.0f, 45.0f});
+
     }
 
 
@@ -347,7 +359,7 @@ struct InfoScreen
 
     void processInfoscreenClick(const int inX, const int inY)
     {
-        if(m_screenType == TScreenType::I_HUMAN_ISLE)
+        if(m_screenType == I_HUMAN_ISLE)
         {
             m_shipListList.processClick(inX, inY);
         }
@@ -367,20 +379,24 @@ struct InfoScreen
         // display extra info -- depending on screen
         switch(m_screenType)
         {
-        case TScreenType::I_WATER:
-            refWindow.draw(m_posText);
-            break;
-        case TScreenType::I_ISLE:
-        case TScreenType::I_SHIP:   // OK at the moment
-            refWindow.draw(m_idOwnerText);
-            break;
-        case TScreenType::I_HUMAN_ISLE:
-            refWindow.draw(m_idOwnerText);
-            refWindow.draw(m_shipListTitle);
-            m_shipListList.paint(refWindow);
-            break;
-        default:
-            break;
+            case TScreenEnum::I_WATER:
+                refWindow.draw(m_posText);
+                break;
+            case I_ISLE:
+            case I_SHIP:   // OK at the moment
+                refWindow.draw(m_idOwnerText);
+                break;
+            case I_HUMAN_ISLE:
+                refWindow.draw(m_idOwnerText);
+                refWindow.draw(m_shipListTitle);
+                m_shipListList.paint(refWindow);
+                break;
+            case I_HUMAN_SHIP:
+                refWindow.draw(m_targetTypeLabel);
+                refWindow.draw(m_targetTypeText);
+                break;
+            default:
+                break;
         }
     }
 
@@ -391,38 +407,66 @@ struct InfoScreen
         m_titleText.setString("Water");
         std::string s = "Pos: (" + std::to_string(inX) + ", " + std::to_string(inY) + ")";
         m_posText.setString(s);
-        m_screenType = TScreenType::I_WATER;
+        m_screenType = I_WATER;
     }
 
 
-    void showIsle(IsleInfo inIsleInfo)
+    void showIsle(const IsleInfo inIsleInfo)
     {
         m_rectangle.setFillColor(sf::Color(20, 20, 255, 128));
         m_titleText.setString("Isle");
         std::string s = "ID: " + std::to_string(inIsleInfo.id) + ", Owner: " + std::to_string(inIsleInfo.owner);
         m_idOwnerText.setString(s);
-        m_screenType = TScreenType::I_ISLE;
+        m_screenType = I_ISLE;
     }
 
 
-    void showHumanIsle(IsleInfo inIsleInfo, TShipInfos inShipInfos)
+    void showHumanIsle(const IsleInfo inIsleInfo, const TShipInfos inShipInfos)
     {
         m_rectangle.setFillColor(sf::Color(20, 20, 255, 128));
         m_titleText.setString("Human Isle");
         std::string s = "ID: " + std::to_string(inIsleInfo.id) + ", Owner: Player";
         m_idOwnerText.setString(s);
         m_shipListList.setShipInfos(inShipInfos);
-        m_screenType = TScreenType::I_HUMAN_ISLE;
+        m_screenType = I_HUMAN_ISLE;
     }
 
 
-    void showShip(ShipInfo inShipInfo)
+    void showShip(const ShipInfo inShipInfo)
     {
         m_rectangle.setFillColor(sf::Color(20, 20, 255, 128));
         m_titleText.setString("Ship");
         std::string s = "ID: " + std::to_string(inShipInfo.id) + ", Owner: " + std::to_string(inShipInfo.owner);
         m_idOwnerText.setString(s);
-        m_screenType = TScreenType::I_SHIP;
+        m_screenType = I_SHIP;
+    }
+
+
+    void showHumanShip(const ShipInfo inShipInfo, const Target inTarget)
+    {
+        m_rectangle.setFillColor(sf::Color(20, 20, 255, 128));
+        m_titleText.setString("Human Isle");
+        std::string s = "ID: " + std::to_string(inShipInfo.id) + ", Owner: Player";
+        m_idOwnerText.setString(s);
+
+        if(inTarget.validTarget)
+        {
+            switch(inTarget.tType)
+            {
+                case Target::T_ISLE:
+                    m_targetTypeText.setString("Isle");
+                    break;
+                case Target::T_SHIP:
+                    m_targetTypeText.setString("Ship");
+                    break;
+                case Target::T_WATER:
+                    m_targetTypeText.setString("Water");
+                    break;
+            }
+        }
+        else
+            m_targetTypeText.setString("no target");
+        m_screenType = I_HUMAN_SHIP;
     }
 
 
@@ -436,7 +480,7 @@ struct InfoScreen
     sf::RectangleShape m_rectangle; // infoscreen is just a rectangle
     float m_xPos;               // position (relative to main screen, see main.cpp)
     float m_width, m_height;    // width, height of this infoscreen
-    TScreenType m_screenType;   // current active screen
+    TScreenEnum m_screenType;   // current active screen
 
     sf::Font m_font;            // font for text items
     sf::Text m_titleText;       // Title of screen
@@ -448,6 +492,12 @@ struct InfoScreen
     sf::Font m_sectionFont;     // font for sections on screen
     sf::Text m_shipListTitle;   // title above shiplist
     ShipListList m_shipListList;
+
+    /* human ship screen */
+    sf::Text m_targetTypeLabel;
+    sf::Text m_targetTypeText;
+
+
 };
 
 

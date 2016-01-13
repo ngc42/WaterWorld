@@ -211,17 +211,19 @@ struct Manager : Postoffice
     /**
      * @brief shipInfoByPos: returns ShipInfo if coordinates match a ship on the ocean
      * @param outInfo valid ShipInfo returned to caller, if (inX, inY) is point on ship, else undefined
+     * @param outTarget returned target, only valid if ship has a target and ship was found
      * @param inX mouse X pos
      * @param inY mouse Y pos
      * @return true, if (inX, inY) are a point on an ship
      */
-    bool shipInfoByPos(ShipInfo & outInfo, const int inX, const int inY)
+    bool shipInfoByPos(ShipInfo & outInfo, Target & outTarget, const int inX, const int inY)
     {
         for(Ship *ship: m_ships)
         {
             if(ship->pointInShip(inX, inY) and (ship->positionType() == ShipPositionEnum::S_OCEAN))
             {
                 outInfo = ship->info();
+                outTarget = ship->target();
                 return true;
             }
         }
@@ -431,7 +433,6 @@ struct Manager : Postoffice
                 }
             }
 
-
             if(ship->positionType() != ShipPositionEnum::S_TRASH)
             {
                 // we are still alive and want to fight the isle
@@ -542,8 +543,6 @@ struct Manager : Postoffice
 
         for(Ship *s : m_ships)
             std::cout << "DELETE SHIPS: still alive: " << s->id() << std::endl;
-
-
     }
 
     /* *********************************** */
