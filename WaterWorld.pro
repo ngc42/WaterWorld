@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     waterobject.cpp \
     isle.cpp \
     ship.cpp \
-    shiplistitem.cpp
+    shiplistitem.cpp \
+    strategy.cpp
 
 HEADERS  += mainwindow.h \
     universescene.h \
@@ -34,7 +35,8 @@ HEADERS  += mainwindow.h \
     waterobject.h \
     isle.h \
     ship.h \
-    shiplistitem.h
+    shiplistitem.h \
+    strategy.h
 
 FORMS    += mainwindow.ui \
     waterobjectinfo.ui

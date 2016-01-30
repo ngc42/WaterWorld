@@ -10,6 +10,7 @@
 
 #include <isle.h>
 #include <ship.h>
+#include <strategy.h>
 #include <universescene.h>
 #include <QVector>
 #include <QList>
@@ -87,6 +88,12 @@ private:
     // Isles and Ships
     QVector<Isle*> m_isles;
     QList<Ship*> m_ships;
+
+    // send isle and ship infos to strategy
+    void prepareStrategies();
+
+    Strategy *m_strategy;
+
 
 signals:
     void sigShowInfoWater();

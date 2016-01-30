@@ -6,7 +6,7 @@
 
 #include "isle.h"
 #include <QBrush>
-
+#include <QDebug>
 
 Isle::Isle(const uint inId, const uint inOwner, const QPointF inPos,
      const QColor inColor)
@@ -68,10 +68,10 @@ bool Isle::nextRound()
         m_population = m_population / 1.0987654;
 
     m_technology = m_technology * 1.011111f + 0.01;
-    m_buildlevel = m_buildlevel + 0.1 + 0.9f / m_technology;
+    m_buildlevel = m_buildlevel + 0.1 + 0.4f / m_technology;
     if(m_buildlevel >= 1.0f)
     {   // hurray we finished a ship
-        m_buildlevel -= 1.0;
+        m_buildlevel = 0.0f;
         return true;            // ask universe to release a ship
     }
     return false;

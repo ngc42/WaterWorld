@@ -22,6 +22,9 @@ Universe::Universe(QObject *inParent, UniverseScene *& inOutUniverseScene, const
     {
         inOutUniverseScene->addItem(isle->shape());
     }
+
+    // @fixme: hardcoded owner number, shared with createIsles()
+    m_strategy = new Strategy(2);
 }
 
 
@@ -87,6 +90,8 @@ QPointF Universe::shipPosById(const uint inShipId)
 
 void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 {
+    prepareStrategies();
+
     for(Isle *isle : m_isles)
     {
         if(isle->nextRound())
@@ -502,6 +507,38 @@ void Universe::showHumanIsle(const IsleInfo inIsleInfo)
     }
 
     emit sigShowInfoHumanIsle(inIsleInfo, sList);
+}
+
+
+void Universe::prepareStrategies()
+{
+    QList<IsleInfo> isleInfosPublic;
+    QList<IsleInfo> isleInfosPrivate;
+
+    for(Isle *isle : m_isles)
+    {
+        IsleInfo isleInfo = isle->info();
+        if(isleInfo.owner == m_strategy->owner())
+            isleInfosPrivate.append(isleInfo);
+        else
+            isleInfosPublic.append(isleInfo);
+
+    }
+    m_strategy->setIsles(isleInfosPublic, isleInfosPrivate);
+
+    QList<ShipInfo> shipInfosPublic;
+    QList<ShipInfo> shipInfosPrivate;
+
+    for(Ship *ship : m_ships)
+    {
+        ShipInfo shipInfo = ship->info();
+        if(shipInfo.owner == m_strategy->owner())
+            shipInfosPrivate.append(shipInfo);
+        else
+            shipInfosPublic.append(shipInfo);
+    }
+    m_strategy->setShips(shipInfosPublic, shipInfosPrivate);
+
 }
 
 
