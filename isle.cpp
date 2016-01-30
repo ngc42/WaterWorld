@@ -1,11 +1,14 @@
-#include "isle.h"
+/* This File is part of WaterWorld. License is GNU GPL Version 3.
+ * Please see https://github.com/ngc42/WaterWorld/blob/master/LICENSE for details.
+ * WaterWorld is (C) 2016 by Eike Lange (eike@ngc42.de)
+ */
 
+
+#include "isle.h"
 #include <QBrush>
 
 
-Isle::Isle(const uint inId,
-     const uint inOwner,
-     const QPointF inPos,
+Isle::Isle(const uint inId, const uint inOwner, const QPointF inPos,
      const QColor inColor)
     : WaterObject(inId, inOwner, inPos, inColor, 0.0f)
 {
@@ -17,7 +20,6 @@ Isle::Isle(const uint inId,
 }
 
 
-// setter
 void Isle::setOwner(const uint inOwner, const QColor inColor)
 {
     m_owner = inOwner;

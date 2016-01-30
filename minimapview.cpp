@@ -1,6 +1,13 @@
+/* This File is part of WaterWorld. License is GNU GPL Version 3.
+ * Please see https://github.com/ngc42/WaterWorld/blob/master/LICENSE for details.
+ * WaterWorld is (C) 2016 by Eike Lange (eike@ngc42.de)
+ */
+
+
 #include "minimapview.h"
 #include <QMouseEvent>
 #include <QDebug>
+
 
 MinimapView::MinimapView(QWidget *inParent) :
     QGraphicsView(inParent)
@@ -8,12 +15,6 @@ MinimapView::MinimapView(QWidget *inParent) :
 }
 
 
-/**
- * @brief MinimapView::mousePressEvent - react on mouse press events inside of minimap
- * @param inMouseEvent
- *
- * This is the only reason, why this class exists:
- */
 void MinimapView::mousePressEvent(QMouseEvent *inMouseEvent)
 {
     qDebug()  << "Minimap sends Click: " << mapToScene( inMouseEvent->pos() );

@@ -1,5 +1,12 @@
+/* This File is part of WaterWorld. License is GNU GPL Version 3.
+ * Please see https://github.com/ngc42/WaterWorld/blob/master/LICENSE for details.
+ * WaterWorld is (C) 2016 by Eike Lange (eike@ngc42.de)
+ */
+
+
 #ifndef SHIP_H
 #define SHIP_H
+
 
 #include <waterobject.h>
 #include <universescene.h>
@@ -19,7 +26,9 @@ struct Target
     QPointF pos;
 };
 
+
 enum ShipPositionEnum {S_ONISLE, S_PATROL, S_OCEAN, S_TRASH};
+
 
 /* Things we get to know, if we click on a ship */
 struct ShipInfo
@@ -36,15 +45,12 @@ struct ShipInfo
 };
 
 
-
 class Ship : public WaterObject
 {
 public:
-
     Ship(UniverseScene *& inOutRefScene, const uint inId, const uint inOwner,
          const QPointF inPos, const QColor inColor, const ShipPositionEnum inPosType,
          const uint inIsleId, const float inTechnology);
-
 
     ~Ship();
 
@@ -100,12 +106,6 @@ public:
 
     // tester
     bool pointInShip(const QPointF inPos);
-
-
-    /* *********************************** */
-    /* Data begins here                    */
-    /* *********************************** */
-
 
 private:
     QGraphicsRectItem *m_shape;

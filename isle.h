@@ -1,10 +1,18 @@
+/* This File is part of WaterWorld. License is GNU GPL Version 3.
+ * Please see https://github.com/ngc42/WaterWorld/blob/master/LICENSE for details.
+ * WaterWorld is (C) 2016 by Eike Lange (eike@ngc42.de)
+ */
+
+
 #ifndef ISLE_H
 #define ISLE_H
+
 
 #include <waterobject.h>
 #include <QGraphicsEllipseItem>
 #include <QPointF>
 #include <QColor>
+
 
 struct IsleInfo
 {
@@ -36,14 +44,15 @@ public:
         return outInfo;
     }
 
-
     // setter
     void setOwner(const uint inOwner, const QColor inColor);
 
     void setPopulation(const float inPopulation);
 
+    // test
     bool pointInIsle(const QPointF inPos);
 
+    // nextround
     void nextRound();
 
 private:

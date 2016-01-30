@@ -1,8 +1,16 @@
+/* This File is part of WaterWorld. License is GNU GPL Version 3.
+ * Please see https://github.com/ngc42/WaterWorld/blob/master/LICENSE for details.
+ * WaterWorld is (C) 2016 by Eike Lange (eike@ngc42.de)
+ */
+
+
 #ifndef WATEROBJECT_H
 #define WATEROBJECT_H
 
-#include <qpoint.h>
-#include <qcolor.h>
+
+#include <QPoint>
+#include <QColor>
+
 
 class WaterObject
 {
@@ -12,6 +20,7 @@ public:
 
     // getter
     uint id() const { return m_id; }
+
     QPointF pos() const { return m_pos; }
 
 protected:

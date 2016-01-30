@@ -1,9 +1,15 @@
-#include "universe.h"
-#include <qbrush.h>
+/* This File is part of WaterWorld. License is GNU GPL Version 3.
+ * Please see https://github.com/ngc42/WaterWorld/blob/master/LICENSE for details.
+ * WaterWorld is (C) 2016 by Eike Lange (eike@ngc42.de)
+ */
 
+
+#include "universe.h"
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>
+#include <QBrush>
 #include <QDebug>
+
 
 Universe::Universe(QObject *inParent, UniverseScene *& inOutUniverseScene, const qreal inUniverseWidth,
                    const qreal inUniverseHeight, const uint inNumIsles)
@@ -193,7 +199,6 @@ void Universe::nextRound()
     }
 
 }
-
 
 
 void Universe::callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsleInfo, const ShipInfo inShipInfo)

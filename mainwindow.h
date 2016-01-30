@@ -1,13 +1,19 @@
+/* This File is part of WaterWorld. License is GNU GPL Version 3.
+ * Please see https://github.com/ngc42/WaterWorld/blob/master/LICENSE for details.
+ * WaterWorld is (C) 2016 by Eike Lange (eike@ngc42.de)
+ */
+
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QStackedWidget>
 
 #include <universescene.h>
 #include <universeview.h>
 #include <minimapview.h>
 #include <universe.h>
+#include <QMainWindow>
+#include <QStackedWidget>
 
 
 namespace Ui {
@@ -21,8 +27,6 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-
-
     explicit MainWindow(QWidget *inParent = 0);
     ~MainWindow();
 
@@ -57,7 +61,6 @@ private slots:
     void slotShowUniverseInfoIsle(IsleInfo isleInfo);
     void slotShowUniverseInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo> sList);
     void slotShowUniverseInfoShip(ShipInfo shipInfo);
-
 
     // user clicked a button on info view -> human isle
     void slotDeleteShip();

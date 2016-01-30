@@ -1,7 +1,13 @@
+/* This File is part of WaterWorld. License is GNU GPL Version 3.
+ * Please see https://github.com/ngc42/WaterWorld/blob/master/LICENSE for details.
+ * WaterWorld is (C) 2016 by Eike Lange (eike@ngc42.de)
+ */
+
+
 #ifndef UNIVERSE_H
 #define UNIVERSE_H
 
-#include <QObject>
+
 #include <isle.h>
 #include <ship.h>
 #include <universescene.h>
@@ -9,12 +15,14 @@
 #include <QList>
 #include <QPointF>
 
+
 enum InfoscreenPage {PAGE_NOTHING = 0, PAGE_WATER = 1, PAGE_ISLE = 2, PAGE_HUMAN_ISLE = 3, PAGE_SHIP = 4};
 
 
 class Universe : public QObject
 {
     Q_OBJECT
+
 public:
     explicit Universe(QObject *inParent, UniverseScene *& inOutUniverseScene, const qreal inUniverseWidth,
                       const qreal inUniverseHeight, const uint inNumIsles);
@@ -38,7 +46,6 @@ public:
     QList<Ship*> m_ships;
 
 private:
-
     void createIsles(UniverseScene *& inOutUniverseScene, const qreal inUniverseWidth, const qreal inUniverseHeight,
                      const uint inNumIsles);
 
@@ -66,8 +73,8 @@ private:
     void isleForId(const uint inIsleId, IsleInfo & outIsleInfo);
 
     void setIsleOwnerById(const uint inIsleId, const uint inNewOwner, const QColor inNewColor);
-    void setIslePopulationById(const uint inIsleId, const float inNewPopulation);
 
+    void setIslePopulationById(const uint inIsleId, const float inNewPopulation);
 
     void shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo);
 
@@ -82,10 +89,6 @@ private:
     // is of water objects, each id of every object is unique
     uint m_lastInsertedId;
 
-
-
-
-
 signals:
     void sigShowInfoWater();
     void sigShowInfoIsle(IsleInfo isleInfo);
@@ -95,8 +98,6 @@ signals:
 public slots:
     void slotUniverseViewClicked(QPointF scenePos);
     void slotUniverseViewClickedFinishTarget(QPointF scenePos, uint shipId);
-
-
 };
 
 #endif // UNIVERSE_H

@@ -1,12 +1,18 @@
+/* This File is part of WaterWorld. License is GNU GPL Version 3.
+ * Please see https://github.com/ngc42/WaterWorld/blob/master/LICENSE for details.
+ * WaterWorld is (C) 2016 by Eike Lange (eike@ngc42.de)
+ */
+
+
 #ifndef SHIPLISTITEM_H
 #define SHIPLISTITEM_H
 
+
+#include <ship.h>
 #include <QTableWidgetItem>
 #include <QLabel>
 #include <QPixmap>
 #include <QIcon>
-
-#include <ship.h>
 
 
 /**
@@ -28,7 +34,6 @@
 class ShipListItem : public QTableWidgetItem
 {
 public:
-
     /**
      * @brief The ShipListItemType enum describes different type of data to set
      */
@@ -42,13 +47,11 @@ public:
      */
     ShipListItem(const ShipListItemType inType, const ShipInfo inShipInfo, const QString inTitle);
 
-
     /**
      * @brief id returns the ship, we show info about
      * @return ShipId
      */
     uint id() const { return m_shipId; }
-
 
 private:
     ShipListItemType m_myType;
