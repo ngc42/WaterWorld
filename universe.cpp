@@ -91,6 +91,9 @@ QPointF Universe::shipPosById(const uint inShipId)
 void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 {
     prepareStrategies();
+    QList<StrategyCommand> strategyCommands;
+    m_strategy->nextRound(strategyCommands);
+    processStrategyCommands(m_strategy->owner(), strategyCommands);
 
     for(Isle *isle : m_isles)
     {
@@ -535,10 +538,72 @@ void Universe::prepareStrategies()
         if(shipInfo.owner == m_strategy->owner())
             shipInfosPrivate.append(shipInfo);
         else
-            shipInfosPublic.append(shipInfo);
+        {
+            if(shipInfo.posType == ShipPositionEnum::S_OCEAN)
+                // just append if visible to everyone
+                shipInfosPublic.append(shipInfo);
+        }
     }
     m_strategy->setShips(shipInfosPublic, shipInfosPrivate);
+}
 
+
+void Universe::processStrategyCommands(const uint inOwner, const QList<StrategyCommand> inCommands)
+{
+    // @fixme: we really need to check, if strategy is cheating
+    if(inCommands.isEmpty())
+        return;
+    for(StrategyCommand cmd : inCommands)
+    {
+        qInfo() << "cmd owner=" << inOwner <<  " wants to send ship " << cmd.shipId << " to id " << cmd.targetId;
+
+        Ship *sourceShip;
+        ShipInfo sourceShipInfo;
+        bool foundShip = false;
+
+        for(Ship *s : m_ships)
+        {
+            if(s->id() == cmd.shipId)
+            {
+                foundShip = true;
+                sourceShip = s;
+                sourceShipInfo = s->info();
+                break;
+            }
+        }
+
+        // check nonexistent ships
+        if(! foundShip)
+            return;
+
+        // check for ownership
+        if(sourceShipInfo.owner != inOwner)
+            return;
+
+        if(cmd.targetType == Target::TargetEnum::T_ISLE)
+        {
+            IsleInfo isleInfo;
+            isleForId(cmd.targetId, isleInfo);
+            // check valid isle
+            if(isleInfo.id == 0)
+                return;
+            sourceShip->setTargetIsle(isleInfo.id, isleInfo.pos);
+        }
+        else if(cmd.targetType == Target::TargetEnum::T_SHIP)
+        {
+            ShipInfo shipInfo;
+            shipForId(cmd.targetId, shipInfo);
+            // check valid ship
+            if(shipInfo.id == 0)
+                return;
+            sourceShip->setTargetShip(shipInfo.id, shipInfo.pos);
+        }
+        else // must be water
+        {
+            sourceShip->setTargetWater(cmd.pos);
+        }
+
+    }
 }
 
 

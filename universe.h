@@ -91,6 +91,7 @@ private:
 
     // send isle and ship infos to strategy
     void prepareStrategies();
+    void processStrategyCommands(const uint inOwner, const QList<StrategyCommand> inCommands);
 
     Strategy *m_strategy;
 
