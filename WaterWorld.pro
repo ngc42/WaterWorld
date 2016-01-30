@@ -1,19 +1,40 @@
+#-------------------------------------------------
+#
+# Project created by QtCreator 2016-01-22T09:47:36
+#
+#-------------------------------------------------
+
+QT       += core gui
+
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+TARGET = WaterWorld
 TEMPLATE = app
+
 CONFIG += console
-CONFIG -= app_bundle
-CONFIG -= qt
 CONFIG += c++11
 
-SOURCES += main.cpp
 
-INCLUDEPATH += /usr/include
-LIBS += -L/usr/lib/x86_64-linux-gnu/
-CONFIG(release, debug|release): LIBS += -lsfml-audio -lsfml-graphics -lsfml-network -lsfml-window -lsfml-system
-CONFIG(debug, debug|release): LIBS += -lsfml-audio-d -lsfml-graphics-d -lsfml-network-d -lsfml-window-d -lsfml-system-d
+SOURCES += main.cpp\
+        mainwindow.cpp \
+    universescene.cpp \
+    minimapview.cpp \
+    universeview.cpp \
+    universe.cpp \
+    waterobject.cpp \
+    isle.cpp \
+    ship.cpp \
+    shiplistitem.cpp
 
-HEADERS += \
+HEADERS  += mainwindow.h \
+    universescene.h \
+    minimapview.h \
+    universeview.h \
+    universe.h \
     waterobject.h \
     isle.h \
     ship.h \
-    screens.h \
-    manager.h
+    shiplistitem.h
+
+FORMS    += mainwindow.ui \
+    waterobjectinfo.ui
