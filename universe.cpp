@@ -16,6 +16,12 @@ Universe::Universe(QObject *inParent, UniverseScene *& inOutUniverseScene, const
     : QObject(inParent), m_lastInsertedId(10)
 {
     createIsles(inUniverseWidth, inUniverseHeight, inNumIsles);
+
+    // add created isles to the scene
+    for(Isle *isle : m_isles)
+    {
+        inOutUniverseScene->addItem(isle->shape());
+    }
 }
 
 

@@ -41,10 +41,6 @@ public:
     // update InfoScreen after MainWindow::nextRound()
     void callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsleInfo, const ShipInfo inShipInfo);
 
-    // @fixme: this should be private, some day
-    QVector<Isle*> m_isles;
-    QList<Ship*> m_ships;
-
 private:
     void createIsles(const qreal inUniverseWidth, const qreal inUniverseHeight, const uint inNumIsles);
 
@@ -87,6 +83,10 @@ private:
 
     // is of water objects, each id of every object is unique
     uint m_lastInsertedId;
+
+    // Isles and Ships
+    QVector<Isle*> m_isles;
+    QList<Ship*> m_ships;
 
 signals:
     void sigShowInfoWater();
