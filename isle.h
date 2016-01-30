@@ -22,6 +22,7 @@ struct IsleInfo
     QPointF pos;
     float population;
     float technology;
+    float buildlevel;
 };
 
 
@@ -41,6 +42,7 @@ public:
         outInfo.pos = m_pos;
         outInfo.population = m_population;
         outInfo.technology = m_technology;
+        outInfo.buildlevel = m_buildlevel;
         return outInfo;
     }
 
@@ -52,12 +54,13 @@ public:
     // test
     bool pointInIsle(const QPointF inPos);
 
-    // nextround
-    void nextRound();
+    // nextround, returns true if we finished a new ship
+    bool nextRound();
 
 private:
-    QGraphicsEllipseItem *m_shape;  // display of the isle
-    float m_population;               // number of people on island
+    QGraphicsEllipseItem *m_shape;      // display of the isle
+    float m_population;                 // number of people on island
+    float m_buildlevel;     // percentage of building a new ship. 1 means, release a new ship during nextRound()
 };
 
 #endif // ISLE_H

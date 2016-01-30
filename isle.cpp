@@ -17,6 +17,7 @@ Isle::Isle(const uint inId, const uint inOwner, const QPointF inPos,
 
     m_population  = inOwner > 0 ? 100.1f : 0.0f;
     m_technology = inOwner > 0 ? 1.01f : 0.0f;
+    m_buildlevel = 0.0f;
 }
 
 
@@ -28,7 +29,7 @@ void Isle::setOwner(const uint inOwner, const QColor inColor)
 
     m_population  = inOwner > 0 ? 100.1 : 0.0f;
     m_technology = inOwner > 0 ? 1.01f : 0.0f;
-
+    m_buildlevel = 0.0f;
 }
 
 
@@ -47,21 +48,31 @@ bool Isle::pointInIsle(const QPointF inPos)
 }
 
 
-void Isle::nextRound()
+bool Isle::nextRound()
 {
     if(m_owner == 0)
-        return;
+        return false;
     if(m_population < 100.0f)
     {   // too few people on isle, they die by loneliness, sad but thats nature...
         setOwner(0, Qt::gray);
-        return;
+        return false;
     }
 
     // some magic numbers here:
     // population and technology should not grow too fast.
+    // @fixme: I'm not happy with linear growth rate
+    //         population, technology and buildlevel should depend on each other
+    //         these things should depend on user's input parameters
     m_population = m_population * 1.05;
     if(m_population > 60000)
         m_population = m_population / 1.0987654;
 
     m_technology = m_technology * 1.011111f + 0.01;
+    m_buildlevel = m_buildlevel + 0.1 + 0.9f / m_technology;
+    if(m_buildlevel >= 1.0f)
+    {   // hurray we finished a ship
+        m_buildlevel -= 1.0;
+        return true;            // ask universe to release a ship
+    }
+    return false;
 }

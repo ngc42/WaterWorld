@@ -219,7 +219,7 @@ void MainWindow::slotSetNewTargetForShip()
 
 void MainWindow::slotNextRound()
 {
-    m_universe->nextRound();
+    m_universe->nextRound(m_universeScene);
     // call the infoscreen again. so there is a live update of ships and isles
     // during nextRound()
     m_universe->callInfoScreen(m_lastCalledPage, m_lastCalledIsleInfo, m_lastCalledShipInfo);

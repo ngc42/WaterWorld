@@ -15,7 +15,7 @@ Universe::Universe(QObject *inParent, UniverseScene *& inOutUniverseScene, const
                    const qreal inUniverseHeight, const uint inNumIsles)
     : QObject(inParent), m_lastInsertedId(10)
 {
-    createIsles(inOutUniverseScene, inUniverseWidth, inUniverseHeight, inNumIsles);
+    createIsles(inUniverseWidth, inUniverseHeight, inNumIsles);
 }
 
 
@@ -79,10 +79,17 @@ QPointF Universe::shipPosById(const uint inShipId)
 }
 
 
-void Universe::nextRound()
+void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 {
     for(Isle *isle : m_isles)
-        isle->nextRound();
+    {
+        if(isle->nextRound())
+        {
+            qInfo() << "isle " << isle->id() << "finished a ship";
+            createShipOnIsle(inOutUniverseScene, isle->id());
+
+        }
+    }
     for(Ship *ship : m_ships)
     {
         ShipInfo shipInfo = ship->info();
@@ -227,8 +234,7 @@ void Universe::callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsle
 }
 
 
-void Universe::createIsles(UniverseScene *& inOutUniverseScene, const qreal inUniverseWidth, const qreal inUniverseHeight,
-                           const uint inNumIsles)
+void Universe::createIsles(const qreal inUniverseWidth, const qreal inUniverseHeight, const uint inNumIsles)
 {
     srand(time(NULL));
 
@@ -248,15 +254,8 @@ void Universe::createIsles(UniverseScene *& inOutUniverseScene, const qreal inUn
     Isle *isle = m_isles.at(0);
     isle->setOwner(1, Qt::green);
 
-    createShipOnIsle(inOutUniverseScene, isle->id());
-    createShipOnIsle(inOutUniverseScene, isle->id());
-
     isle = m_isles.at(1);
     isle->setOwner(2, Qt::red);
-    createShipOnIsle(inOutUniverseScene, isle->id());
-
-    Ship *s = m_ships.at( m_ships.count() -1);
-    s->setTargetWater({500, 500});
 }
 
 

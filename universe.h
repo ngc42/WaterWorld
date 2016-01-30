@@ -36,7 +36,7 @@ public:
 
     QPointF shipPosById(const uint inShipId);
 
-    void nextRound();
+    void nextRound(UniverseScene *& inOutUniverseScene);
 
     // update InfoScreen after MainWindow::nextRound()
     void callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsleInfo, const ShipInfo inShipInfo);
@@ -46,8 +46,7 @@ public:
     QList<Ship*> m_ships;
 
 private:
-    void createIsles(UniverseScene *& inOutUniverseScene, const qreal inUniverseWidth, const qreal inUniverseHeight,
-                     const uint inNumIsles);
+    void createIsles(const qreal inUniverseWidth, const qreal inUniverseHeight, const uint inNumIsles);
 
     void createShipOnIsle(UniverseScene *& inOutUniverseScene, const uint inIsleId);
 
