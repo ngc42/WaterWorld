@@ -8,6 +8,7 @@
 #include <QBrush>
 #include <QDebug>
 
+
 Isle::Isle(const uint inId, const uint inOwner, const QPointF inPos,
      const QColor inColor)
     : WaterObject(inId, inOwner, inPos, inColor, 0.0f)
@@ -67,8 +68,8 @@ bool Isle::nextRound()
     if(m_population > 60000)
         m_population = m_population / 1.0987654;
 
-    m_technology = m_technology * 1.011111f + 0.01;
-    m_buildlevel = m_buildlevel + 0.1 + 0.4f / m_technology;
+    m_technology = m_technology + 0.1 * m_population / 60000.0f;
+    m_buildlevel = m_buildlevel + 0.1f / m_technology;
     if(m_buildlevel >= 1.0f)
     {   // hurray we finished a ship
         m_buildlevel = 0.0f;
