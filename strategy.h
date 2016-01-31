@@ -47,7 +47,7 @@ public:
     void nextRound(QList<StrategyCommand> & outCommands);
 
 protected:
-    QList<uint> orderedUnsettledIsleFromCenter() const;
+    QList<uint> orderedUnsettledOrEnemyIsleFromCenter(const bool inSetUnsettled) const;
 
 
     uint m_owner;   // this strategy belongs to this owner

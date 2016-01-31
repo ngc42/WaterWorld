@@ -101,7 +101,6 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
         {
             qInfo() << "isle " << isle->id() << "finished a ship";
             createShipOnIsle(inOutUniverseScene, isle->id());
-
         }
     }
     for(Ship *ship : m_ships)
@@ -146,12 +145,8 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                 else
                 {   // enemy isle -> fight
 
-                    qDebug() <<" ship fights an isle" << ship->id();
-
                     // 1. fight isles patrol
                     shipFightIslePatol(ship, target.id);
-
-                    qDebug() <<" after isle patrol" << ship->id();
 
                     // 2. fight isle
                     if( shipFightIsle(ship, target.id) )
@@ -160,8 +155,6 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 
                         // @fixme: every other enemy ship on this isle
                         // now owned by winner
-
-                        qDebug() <<" ship now lands on isle" << ship->id();
                     }
                 }
             }
@@ -343,10 +336,10 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
     isleForId(inIsleId, info2);
     if(info1.posType == ShipPositionEnum::S_TRASH)
         return false;
-    if(info2.owner <= 1)
+    if(info2.owner < 1 or info2.owner == info1.owner)
     {
-        qErrnoWarning("Universe::shipFightIsle(): something went wrong");
-        return false;
+        qInfo() << "BUG: unsettled or own isle, automatic won, no damage added";
+        return true;
     }
 
     float force1 = 2.0f * info1.technology * (1.0 - info1.damage) * 10.0f;
@@ -354,7 +347,6 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
 
     if(force1 > force2)
     {   // attacker (ship) has won
-
         float damage_to_add = (force1 - force2) / (force1 + force2);
         inOutAttacker->addDamage(damage_to_add);
         info1 = inOutAttacker->info();
@@ -365,7 +357,7 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
         }
         else
         {   // ship is alive
-            setIsleOwnerById(info1.id, info1.owner, info1.color);
+            setIsleOwnerById(info2.id, info1.owner, info1.color);
             return true;
         }
 

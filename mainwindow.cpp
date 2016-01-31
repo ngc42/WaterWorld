@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *inParent) :
     infoLayout->addWidget(m_waterObjectInfo);
 
     // universe show isles
-    m_universe = new Universe(this, m_universeScene, 1000.0, 1000.0, 20);
+    m_universe = new Universe(this, m_universeScene, 1000.0, 1000.0, 30);
 
     connect(m_minimapView, SIGNAL(sigMinimapClicked(QPointF)), m_universeView, SLOT(slotMinimapClicked(QPointF)));
     connect(m_ui->actionZoomIn, SIGNAL(triggered(bool)), m_universeView, SLOT(slotZoomIn()));

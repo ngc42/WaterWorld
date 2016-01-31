@@ -48,10 +48,11 @@ void Strategy::setShips(const QList<ShipInfo> inPublicShipInfos, const QList<Shi
 
 void Strategy::nextRound(QList<StrategyCommand> & outCommands)
 {
+    QSet<uint> shipsAlreadyProcessed;
+
     if(m_thereAreUnownedIsles)
     {
-        QSet<uint> shipsAlreadyProcessed;
-        QList<uint> unownedIds = orderedUnsettledIsleFromCenter();
+        QList<uint> unownedIds = orderedUnsettledOrEnemyIsleFromCenter(true);
         for(uint isleId : unownedIds)
         {
             bool shipsAvailable = false;
@@ -75,16 +76,43 @@ void Strategy::nextRound(QList<StrategyCommand> & outCommands)
                 break;
         }
     }
+    else
+    {
+        QList<uint> enemyIds = orderedUnsettledOrEnemyIsleFromCenter(false);
+        for(uint isleId : enemyIds )
+        {
+            int sendNumShips = 0;
+            for(ShipInfo shipInfo : m_privateShips)
+            {
+                if(shipInfo.posType == ShipPositionEnum::S_ONISLE and !shipsAlreadyProcessed.contains(shipInfo.id))
+                {
+                    shipsAlreadyProcessed.insert(shipInfo.id);
+                    StrategyCommand cmd;
+                    cmd.owner = owner();
+                    cmd.shipId = shipInfo.id;
+                    cmd.targetType = Target::TargetEnum::T_ISLE;
+                    cmd.targetId = isleId;
+                    outCommands.append(cmd);
+
+                    sendNumShips++;
+                }
+                if(sendNumShips > 10)
+                    break;
+            }
+            if(sendNumShips > 10)
+                break;
+        }
+    }
 }
 
 
-QList<uint> Strategy::orderedUnsettledIsleFromCenter() const
+QList<uint> Strategy::orderedUnsettledOrEnemyIsleFromCenter(const bool inSetUnsettled) const
 {
     QList< QPair<qreal, uint> > uList;
 
     for(IsleInfo isleInfo : m_publicIsles)
     {
-        if(isleInfo.owner == 0)
+        if( (inSetUnsettled and isleInfo.owner == 0) or (!inSetUnsettled and isleInfo.owner  != m_owner) )
         {
             qreal dx = isleInfo.pos.x() - m_centerOfMyIsles.x();
             qreal dy = isleInfo.pos.y() - m_centerOfMyIsles.y();
