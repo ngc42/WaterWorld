@@ -107,6 +107,8 @@ void Ship::addDamage(const float inDamageToAdd)
         setPositionType(ShipPositionEnum::S_TRASH);
         setTargetFinished();
     }
+
+    qInfo() << "Ship " << id() <<  " has damage " << m_damage;
 }
 
 

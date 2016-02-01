@@ -7,7 +7,7 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QHBoxLayout>
-
+#include <QDebug>
 
 ShipListItem::ShipListItem(const ShipListItemType inType, const ShipInfo inShipInfo, const QString inTitle)
     : QTableWidgetItem(), m_myType(inType), m_shipId(inShipInfo.id)
@@ -64,7 +64,8 @@ ShipListItem::ShipListItem(const ShipListItemType inType, const ShipInfo inShipI
         p.fillRect(20 - width, 0, width, 10, Qt::red);
         p.end();
         setIcon(circle);  // show damage
-        QString text = QString("Dmg: %1").arg(inShipInfo.damage * 100.0f, 0);
+        QString text = QString("Dmg: %1").arg(inShipInfo.damage * 100.0f, 3);
+        qInfo() << " SLIT_STATUS: id: " << inShipInfo.id << " dmg: " << inShipInfo.damage;
         setText(text);
     }
     else

@@ -307,6 +307,8 @@ void Universe::shipFightShip(Ship *& inOutAttacker, Ship *& inOutDefender)
     float force1 = (1.0f - info1.damage) * info1.technology * 1.1f;
     float force2 = (1.0f - info2.damage) * info2.technology;
 
+    qInfo() << "Ship fight ship, forces: " << force1 << " " << force2;
+
     if(force1 > force2)
     {   // Attacker has won
         inOutAttacker->addDamage(force2 / force1);
@@ -314,7 +316,7 @@ void Universe::shipFightShip(Ship *& inOutAttacker, Ship *& inOutDefender)
     }
     else if(force2 > force1)
     {   // defender has won
-        inOutDefender->addDamage(force2 / force1);
+        inOutDefender->addDamage(force1 / force2);
         inOutAttacker->setPositionType(ShipPositionEnum::S_TRASH);
     }
     else
