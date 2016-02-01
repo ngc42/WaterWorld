@@ -5,6 +5,7 @@
 
 
 #include "isle.h"
+#include <math.h>
 #include <QBrush>
 #include <QDebug>
 
@@ -64,18 +65,22 @@ bool Isle::nextRound()
         setOwner(0, Qt::gray);
         return false;
     }
+    // population formula is based on a logistic function for populations,
+    // see https://en.wikipedia.org/wiki/Logistic_function for details.
+    // the magic factor is try-and-error with Libre Office Calc, try out:
+    // =(60000 * B1 * EXP(Param3) ) / (60000 + (B1 * (EXP(Param3) - 1))) - 1
+    const float max_population = 60000.0f;
+    const float magic_population_factor = 0.097f;
+    m_population = (max_population * m_population * exp(magic_population_factor)) /
+            (max_population + (m_population * exp(magic_population_factor))) ;
 
-    // some magic numbers here:
-    // population and technology should not grow too fast.
-    // @fixme: I'm not happy with linear growth rate
-    //         population, technology and buildlevel should depend on each other
-    //         these things should depend on user's input parameters
-    m_population = m_population * 1.05;
-    if(m_population > 60000)
-        m_population = m_population / 1.0987654;
+    // The values here are try and error too. Idea is, that more population can
+    // grow tech faster.
+    // Libre Office (col A is tech, col B is population) =A1 + 0,3 +  0,2 * B1 / 60000
+    m_technology = m_technology + 0.3 + 0.2 * m_population / max_population;
 
-    m_technology = m_technology + 0.1 * m_population / 60000.0f;
-    m_buildlevel = m_buildlevel + 0.05f / m_technology;
+    // Libre Office: = C1 + 0,2 + 0,5 / A1 + 0,5 * B1 / 60000
+    m_buildlevel = m_buildlevel + 0.2f + 0.5f * (1.0f / m_technology +  m_population / max_population);
     if(m_buildlevel >= 1.0f)
     {   // hurray we finished a ship
         m_buildlevel = 0.0f;
