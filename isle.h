@@ -51,6 +51,9 @@ public:
 
     void setPopulation(const float inPopulation);
 
+    // set technology, if inTechnology is higher than isle's tech
+    void setMaxTechnology(const float inTechnology);
+
     // test
     bool pointInIsle(const QPointF inPos);
 

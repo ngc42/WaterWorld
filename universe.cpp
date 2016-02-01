@@ -99,7 +99,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
     {
         if(isle->nextRound())
         {
-            qInfo() << "isle " << isle->id() << "finished a ship";
+            qDebug() << "isle " << isle->id() << "finished a ship";
             createShipOnIsle(inOutUniverseScene, isle->id());
         }
     }
@@ -136,11 +136,11 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                 if(isleInfo.owner == 0)
                 {   // isle has no inhabitants
                     setIsleOwnerById(isleInfo.id, shipInfo.owner, shipInfo.color);
-                    ship->landOnIsle(target.id, target.pos);
+                    shipLandOnIsle(ship);
                 }
                 else if(isleInfo.owner == shipInfo.owner)
                 {   // own isle
-                    ship->landOnIsle(target.id, target.pos);
+                    shipLandOnIsle(ship);
                 }
                 else
                 {   // enemy isle -> fight
@@ -151,10 +151,21 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                     // 2. fight isle
                     if( shipFightIsle(ship, target.id) )
                     {   // ship has won
-                        ship->landOnIsle(target.id, target.pos);
+                        shipLandOnIsle(ship);
 
-                        // @fixme: every other enemy ship on this isle
-                        // now owned by winner
+                        // every other enemy ship on this isle is now owned by the winner
+                        for(Ship *isleShip : m_ships)
+                        {
+                            ShipInfo isleShipInfo = isleShip->info();
+                            if(isleShipInfo.posType == ShipPositionEnum::S_ONISLE and
+                               isleShipInfo.isleId == target.id)
+                            {
+                                qDebug() << "ISLE SHIP: ship " << isleShipInfo.id << " with owner " << isleShipInfo.owner <<
+                                            " gets new owner " << shipInfo.owner;
+                                isleShip->setOwner(shipInfo.owner, shipInfo.color);
+                            }
+                        }
+
                     }
                 }
             }
@@ -201,7 +212,6 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                 // 5%
                 ship->addDamage(shipInfo.damage > 0.05f ? -0.05f : -shipInfo.damage );
             }
-
         }
     }
 
@@ -338,7 +348,7 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
         return false;
     if(info2.owner < 1 or info2.owner == info1.owner)
     {
-        qInfo() << "BUG: unsettled or own isle, automatic won, no damage added";
+        qDebug() << "BUG: unsettled or own isle, automatic won, no damage added";
         return true;
     }
 
@@ -381,6 +391,42 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
     }
 
     return false;   // ship has lost
+}
+
+
+void Universe::shipLandOnIsle(Ship *& inOutShipToLand)
+{
+    Target targetInfo = inOutShipToLand->target();
+    if(! targetInfo.validTarget or (targetInfo.tType != Target::TargetEnum::T_ISLE))
+    {   // just to get sure
+        qDebug() << "ERR 1 in Universe::shipLandOnIsle()";
+        return;
+    }
+
+    ShipInfo shipInfo = inOutShipToLand->info();
+    Isle *targetIsle = 0;
+    IsleInfo isleInfo;
+    isleInfo.id = 0;
+
+    for(Isle *isle : m_isles )
+        if( isle->id() == targetInfo.id)
+        {
+            targetIsle = isle;
+            isleInfo = isle->info();
+            break;
+        }
+
+    if(isleInfo.id == 0 or shipInfo.owner != isleInfo.owner)
+    {   // just to get sure
+        qDebug() << "ERR 2 in Universe::shipLandOnIsle()";
+        return;
+    }
+
+    // transfer technology to the isle
+    targetIsle->setMaxTechnology(shipInfo.technology);
+
+    // and realy land
+    inOutShipToLand->landOnIsle(isleInfo.id, isleInfo.pos);
 }
 
 
@@ -547,7 +593,7 @@ void Universe::processStrategyCommands(const uint inOwner, const QList<StrategyC
         return;
     for(StrategyCommand cmd : inCommands)
     {
-        qInfo() << "cmd owner=" << inOwner <<  " wants to send ship " << cmd.shipId << " to id " << cmd.targetId;
+        qDebug() << "cmd owner=" << inOwner <<  " wants to send ship " << cmd.shipId << " to id " << cmd.targetId;
 
         Ship *sourceShip;
         ShipInfo sourceShipInfo;
@@ -631,7 +677,7 @@ void Universe::slotUniverseViewClickedFinishTarget(QPointF scenePos, uint shipId
     IsleInfo isleInfo;
     isleForPoint(scenePos, isleInfo);
 
-    Ship *sourceShip;
+    Ship *sourceShip = 0;
     for(Ship *s : m_ships)
         if(s->id() == shipId)
         {

@@ -59,6 +59,8 @@ private:
      */
     bool shipFightIsle(Ship *& inOutAttacker, const uint inIsleId);
 
+    void shipLandOnIsle(Ship *& inOutShipToLand);
+
     /**
      * @brief isleForPoint - returns an isleInfo if we hit an isle
      * @param inScenePoint - position inside universe (scene coordinates)

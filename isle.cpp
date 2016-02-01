@@ -40,6 +40,12 @@ void Isle::setPopulation(const float inPopulation)
 }
 
 
+void Isle::setMaxTechnology(const float inTechnology)
+{
+    m_technology = m_technology < inTechnology ? inTechnology : m_technology;
+}
+
+
 bool Isle::pointInIsle(const QPointF inPos)
 {
     QPointF myPos = pos();
@@ -69,7 +75,7 @@ bool Isle::nextRound()
         m_population = m_population / 1.0987654;
 
     m_technology = m_technology + 0.1 * m_population / 60000.0f;
-    m_buildlevel = m_buildlevel + 0.1f / m_technology;
+    m_buildlevel = m_buildlevel + 0.05f / m_technology;
     if(m_buildlevel >= 1.0f)
     {   // hurray we finished a ship
         m_buildlevel = 0.0f;
