@@ -252,11 +252,21 @@ void Universe::callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsle
     else if(inPage == InfoscreenPage::PAGE_SHIP)
     {
         ShipInfo shipInfo;
-        shipForId(inShipInfo.id, shipInfo);
+        Target targetUnused;
+        shipForId(inShipInfo.id, shipInfo, targetUnused);
         emit sigShowInfoShip(inShipInfo);
     }
     else if(inPage == InfoscreenPage::PAGE_WATER)
         emit sigShowInfoWater();
+    else if(inPage == InfoscreenPage::PAGE_HUMAN_SHIP)
+    {
+        for(Ship *s : m_ships)
+            if(inShipInfo.id == s->id())
+            {
+                emit sigShowInfoHumanShip(s->info(), s->target());
+                break;
+            }
+    }
     // else -> PAGE_NOTHING -> ignore
 }
 
@@ -490,7 +500,7 @@ void Universe::setIslePopulationById(const uint inIsleId, const float inNewPopul
 }
 
 
-void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo)
+void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo, Target & outShipTarget)
 {
     outShipInfo.id = 0;
     for(Ship *ship : m_ships)
@@ -498,13 +508,14 @@ void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo)
         if(ship->pointInShip(inScenePoint))
         {
             outShipInfo = ship->info();
+            outShipTarget = ship->target();
             break;
         }
     }
 }
 
 
-void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo)
+void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo, Target & outShipTarget)
 {
     outShipInfo.id = 0;
     for(Ship *ship : m_ships)
@@ -512,6 +523,7 @@ void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo)
         if(ship->id() == inShipId)
         {
             outShipInfo = ship->info();
+            outShipTarget = ship->target();
             break;
         }
     }
@@ -642,7 +654,8 @@ void Universe::processStrategyCommands(const uint inOwner, const QList<StrategyC
         else if(cmd.targetType == Target::TargetEnum::T_SHIP)
         {
             ShipInfo shipInfo;
-            shipForId(cmd.targetId, shipInfo);
+            Target shipTargetUnused;
+            shipForId(cmd.targetId, shipInfo, shipTargetUnused);
             // check valid ship
             if(shipInfo.id == 0)
                 return;
@@ -675,9 +688,15 @@ void Universe::slotUniverseViewClicked(QPointF scenePos)
     else
     {   // ship or water
         ShipInfo shipInfo;
-        shipForPoint(scenePos, shipInfo);
+        Target target;
+        shipForPoint(scenePos, shipInfo, target);
         if(shipInfo.id > 0)
-            emit sigShowInfoShip(shipInfo);
+        {   // human or enemy ship?
+            if(shipInfo.owner == 1)
+                emit sigShowInfoHumanShip(shipInfo, target);
+            else
+                emit sigShowInfoShip(shipInfo);
+        }
         else
             emit sigShowInfoWater();
     }
@@ -686,9 +705,7 @@ void Universe::slotUniverseViewClicked(QPointF scenePos)
 
 void Universe::slotUniverseViewClickedFinishTarget(QPointF scenePos, uint shipId)
 {
-    IsleInfo isleInfo;
-    isleForPoint(scenePos, isleInfo);
-
+    // find the source ship which needs new target
     Ship *sourceShip = 0;
     for(Ship *s : m_ships)
         if(s->id() == shipId)
@@ -696,9 +713,10 @@ void Universe::slotUniverseViewClickedFinishTarget(QPointF scenePos, uint shipId
             sourceShip = s;
             break;
         }
-
     ShipInfo sourceShipInfo = sourceShip->info();
 
+    IsleInfo isleInfo;
+    isleForPoint(scenePos, isleInfo);
     if(isleInfo.id > 0)
     {
         // ship with id shipId wants target isle with id isleInfo.id
@@ -707,7 +725,8 @@ void Universe::slotUniverseViewClickedFinishTarget(QPointF scenePos, uint shipId
     else
     {
         ShipInfo targetShipInfo;
-        shipForPoint(scenePos, targetShipInfo);
+        Target targetUnused;
+        shipForPoint(scenePos, targetShipInfo, targetUnused);
         if(targetShipInfo.id > 0 and targetShipInfo.id != sourceShipInfo.id)
         {   // target other ship
             qDebug() << "SET Target SHIP at " << scenePos << " id= " << sourceShipInfo.id;
@@ -722,6 +741,7 @@ void Universe::slotUniverseViewClickedFinishTarget(QPointF scenePos, uint shipId
 
     // shipInfo describes old state. if this ship was on an isle
     // then we have to show this isle again
+    // this updates the graphics which shows, that this ship has a target
     if( (sourceShipInfo.posType == S_ONISLE) or (sourceShipInfo.posType == S_PATROL) )
     {
         // redraw isle info

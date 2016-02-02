@@ -74,9 +74,9 @@ private:
 
     void setIslePopulationById(const uint inIsleId, const float inNewPopulation);
 
-    void shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo);
+    void shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo, Target & outShipTarget);
 
-    void shipForId(const uint inShipId, ShipInfo & outShipInfo);
+    void shipForId(const uint inShipId, ShipInfo & outShipInfo, Target & outShipTarget);
 
     // really delete a ship
     void deleteShip(const uint inShipId);
@@ -99,10 +99,21 @@ private:
 
 
 signals:
+    /* These signals match the above enum InfoscreenPage.
+     * How Infoscreen works:
+     * 1. UniverseView::mousePressEvent() sends mouse position to Universe::slotUniverseViewClicked()
+     * 2. it is selected, which object is hit by the userData
+     * 3. The following signals are emitted, depends on object
+     * 4. Mainwindow::slotShowUniverse* pops up the infoscreen
+     *
+     * on every MainWindow::nextRound(), the current InfoScreen is saved.
+     * - callInfoScreen() is called, to display the page again.
+     */
     void sigShowInfoWater();
     void sigShowInfoIsle(IsleInfo isleInfo);
     void sigShowInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo> sList);
     void sigShowInfoShip(ShipInfo shipInfo);
+    void sigShowInfoHumanShip(ShipInfo shipInfo, Target target);
 
 public slots:
     void slotUniverseViewClicked(QPointF scenePos);

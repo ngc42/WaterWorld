@@ -70,6 +70,7 @@ MainWindow::MainWindow(QWidget *inParent) :
     connect(m_universe, SIGNAL(sigShowInfoIsle(IsleInfo)), this, SLOT(slotShowUniverseInfoIsle(IsleInfo)));
     connect(m_universe, SIGNAL(sigShowInfoHumanIsle(IsleInfo, QList<ShipInfo>)), this, SLOT(slotShowUniverseInfoHumanIsle(IsleInfo, QList<ShipInfo>)));
     connect(m_universe, SIGNAL(sigShowInfoShip(ShipInfo)), this, SLOT(slotShowUniverseInfoShip(ShipInfo)));
+    connect(m_universe, SIGNAL(sigShowInfoHumanShip(ShipInfo, Target)), this, SLOT(slotShowUniverseInfoHumanShip(ShipInfo, Target)));
 
 
     // Push buttons on Info -> human isle
@@ -171,7 +172,6 @@ void MainWindow::slotShowUniverseInfoShip(ShipInfo shipInfo)
     s = QString("Tech: %1").arg(shipInfo.technology, 2);
     m_uiWaterObjectInfo->labelShipTechnology->setText(s);
 
-    m_waterObjectInfo->setCurrentIndex(PAGE_SHIP);
     // set page and save last state
     m_waterObjectInfo->setCurrentIndex(PAGE_SHIP);
     m_lastCalledPage = PAGE_SHIP;
@@ -189,7 +189,20 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, Target shipTar
     m_uiWaterObjectInfo->labelHumanShipDamage->setText(s);
     s = QString("Tech: %1").arg(shipInfo.technology, 2);
     m_uiWaterObjectInfo->labelHumanShipTechnology->setText(s);
-    //@fixme unfinished
+
+    if(shipTarget.validTarget)
+    {
+        s = QString(shipTarget.tType == Target::TargetEnum::T_ISLE ? "isle" : Target::TargetEnum::T_SHIP ? "ship" : "water");
+    }
+    else
+        s = {"no"};
+    m_uiWaterObjectInfo->labelHumanShipHasTarget->setText(s);
+
+    // set page and save last state
+    m_waterObjectInfo->setCurrentIndex(PAGE_HUMAN_SHIP);
+    m_lastCalledPage = PAGE_HUMAN_SHIP;
+    m_lastCalledShipInfo = shipInfo;
+
 }
 
 void MainWindow::slotDeleteShip()
