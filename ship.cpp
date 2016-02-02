@@ -108,7 +108,7 @@ void Ship::addDamage(const float inDamageToAdd)
         setTargetFinished();
     }
 
-    qInfo() << "Ship " << id() <<  " has damage " << m_damage;
+    qDebug() << "Ship " << id() <<  " has damage " << m_damage;
 }
 
 

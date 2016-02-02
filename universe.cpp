@@ -90,6 +90,7 @@ QPointF Universe::shipPosById(const uint inShipId)
 
 void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 {
+    qDebug() << "BEGIN NEXTROUND ==================";
     prepareStrategies();
     QList<StrategyCommand> strategyCommands;
     m_strategy->nextRound(strategyCommands);
@@ -221,7 +222,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
         if(deleteThatShip->positionType() == ShipPositionEnum::S_TRASH)
             deleteShip(deleteThatShip->id());
     }
-
+    qDebug() << "END NEXTROUND ==================";
 }
 
 
@@ -231,13 +232,22 @@ void Universe::callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsle
     {
         IsleInfo isleInfo;
         isleForId(inIsleInfo.id, isleInfo);
-        emit sigShowInfoIsle(isleInfo);
+        // owner may have changed
+        if(isleInfo.owner == 1)
+            // human
+            showHumanIsle(isleInfo);
+        else
+            emit sigShowInfoIsle(isleInfo);
     }
     else if(inPage == InfoscreenPage::PAGE_HUMAN_ISLE)
     {
         IsleInfo isleInfo;
         isleForId(inIsleInfo.id, isleInfo);
-        showHumanIsle(isleInfo);
+        // owner may have changed
+        if(isleInfo.owner == 1)
+            showHumanIsle(isleInfo);
+        else
+            emit sigShowInfoIsle(isleInfo);
     }
     else if(inPage == InfoscreenPage::PAGE_SHIP)
     {
@@ -307,7 +317,7 @@ void Universe::shipFightShip(Ship *& inOutAttacker, Ship *& inOutDefender)
     float force1 = (1.0f - info1.damage) * info1.technology * 1.1f;
     float force2 = (1.0f - info2.damage) * info2.technology;
 
-    qInfo() << "Ship fight ship, forces: " << force1 << " " << force2;
+    qDebug() << "Ship fight ship, forces: " << force1 << " " << force2;
 
     if(force1 > force2)
     {   // Attacker has won

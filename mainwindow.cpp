@@ -179,6 +179,19 @@ void MainWindow::slotShowUniverseInfoShip(ShipInfo shipInfo)
 }
 
 
+void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, Target shipTarget)
+{
+    QPixmap pix(30, 20);
+    pix.fill(shipInfo.color);
+    m_uiWaterObjectInfo->labelHumanShipId->setText(QString("%1").arg(shipInfo.id));
+    m_uiWaterObjectInfo->labelHumanShipColor->setPixmap(pix);
+    QString s = QString("Dmg: %1").arg(shipInfo.damage, 2);
+    m_uiWaterObjectInfo->labelHumanShipDamage->setText(s);
+    s = QString("Tech: %1").arg(shipInfo.technology, 2);
+    m_uiWaterObjectInfo->labelHumanShipTechnology->setText(s);
+    //@fixme unfinished
+}
+
 void MainWindow::slotDeleteShip()
 {
     // @fixme: we have ShipPositionEnum::S_TRASH, but this here really deletes the ship in place

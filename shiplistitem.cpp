@@ -65,7 +65,7 @@ ShipListItem::ShipListItem(const ShipListItemType inType, const ShipInfo inShipI
         p.end();
         setIcon(circle);  // show damage
         QString text = QString("Dmg: %1").arg(inShipInfo.damage * 100.0f, 3);
-        qInfo() << " SLIT_STATUS: id: " << inShipInfo.id << " dmg: " << inShipInfo.damage;
+        qDebug() << " SLIT_STATUS: id: " << inShipInfo.id << " dmg: " << inShipInfo.damage;
         setText(text);
     }
     else
