@@ -77,6 +77,7 @@ MainWindow::MainWindow(QWidget *inParent) :
     connect(m_uiWaterObjectInfo->pbDelete, SIGNAL(clicked()), this, SLOT(slotDeleteShip()));
     connect(m_uiWaterObjectInfo->pbPatrol, SIGNAL(clicked()), this, SLOT(slotSetShipPartrol()));
     connect(m_uiWaterObjectInfo->pbTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForShip()));
+    connect(m_uiWaterObjectInfo->pbHumanShipSetTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForShip()));
 
 
     // show nothing at start
@@ -228,11 +229,17 @@ void MainWindow::slotSetShipPartrol()
 
 void MainWindow::slotSetNewTargetForShip()
 {
-    if(m_uiWaterObjectInfo->tableWidget->currentRow() < 0)
-        return;
-    ShipListItem *item = (ShipListItem* ) m_uiWaterObjectInfo->tableWidget->currentItem();
-    m_universeView->toggleShipWantsTarget(m_universe->shipPosById(item->id()), item->id());
-
+    if(m_lastCalledPage == PAGE_HUMAN_ISLE)
+    {
+        if(m_uiWaterObjectInfo->tableWidget->currentRow() < 0)
+            return;
+        ShipListItem *item = (ShipListItem* ) m_uiWaterObjectInfo->tableWidget->currentItem();
+        m_universeView->toggleShipWantsTarget(m_universe->shipPosById(item->id()), item->id());
+    }
+    else if(m_lastCalledPage == PAGE_HUMAN_SHIP)
+    {
+        m_universeView->toggleShipWantsTarget(m_lastCalledShipInfo.pos, m_lastCalledShipInfo.id);
+    }
     // now, its up to m_universeView to show visible feedback until target gets clicked.
     // -> then, m_universe sets up the target
     // -> then, m_universe shows up this isle again (if it was triggered by isle buttons)
