@@ -90,7 +90,7 @@ QPointF Universe::shipPosById(const uint inShipId)
 
 void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 {
-    qDebug() << "BEGIN NEXTROUND ==================";
+    qInfo() << "BEGIN NEXTROUND ==================";
     prepareStrategies();
     QList<StrategyCommand> strategyCommands;
     m_strategy->nextRound(strategyCommands);
@@ -161,7 +161,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                             if(isleShipInfo.posType == ShipPositionEnum::S_ONISLE and
                                isleShipInfo.isleId == target.id)
                             {
-                                qDebug() << "ISLE SHIP: ship " << isleShipInfo.id << " with owner " << isleShipInfo.owner <<
+                                qInfo() << "ISLE SHIP: ship " << isleShipInfo.id << " with owner " << isleShipInfo.owner <<
                                             " gets new owner " << shipInfo.owner;
                                 isleShip->setOwner(shipInfo.owner, shipInfo.color);
                             }
@@ -222,7 +222,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
         if(deleteThatShip->positionType() == ShipPositionEnum::S_TRASH)
             deleteShip(deleteThatShip->id());
     }
-    qDebug() << "END NEXTROUND ==================";
+    qInfo() << "END NEXTROUND ==================";
 }
 
 
@@ -279,11 +279,27 @@ void Universe::createIsles(const qreal inUniverseWidth, const qreal inUniverseHe
     const uint maxHeight = (uint) inUniverseHeight;
 
     qreal x, y;
-
+    bool tooClose = true;  // pos is too close to another isle
     for(uint i = 0; i < inNumIsles; i++)
     {
-        x = rand() % maxWidth;
-        y = rand() % maxHeight;
+        do
+        {
+            x = rand() % maxWidth;
+            y = rand() % maxHeight;
+            tooClose = false;
+            for(Isle *isla : m_isles)
+            {
+                QPointF p = isla->pos() - QPointF(x, y);
+                if(p.manhattanLength() < 50.0f)
+                {
+                    tooClose = true;
+                    break;
+                }
+            }
+        } while(tooClose);
+
+
+
         Isle *isle = new Isle(m_lastInsertedId++, 0, QPointF(x, y), Qt::gray);
         m_isles.append(isle);
     }

@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *inParent) :
     infoLayout->addWidget(m_waterObjectInfo);
 
     // universe show isles
-    m_universe = new Universe(this, m_universeScene, 100.0, 100.0, 3);
+    m_universe = new Universe(this, m_universeScene, 1000.0, 1000.0, 20);
 
     connect(m_minimapView, SIGNAL(sigMinimapClicked(QPointF)), m_universeView, SLOT(slotMinimapClicked(QPointF)));
     connect(m_ui->actionZoomIn, SIGNAL(triggered(bool)), m_universeView, SLOT(slotZoomIn()));
@@ -65,20 +65,17 @@ MainWindow::MainWindow(QWidget *inParent) :
     connect(m_universeView, SIGNAL(sigUniverseViewClickedFinishTarget(QPointF,uint)),
             m_universe, SLOT(slotUniverseViewClickedFinishTarget(QPointF,uint)));
 
-
     connect(m_universe, SIGNAL(sigShowInfoWater()), this, SLOT(slotShowUniverseInfoWater()));
     connect(m_universe, SIGNAL(sigShowInfoIsle(IsleInfo)), this, SLOT(slotShowUniverseInfoIsle(IsleInfo)));
     connect(m_universe, SIGNAL(sigShowInfoHumanIsle(IsleInfo, QList<ShipInfo>)), this, SLOT(slotShowUniverseInfoHumanIsle(IsleInfo, QList<ShipInfo>)));
     connect(m_universe, SIGNAL(sigShowInfoShip(ShipInfo)), this, SLOT(slotShowUniverseInfoShip(ShipInfo)));
     connect(m_universe, SIGNAL(sigShowInfoHumanShip(ShipInfo, Target)), this, SLOT(slotShowUniverseInfoHumanShip(ShipInfo, Target)));
 
-
     // Push buttons on Info -> human isle
     connect(m_uiWaterObjectInfo->pbDelete, SIGNAL(clicked()), this, SLOT(slotDeleteShip()));
     connect(m_uiWaterObjectInfo->pbPatrol, SIGNAL(clicked()), this, SLOT(slotSetShipPartrol()));
     connect(m_uiWaterObjectInfo->pbTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForShip()));
     connect(m_uiWaterObjectInfo->pbHumanShipSetTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForShip()));
-
 
     // show nothing at start
     m_waterObjectInfo->setCurrentIndex(PAGE_NOTHING);
