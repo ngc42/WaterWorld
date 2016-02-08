@@ -37,6 +37,10 @@ public:
 
     QPointF shipPosById(const uint inShipId);
 
+    // for communication with OverviewDialog (used in MainWindow::slotToggleOverviewDialog())
+    void getAllIsleInfos(QList<IsleInfo> & outIsleInfos);
+    void getAllShipInfos(QList<ShipInfo> & outShipInfos);
+
     void nextRound(UniverseScene *& inOutUniverseScene);
 
     // update InfoScreen after MainWindow::nextRound()

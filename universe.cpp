@@ -88,6 +88,21 @@ QPointF Universe::shipPosById(const uint inShipId)
 }
 
 
+void Universe::getAllIsleInfos(QList<IsleInfo> & outIsleInfos)
+{
+    outIsleInfos.clear();
+    for(Isle *isle : m_isles)
+        outIsleInfos.append(isle->info());
+}
+
+
+void Universe::getAllShipInfos(QList<ShipInfo> & outShipInfo)
+{
+    outShipInfo.clear();
+    for(Ship *ship : m_ships)
+        outShipInfo.append(ship->info());
+}
+
 void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 {
     qInfo() << "BEGIN NEXTROUND ==================";
@@ -300,21 +315,19 @@ void Universe::createIsles(const qreal inUniverseWidth, const qreal inUniverseHe
     {
         do
         {
-            x = rand() % maxWidth;
+            x = rand() % maxWidth;      // random pos
             y = rand() % maxHeight;
             tooClose = false;
             for(Isle *isla : m_isles)
             {
                 QPointF p = isla->pos() - QPointF(x, y);
-                if(p.manhattanLength() < 50.0f)
+                if(p.manhattanLength() < 50.0f)     // |p.x| + |p.y| < 50 is too close
                 {
                     tooClose = true;
                     break;
                 }
             }
         } while(tooClose);
-
-
 
         Isle *isle = new Isle(m_lastInsertedId++, 0, QPointF(x, y), Qt::gray);
         m_isles.append(isle);
@@ -402,8 +415,13 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
         return false;
     if(info2.owner < 1 or info2.owner == info1.owner)
     {
-        qDebug() << "BUG: unsettled or own isle, automatic won, no damage added";
+        qInfo() << "BUG: unsettled or own isle, automatic won, no damage added";
         return true;
+    }
+    if(info1.damage > 0.999f)
+    {
+        qInfo() << "BUG: A totally damaged ship wants to conquer an isle --> rejected";
+        return false;
     }
 
     float force1 = 2.0f * info1.technology * (1.0 - info1.damage) * 10.0f;
@@ -411,13 +429,14 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
 
     if(force1 > force2)
     {   // attacker (ship) has won
-        float damage_to_add = (force1 - force2) / (force1 + force2);
+        float damage_to_add = force2 / force1;
         inOutAttacker->addDamage(damage_to_add);
         info1 = inOutAttacker->info();
 
         if(info1.posType == ShipPositionEnum::S_TRASH)
         {   // isle is now empty without owner
             setIsleOwnerById(info2.id, 0, Qt::gray);
+            return false;   // ship is too damaged
         }
         else
         {   // ship is alive
@@ -463,7 +482,7 @@ void Universe::shipLandOnIsle(Ship *& inOutShipToLand)
     isleInfo.id = 0;
 
     for(Isle *isle : m_isles )
-        if( isle->id() == targetInfo.id)
+        if(isle->id() == targetInfo.id)
         {
             targetIsle = isle;
             isleInfo = isle->info();

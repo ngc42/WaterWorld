@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     isle.cpp \
     ship.cpp \
     shiplistitem.cpp \
-    strategy.cpp
+    strategy.cpp \
+    overviewdialog.cpp
 
 HEADERS  += mainwindow.h \
     universescene.h \
@@ -36,7 +37,9 @@ HEADERS  += mainwindow.h \
     isle.h \
     ship.h \
     shiplistitem.h \
-    strategy.h
+    strategy.h \
+    overviewdialog.h
 
 FORMS    += mainwindow.ui \
-    waterobjectinfo.ui
+    waterobjectinfo.ui \
+    overviewdialog.ui

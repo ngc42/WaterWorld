@@ -102,13 +102,13 @@ void Ship::landOnIsle(const uint inIsleId, const QPointF inPos)
 void Ship::addDamage(const float inDamageToAdd)
 {
     m_damage = m_damage + inDamageToAdd;
-    if(m_damage > 0.99f)
+    if(m_damage > 0.999f)
     {
         setPositionType(ShipPositionEnum::S_TRASH);
         setTargetFinished();
     }
 
-    qDebug() << "Ship " << id() <<  " has damage " << m_damage;
+    qInfo() << "Ship " << id() <<  " has damage " << m_damage;
 }
 
 

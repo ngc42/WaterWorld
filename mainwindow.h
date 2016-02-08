@@ -12,6 +12,7 @@
 #include <universeview.h>
 #include <minimapview.h>
 #include <universe.h>
+#include <overviewdialog.h>
 #include <QMainWindow>
 #include <QStackedWidget>
 
@@ -37,6 +38,9 @@ private:
     QWidget *m_infoWidget;
     UniverseView *m_universeView;
     MinimapView *m_minimapView;
+
+    // Player overview
+    OverviewDialog *m_overviewDialog;
 
     // Info about water objects
     Ui::StackedWidget *m_uiWaterObjectInfo;
@@ -70,6 +74,9 @@ private slots:
 
     // nextround
     void slotNextRound();
+
+    // overview dialog
+    void slotToggleOverviewDialog();
 };
 
 #endif // MAINWINDOW_H

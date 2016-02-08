@@ -55,11 +55,16 @@ MainWindow::MainWindow(QWidget *inParent) :
     // universe show isles
     m_universe = new Universe(this, m_universeScene, 1000.0, 1000.0, 20);
 
+    // overview dialog
+    m_overviewDialog = new OverviewDialog(2, this);
+    m_overviewDialog->hide();
+
     connect(m_minimapView, SIGNAL(sigMinimapClicked(QPointF)), m_universeView, SLOT(slotMinimapClicked(QPointF)));
     connect(m_ui->actionZoomIn, SIGNAL(triggered(bool)), m_universeView, SLOT(slotZoomIn()));
     connect(m_ui->actionZoomOut, SIGNAL(triggered(bool)), m_universeView, SLOT(slotZoomOut()));
     connect(m_ui->actionZoomNorm, SIGNAL(triggered(bool)), m_universeView, SLOT(slotZoomNorm()));
     connect(m_ui->actionNextRound, SIGNAL(triggered(bool)), this, SLOT(slotNextRound()));
+    connect(m_ui->actionOverview, SIGNAL(triggered()), this, SLOT(slotToggleOverviewDialog()));
 
     connect(m_universeView, SIGNAL(sigUniverseViewClicked(QPointF)), m_universe, SLOT(slotUniverseViewClicked(QPointF)));
     connect(m_universeView, SIGNAL(sigUniverseViewClickedFinishTarget(QPointF,uint)),
@@ -85,6 +90,7 @@ MainWindow::MainWindow(QWidget *inParent) :
 
 MainWindow::~MainWindow()
 {
+    delete m_overviewDialog;
     delete m_uiWaterObjectInfo;
     delete m_ui;
 }
@@ -249,4 +255,22 @@ void MainWindow::slotNextRound()
     // call the infoscreen again. so there is a live update of ships and isles
     // during nextRound()
     m_universe->callInfoScreen(m_lastCalledPage, m_lastCalledIsleInfo, m_lastCalledShipInfo);
+}
+
+
+void MainWindow::slotToggleOverviewDialog()
+{
+    if(m_overviewDialog->isHidden())
+    {
+        QList<IsleInfo> isleInfoList;
+        m_universe->getAllIsleInfos(isleInfoList);
+        m_overviewDialog->updateIsleInfos(isleInfoList);
+
+        QList<ShipInfo> shipInfoList;
+        m_universe->getAllShipInfos(shipInfoList);
+        m_overviewDialog->updateShipInfos(shipInfoList);
+        m_overviewDialog->show();
+    }
+    else
+        m_overviewDialog->hide();
 }
