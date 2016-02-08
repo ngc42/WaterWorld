@@ -39,15 +39,15 @@ OverviewDialog::OverviewDialog(const uint inNumPlayer, QWidget *inParent) :
     {
         // column isles
         QTableWidgetItem *it_0 = new QTableWidgetItem;
-        m_ui->tableWidget->setItem(i, 0, it_0);
+        m_ui->tableWidget->setItem(i, TC_ISLES, it_0);
 
         // column population
         QTableWidgetItem *it_1 = new QTableWidgetItem;
-        m_ui->tableWidget->setItem(i, 1, it_1);
+        m_ui->tableWidget->setItem(i, TC_POPULATION, it_1);
 
         // column ships
         QTableWidgetItem *it_2 = new QTableWidgetItem;
-        m_ui->tableWidget->setItem(i, 2, it_2);
+        m_ui->tableWidget->setItem(i, TC_SHIPS, it_2);
     }
 }
 
@@ -66,9 +66,9 @@ void OverviewDialog::updateIsleInfos(QList<IsleInfo> inIsleInfos)
     for(IsleInfo iInfo : inIsleInfos)
     {
         // counting isles for player iInfo.owner
-        isleCount[iInfo.owner] = isleCount.at(iInfo.owner) + 1;
+        isleCount[iInfo.owner]++;
         // counting isles for all player in total
-        isleCount[m_numPlayer + 1] = isleCount.at(m_numPlayer + 1) + 1;
+        isleCount[m_numPlayer + 1]++;
 
         populationCount[iInfo.owner] = populationCount.value(iInfo.owner) + iInfo.population;
         populationCount[m_numPlayer + 1] = populationCount.value(m_numPlayer + 1) + iInfo.population;
@@ -80,8 +80,8 @@ void OverviewDialog::updateIsleInfos(QList<IsleInfo> inIsleInfos)
         QString ic = QString("%1").arg( isleCount.value(i, -1) );
         QString pc = QString("%1").arg( populationCount.value(i, -1));
 
-        m_ui->tableWidget->item(i, 0)->setText(ic);
-        m_ui->tableWidget->item(i, 1)->setText(pc);
+        m_ui->tableWidget->item(i, TC_ISLES)->setText(ic);
+        m_ui->tableWidget->item(i, TC_POPULATION)->setText(pc);
     }
 }
 
@@ -100,6 +100,6 @@ void OverviewDialog::updateShipInfos(QList<ShipInfo> inShipInfos)
     for(uint i = 0; i < m_numPlayer + 2; i++)
     {
         QString sc = QString("%1").arg( shipCount.value(i, -1) );
-        m_ui->tableWidget->item(i, 2)->setText(sc);
+        m_ui->tableWidget->item(i, TC_SHIPS)->setText(sc);
     }
 }

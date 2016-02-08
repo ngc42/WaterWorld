@@ -23,6 +23,8 @@ class OverviewDialog : public QDialog
 {
     Q_OBJECT
 
+    enum TableColumn {TC_ISLES = 0, TC_POPULATION = 1, TC_SHIPS = 2};
+
 public:
     // inNumPlayer: human and computer player
     explicit OverviewDialog(const uint inNumPlayer, QWidget *inParent = 0);
