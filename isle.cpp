@@ -35,6 +35,7 @@ void Isle::setOwner(const uint inOwner, const QColor inColor)
 }
 
 
+
 void Isle::setPopulation(const float inPopulation)
 {
     m_population = inPopulation;
@@ -76,11 +77,11 @@ bool Isle::nextRound()
 
     // The values here are try and error too. Idea is, that more population can
     // grow tech faster.
-    // Libre Office (col A is tech, col B is population) =A1 + 0,3 +  0,2 * B1 / 60000
-    m_technology = m_technology + 0.3 + 0.2 * m_population / max_population;
+    // Libre Office (col A is tech, col B is population) =A1 + 0,1 +  0,2 * B1 / 60000
+    m_technology = m_technology + 0.01 + 0.1 * m_population / max_population;
 
     // Libre Office: = C1 + 0,2 + 0,5 / A1 + 0,5 * B1 / 60000
-    m_buildlevel = m_buildlevel + 0.2f + 0.5f * (1.0f / m_technology +  m_population / max_population);
+    m_buildlevel = m_buildlevel + 0.08f + 0.1f * (1.0f / m_technology +  m_population / max_population);
     if(m_buildlevel >= 1.0f)
     {   // hurray we finished a ship
         m_buildlevel = 0.0f;

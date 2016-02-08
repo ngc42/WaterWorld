@@ -107,6 +107,13 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
     for(Ship *ship : m_ships)
     {
         ShipInfo shipInfo = ship->info();
+
+        if(shipInfo.posType == ShipPositionEnum::S_TRASH or shipInfo.damage >= 1.0f)
+        {
+            if(shipInfo.posType != ShipPositionEnum::S_TRASH)
+                qInfo() << " -- WRONG: id:" << shipInfo.id  << " owner:" << shipInfo.owner << shipInfo.damage;
+            continue;
+        }
         Target target = ship->target();
 
 
@@ -216,11 +223,20 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
         }
     }
 
+    qInfo() << "-- start delete part";
+
     // empty trash
     for(Ship *deleteThatShip : m_ships)
     {
+        ShipInfo dmgShipInfo = deleteThatShip->info();
+        if(dmgShipInfo.posType == ShipPositionEnum::S_TRASH or dmgShipInfo.damage >= 1.0f)
+            qInfo() << " -- should delete: " << dmgShipInfo.id;
+
         if(deleteThatShip->positionType() == ShipPositionEnum::S_TRASH)
+        {
+            qInfo() << " -- delete " << dmgShipInfo.id;
             deleteShip(deleteThatShip->id());
+        }
     }
     qInfo() << "END NEXTROUND ==================";
 }
