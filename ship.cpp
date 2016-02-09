@@ -16,7 +16,7 @@ Ship::Ship(UniverseScene *& inOutRefScene, const uint inId, const uint inOwner,
       m_positionType(inPosType), m_onIsleById(inIsleId),
       m_damage(0.0f)
 {
-    m_shape = new QGraphicsRectItem(-10.0f, -10.0f, 20.0f, 20.0f);
+    m_shape = new QGraphicsRectItem(-7.0f, -7.0f, 14.0f, 14.0f);
     m_shape->setPos(inPos.x(), inPos.y());
     m_shape->hide();
     inOutRefScene->addItem(m_shape);
