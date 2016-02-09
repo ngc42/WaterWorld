@@ -17,6 +17,6 @@ MinimapView::MinimapView(QWidget *inParent) :
 
 void MinimapView::mousePressEvent(QMouseEvent *inMouseEvent)
 {
-    qDebug()  << "Minimap sends Click: " << mapToScene( inMouseEvent->pos() );
+    //qDebug()  << "Minimap sends Click: " << mapToScene( inMouseEvent->pos() );
     emit sigMinimapClicked( mapToScene(inMouseEvent->pos()) );
 }

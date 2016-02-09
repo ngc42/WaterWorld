@@ -196,7 +196,18 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, Target shipTar
 
     if(shipTarget.validTarget)
     {
-        s = QString(shipTarget.tType == Target::TargetEnum::T_ISLE ? "isle" : Target::TargetEnum::T_SHIP ? "ship" : "water");
+        switch(shipTarget.tType)
+        {
+        case Target::TargetEnum::T_ISLE:
+            s = "isle";
+            break;
+        case Target::TargetEnum::T_SHIP:
+            s = "ship";
+            break;
+        default:
+            s = "water";
+            break;
+        }
     }
     else
         s = {"no"};

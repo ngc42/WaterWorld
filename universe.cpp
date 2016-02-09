@@ -780,12 +780,12 @@ void Universe::slotUniverseViewClickedFinishTarget(QPointF scenePos, uint shipId
         shipForPoint(scenePos, targetShipInfo, targetUnused);
         if(targetShipInfo.id > 0 and targetShipInfo.id != sourceShipInfo.id)
         {   // target other ship
-            qDebug() << "SET Target SHIP at " << scenePos << " id= " << sourceShipInfo.id;
+            qInfo() << "SET Target SHIP at " << scenePos << " id= " << sourceShipInfo.id;
             sourceShip->setTargetShip(targetShipInfo.id, targetShipInfo.pos);
         }
         else
         {   // ship with id shipId wants target water at scenePos
-            qDebug() << "SET Target WATER at " << scenePos;
+            qInfo() << "SET Target WATER at " << scenePos;
             sourceShip->setTargetWater(scenePos);
         }
     }

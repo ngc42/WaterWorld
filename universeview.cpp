@@ -44,7 +44,7 @@ void UniverseView::setScene(QGraphicsScene *inScene)
 void UniverseView::mousePressEvent(QMouseEvent *inMouseEvent)
 {
     QPointF clickPoint = mapToScene(inMouseEvent->pos());
-    qDebug()  << "UniverseView sends Click: " << clickPoint;
+    //qDebug()  << "UniverseView sends Click: " << clickPoint;
 
     if(m_shipWantsTarget)
     {
@@ -68,7 +68,7 @@ void UniverseView::mouseMoveEvent(QMouseEvent *inMouseEvent)
 
 void UniverseView::slotMinimapClicked( QPointF scenePos )
 {
-    qDebug() << "Universe received MinimapClick: " << scenePos;
+    //qDebug() << "Universe received MinimapClick: " << scenePos;
     ensureVisible(scenePos.x() - 100, scenePos.y() - 100, 200, 200);
 }
 
