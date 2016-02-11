@@ -126,7 +126,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
         if(shipInfo.posType == ShipPositionEnum::S_TRASH or shipInfo.damage >= 1.0f)
         {
             if(shipInfo.posType != ShipPositionEnum::S_TRASH)
-                qInfo() << " -- WRONG: id:" << shipInfo.id  << " owner:" << shipInfo.owner << shipInfo.damage;
+                qDebug() << " -- WRONG: id:" << shipInfo.id  << " owner:" << shipInfo.owner << shipInfo.damage;
             continue;
         }
         Target target = ship->target();
@@ -183,7 +183,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                             if(isleShipInfo.posType == ShipPositionEnum::S_ONISLE and
                                isleShipInfo.isleId == target.id)
                             {
-                                qInfo() << "ISLE SHIP: ship " << isleShipInfo.id << " with owner " << isleShipInfo.owner <<
+                                qDebug() << "ISLE SHIP: ship " << isleShipInfo.id << " with owner " << isleShipInfo.owner <<
                                             " gets new owner " << shipInfo.owner;
                                 isleShip->setOwner(shipInfo.owner, shipInfo.color);
                             }
@@ -238,18 +238,18 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
         }
     }
 
-    qInfo() << "-- start delete part";
+    qDebug() << "-- start delete part";
 
     // empty trash
     for(Ship *deleteThatShip : m_ships)
     {
         ShipInfo dmgShipInfo = deleteThatShip->info();
         if(dmgShipInfo.posType == ShipPositionEnum::S_TRASH or dmgShipInfo.damage >= 1.0f)
-            qInfo() << " -- should delete: " << dmgShipInfo.id;
+            qDebug() << " -- should delete: " << dmgShipInfo.id;
 
         if(deleteThatShip->positionType() == ShipPositionEnum::S_TRASH)
         {
-            qInfo() << " -- delete " << dmgShipInfo.id;
+            qDebug() << " -- delete " << dmgShipInfo.id;
             deleteShip(deleteThatShip->id());
         }
     }
@@ -415,12 +415,12 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
         return false;
     if(info2.owner < 1 or info2.owner == info1.owner)
     {
-        qInfo() << "BUG: unsettled or own isle, automatic won, no damage added";
+        //qInfo() << "BUG: unsettled or own isle, automatic won, no damage added";
         return true;
     }
     if(info1.damage > 0.999f)
     {
-        qInfo() << "BUG: A totally damaged ship wants to conquer an isle --> rejected";
+        //qInfo() << "BUG: A totally damaged ship wants to conquer an isle --> rejected";
         return false;
     }
 
@@ -780,12 +780,12 @@ void Universe::slotUniverseViewClickedFinishTarget(QPointF scenePos, uint shipId
         shipForPoint(scenePos, targetShipInfo, targetUnused);
         if(targetShipInfo.id > 0 and targetShipInfo.id != sourceShipInfo.id)
         {   // target other ship
-            qInfo() << "SET Target SHIP at " << scenePos << " id= " << sourceShipInfo.id;
+            //qInfo() << "SET Target SHIP at " << scenePos << " id= " << sourceShipInfo.id;
             sourceShip->setTargetShip(targetShipInfo.id, targetShipInfo.pos);
         }
         else
         {   // ship with id shipId wants target water at scenePos
-            qInfo() << "SET Target WATER at " << scenePos;
+            //qInfo() << "SET Target WATER at " << scenePos;
             sourceShip->setTargetWater(scenePos);
         }
     }
