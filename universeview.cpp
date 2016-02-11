@@ -59,6 +59,8 @@ void UniverseView::mousePressEvent(QMouseEvent *inMouseEvent)
 
 void UniverseView::mouseMoveEvent(QMouseEvent *inMouseEvent)
 {
+    if(!m_shipWantsTarget)
+        return;
     QPointF targetPos = mapToScene(inMouseEvent->pos());
 
     m_rubberBandLine->setLine(m_shipSourcePos.x(), m_shipSourcePos.y(),
