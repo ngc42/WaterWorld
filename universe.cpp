@@ -177,6 +177,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                         shipLandOnIsle(ship);
 
                         // every other enemy ship on this isle is now owned by the winner
+                        float local_tech_max = 0.1f;
                         for(Ship *isleShip : m_ships)
                         {
                             ShipInfo isleShipInfo = isleShip->info();
@@ -186,9 +187,19 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                                 qDebug() << "ISLE SHIP: ship " << isleShipInfo.id << " with owner " << isleShipInfo.owner <<
                                             " gets new owner " << shipInfo.owner;
                                 isleShip->setOwner(shipInfo.owner, shipInfo.color);
+                                // find the maximum technology for pirated ships
+                                local_tech_max = isleShipInfo.technology > local_tech_max ? isleShipInfo.technology : local_tech_max;
+                            }
+                            if(local_tech_max > shipInfo.technology)
+                            {   // maxbe, one of the pirated ships has higher tech than the ship which landed
+                                for(Isle *newShipsIsle : m_isles)
+                                    if(newShipsIsle->id() == target.id)
+                                    {
+                                        newShipsIsle->setMaxTechnology(local_tech_max);
+                                        break;
+                                    }
                             }
                         }
-
                     }
                 }
             }
@@ -225,7 +236,6 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                 // nothing to do here
                 ship->setTargetFinished();
             }
-
         }
         else
         {
@@ -496,7 +506,9 @@ void Universe::shipLandOnIsle(Ship *& inOutShipToLand)
     }
 
     // transfer technology to the isle
+    qInfo() << "Set max technology: ship has" << shipInfo.technology << " isle has: " << targetIsle->info().technology;
     targetIsle->setMaxTechnology(shipInfo.technology);
+    qInfo() << " now isle has " << targetIsle->info().technology;
 
     // and realy land
     inOutShipToLand->landOnIsle(isleInfo.id, isleInfo.pos);
