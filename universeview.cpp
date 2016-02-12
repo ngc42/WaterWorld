@@ -11,7 +11,7 @@
 
 
 UniverseView::UniverseView(QWidget *inParent) :
-    QGraphicsView(inParent), m_shipWantsTarget(false), m_shipVelocity(1.0f)
+    QGraphicsView(inParent), m_shipWantsTarget(false), m_isleWantsDefaultTarget(false), m_shipVelocity(1.0f)
 {
     m_rubberBandLine = new QGraphicsLineItem(10, 10, 10, 10);
     m_journeyLengthDisplay = new QGraphicsSimpleTextItem();
@@ -20,6 +20,8 @@ UniverseView::UniverseView(QWidget *inParent) :
 
 void UniverseView::toggleShipWantsTarget(const QPointF inShipSourcePos, const uint inShipId, const float inShipVelocity)
 {
+    if(m_isleWantsDefaultTarget)
+        return;             // we don't want to get confused
     if(m_shipWantsTarget)
     {
         m_shipWantsTarget = false;
@@ -39,6 +41,27 @@ void UniverseView::toggleShipWantsTarget(const QPointF inShipSourcePos, const ui
 }
 
 
+void UniverseView::toggleIsleWantsTarget(const QPointF inIsleSourcePos, const uint inIsleId)
+{
+    if(m_shipWantsTarget)
+        return;                     // we don't want to get confused
+    //m_journeyLengthDisplay->hide(); // should be off: just to get sure
+    if(m_isleWantsDefaultTarget)
+    {
+        m_isleWantsDefaultTarget = false;
+        m_rubberBandLine->hide();
+    }
+    else
+    {
+        m_isleWantsDefaultTarget = true;
+        m_isleSourcePos = inIsleSourcePos;
+        m_isleSourceId = inIsleId;
+        m_rubberBandLine->show();
+    }
+    setMouseTracking(m_isleWantsDefaultTarget);
+}
+
+
 void UniverseView::setScene(QGraphicsScene *inScene)
 {
     QGraphicsView::setScene(inScene);
@@ -50,13 +73,18 @@ void UniverseView::setScene(QGraphicsScene *inScene)
 void UniverseView::mousePressEvent(QMouseEvent *inMouseEvent)
 {
     QPointF clickPoint = mapToScene(inMouseEvent->pos());
-    //qDebug()  << "UniverseView sends Click: " << clickPoint;
+    qInfo()  << "UniverseView sends Click: " << clickPoint;
 
     if(m_shipWantsTarget)
     {
         toggleShipWantsTarget({0, 0}, 0, 1.0f);
         //qInfo() << "UniverView pos=" << clickPoint;
         emit sigUniverseViewClickedFinishTarget(clickPoint, m_shipSourceId);
+    }
+    else if(m_isleWantsDefaultTarget)
+    {
+        toggleIsleWantsTarget({0, 0}, 0);
+        emit sigUniverseViewClickedFinishIsleTarget(clickPoint, m_isleSourceId);
     }
     else
         emit sigUniverseViewClicked( mapToScene(inMouseEvent->pos()) );
@@ -65,26 +93,35 @@ void UniverseView::mousePressEvent(QMouseEvent *inMouseEvent)
 
 void UniverseView::mouseMoveEvent(QMouseEvent *inMouseEvent)
 {
-    if(!m_shipWantsTarget)
+    if(! (m_shipWantsTarget or m_isleWantsDefaultTarget))
         return;
     QPointF targetPos = mapToScene(inMouseEvent->pos());
 
-    // distance from source to target
-    qreal dx = targetPos.x() - m_shipSourcePos.x();
-    qreal dy = targetPos.y() - m_shipSourcePos.y();
-    uint journeyDuration = (uint) (std::sqrt( (dx * dx) + (dy * dy) ) / m_shipVelocity) + 1;
+    if(m_shipWantsTarget)
+    {
+        // distance from source to target
+        qreal dx = targetPos.x() - m_shipSourcePos.x();
+        qreal dy = targetPos.y() - m_shipSourcePos.y();
+        uint journeyDuration = (uint) (std::sqrt( (dx * dx) + (dy * dy) ) / m_shipVelocity) + 1;
 
-    // write down
-    QString jds = QString("%1 rounds").arg(journeyDuration);
-    m_journeyLengthDisplay->setText(jds);
+        // write down
+        QString jds = QString("%1 rounds").arg(journeyDuration);
+        m_journeyLengthDisplay->setText(jds);
 
-    // display text at 2/3 of the rubber band
-    qreal px = m_shipSourcePos.x() + dx / 1.5f;
-    qreal py = m_shipSourcePos.y() + dy / 1.5f;
-    m_journeyLengthDisplay->setPos(px, py);
+        // display text at 2/3 of the rubber band
+        qreal px = m_shipSourcePos.x() + dx / 1.5f;
+        qreal py = m_shipSourcePos.y() + dy / 1.5f;
+        m_journeyLengthDisplay->setPos(px, py);
 
-    m_rubberBandLine->setLine(m_shipSourcePos.x(), m_shipSourcePos.y(),
-                              targetPos.x(), targetPos.y());
+        m_rubberBandLine->setLine(m_shipSourcePos.x(), m_shipSourcePos.y(),
+                                  targetPos.x(), targetPos.y());
+    }
+    else
+    {
+        m_rubberBandLine->setLine(m_isleSourcePos.x(), m_isleSourcePos.y(),
+                                  targetPos.x(), targetPos.y());
+
+    }
 }
 
 

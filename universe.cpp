@@ -97,6 +97,20 @@ float Universe::shipTechById(const uint inShipId)
 }
 
 
+void Universe::isleForId(const uint inIsleId, IsleInfo & outIsleInfo)
+{
+    outIsleInfo.id = 0;
+    for(Isle* isle : m_isles)
+    {
+        if(isle->id() == inIsleId)
+        {
+            outIsleInfo = isle->info();
+            break;
+        }
+    }
+}
+
+
 void Universe::getAllIsleInfos(QList<IsleInfo> & outIsleInfos)
 {
     outIsleInfos.clear();
@@ -538,20 +552,6 @@ void Universe::isleForPoint(const QPointF inScenePoint, IsleInfo & outIsleInfo)
 }
 
 
-void Universe::isleForId(const uint inIsleId, IsleInfo & outIsleInfo)
-{
-    outIsleInfo.id = 0;
-    for(Isle* isle : m_isles)
-    {
-        if(isle->id() == inIsleId)
-        {
-            outIsleInfo = isle->info();
-            break;
-        }
-    }
-}
-
-
 void Universe::setIsleOwnerById(const uint inIsleId, const uint inNewOwner, const QColor inNewColor)
 {
     for(Isle *isle : m_isles)
@@ -821,4 +821,36 @@ void Universe::slotUniverseViewClickedFinishTarget(QPointF scenePos, uint shipId
         isleForId(sourceShipInfo.isleId, iInfo);
         showHumanIsle(iInfo);
     }
+}
+
+
+void Universe::slotUniverseViewClickedFinishIsleTarget(QPointF scenePos, uint isleId)
+{
+    Isle *sourceIsle = 0;
+
+    // find source isle
+    for(Isle *s : m_isles)
+        if(s->id() == isleId)
+        {
+            sourceIsle = s;
+            break;
+        }
+
+    IsleInfo targetIsleInfo;
+    isleForPoint(scenePos, targetIsleInfo);
+    if(targetIsleInfo.id > 0)
+    {   // we found a target isle
+        if(targetIsleInfo.id == isleId)
+            // source and target isle are the same, disable default target
+            sourceIsle->setDefaultTargetNothing();
+        else
+            sourceIsle->setDefaultTargetIsle(targetIsleInfo.pos, targetIsleInfo.id);
+    }
+    else
+    {   // just water (we do not allow ships as default targets)
+        sourceIsle->setDefaultTargetWater(scenePos);
+    }
+
+    IsleInfo iInfo = sourceIsle->info();
+    showHumanIsle(iInfo);
 }

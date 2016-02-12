@@ -21,6 +21,7 @@ public:
 
     // ship wants a new target. And exactly this here is the message we receive on it
     void toggleShipWantsTarget(const QPointF inShipSourcePos, const uint inShipId, const float inShipVelocity);
+    void toggleIsleWantsTarget(const QPointF inIsleSourcePos, const uint inIsleId);
 
     void setScene(QGraphicsScene *inScene);
 
@@ -32,6 +33,10 @@ private:
     QGraphicsLineItem *m_rubberBandLine;  // we show, if ship wants a new target
     QGraphicsSimpleTextItem *m_journeyLengthDisplay;
 
+    // isle wants default target
+    bool m_isleWantsDefaultTarget;  // true, if we are in search for a default isle target
+    QPointF m_isleSourcePos;        // pos of isle
+    uint m_isleSourceId;            // id of isle
 
     void mousePressEvent(QMouseEvent *inMouseEvent);
     void mouseMoveEvent(QMouseEvent *inMouseEvent);
@@ -39,6 +44,7 @@ private:
 signals:
     void sigUniverseViewClicked(QPointF scenePos);
     void sigUniverseViewClickedFinishTarget(QPointF scenePos, uint shipId);
+    void sigUniverseViewClickedFinishIsleTarget(QPointF scenePos, uint isleId);
 
 public slots:
     void slotMinimapClicked(QPointF scenePos);

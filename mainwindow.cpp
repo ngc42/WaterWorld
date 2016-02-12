@@ -69,10 +69,13 @@ MainWindow::MainWindow(QWidget *inParent) :
     connect(m_universeView, SIGNAL(sigUniverseViewClicked(QPointF)), m_universe, SLOT(slotUniverseViewClicked(QPointF)));
     connect(m_universeView, SIGNAL(sigUniverseViewClickedFinishTarget(QPointF,uint)),
             m_universe, SLOT(slotUniverseViewClickedFinishTarget(QPointF,uint)));
+    connect(m_universeView, SIGNAL(sigUniverseViewClickedFinishIsleTarget(QPointF,uint)),
+            m_universe, SLOT(slotUniverseViewClickedFinishIsleTarget(QPointF,uint)));
 
     connect(m_universe, SIGNAL(sigShowInfoWater()), this, SLOT(slotShowUniverseInfoWater()));
     connect(m_universe, SIGNAL(sigShowInfoIsle(IsleInfo)), this, SLOT(slotShowUniverseInfoIsle(IsleInfo)));
-    connect(m_universe, SIGNAL(sigShowInfoHumanIsle(IsleInfo, QList<ShipInfo>)), this, SLOT(slotShowUniverseInfoHumanIsle(IsleInfo, QList<ShipInfo>)));
+    connect(m_universe, SIGNAL(sigShowInfoHumanIsle(IsleInfo, QList<ShipInfo>)),
+            this, SLOT(slotShowUniverseInfoHumanIsle(IsleInfo, QList<ShipInfo>)));
     connect(m_universe, SIGNAL(sigShowInfoShip(ShipInfo)), this, SLOT(slotShowUniverseInfoShip(ShipInfo)));
     connect(m_universe, SIGNAL(sigShowInfoHumanShip(ShipInfo, Target)), this, SLOT(slotShowUniverseInfoHumanShip(ShipInfo, Target)));
 
@@ -81,6 +84,9 @@ MainWindow::MainWindow(QWidget *inParent) :
     connect(m_uiWaterObjectInfo->pbPatrol, SIGNAL(clicked()), this, SLOT(slotSetShipPartrol()));
     connect(m_uiWaterObjectInfo->pbTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForShip()));
     connect(m_uiWaterObjectInfo->pbHumanShipSetTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForShip()));
+    connect(m_uiWaterObjectInfo->pbSetDefaultTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForIsle()));
+    connect(m_uiWaterObjectInfo->pbClearDefaultTarget, SIGNAL(clicked()), this, SLOT(slotClearIsleTarget()));
+
 
     // show nothing at start
     m_waterObjectInfo->setCurrentIndex(PAGE_NOTHING);
@@ -126,16 +132,17 @@ void MainWindow::slotShowUniverseInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo
     QPixmap pix(30, 20);
     pix.fill(isleInfo.color);
     m_uiWaterObjectInfo->labelHumanIsleId->setText(QString("%1").arg(isleInfo.id));
+    m_uiWaterObjectInfo->labelHumanIsleId->setProperty("ISLEID", QVariant(isleInfo.id));
     m_uiWaterObjectInfo->labelHumanIsleColor->setPixmap(pix);
 
     m_uiWaterObjectInfo->tableWidget->setColumnCount(3);
     m_uiWaterObjectInfo->tableWidget->clearContents();
     m_uiWaterObjectInfo->tableWidget->setRowCount(0);
 
-    QString s = QString("H-P: %1").arg(isleInfo.population);
+    QString s = QString("Pop: %1").arg((uint)isleInfo.population);
     m_uiWaterObjectInfo->labelHumanIslePopulation->setText(s);
 
-    s = QString("H-T: %1").arg(isleInfo.technology, 1);
+    s = QString("Tech: %1").arg((uint)isleInfo.technology);
     m_uiWaterObjectInfo->labelHumanIsleTechnology->setText(s);
 
     for(ShipInfo info : sList)
@@ -154,6 +161,20 @@ void MainWindow::slotShowUniverseInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo
 
     m_uiWaterObjectInfo->tableWidget->resizeColumnsToContents();
 
+    // default target
+    switch(isleInfo.defaultTargetType)
+    {
+    case IsleInfo::T_ISLE:
+        s = QString("T: Isle with id %1").arg(isleInfo.defaultTargetIsle);
+        break;
+    case IsleInfo::T_WATER:
+        s = QString("Water at (%1 ; %2)").arg(isleInfo.defaultTargetPos.x()).arg(isleInfo.defaultTargetPos.y());
+        break;
+    default:    // nothing
+        s = QString("No default target set");
+        break;
+    }
+    m_uiWaterObjectInfo->labelHumanIsleDefaultTarget->setText(s);
     // set page and save last state
     m_waterObjectInfo->setCurrentIndex(PAGE_HUMAN_ISLE);
     m_lastCalledPage = PAGE_HUMAN_ISLE;
@@ -249,18 +270,44 @@ void MainWindow::slotSetNewTargetForShip()
         if(m_uiWaterObjectInfo->tableWidget->currentRow() < 0)
             return;
         ShipListItem *item = (ShipListItem* ) m_uiWaterObjectInfo->tableWidget->currentItem();
-        m_universeView->toggleShipWantsTarget(m_universe->shipPosById(item->id()),
-                                              item->id(),
-                                              m_universe->shipTechById(item->id()));
+        uint id = item->id();
+        m_universeView->toggleShipWantsTarget(m_universe->shipPosById(id), id, m_universe->shipTechById(id));
     }
     else if(m_lastCalledPage == PAGE_HUMAN_SHIP)
     {
         //@fixme: storing ship's tech for last parameter
-        m_universeView->toggleShipWantsTarget(m_lastCalledShipInfo.pos, m_lastCalledShipInfo.id, m_universe->shipTechById(m_lastCalledShipInfo.id));
+        m_universeView->toggleShipWantsTarget(m_lastCalledShipInfo.pos, m_lastCalledShipInfo.id,
+                                              m_universe->shipTechById(m_lastCalledShipInfo.id));
     }
     // now, its up to m_universeView to show visible feedback until target gets clicked.
     // -> then, m_universe sets up the target
     // -> then, m_universe shows up this isle again (if it was triggered by isle buttons)
+}
+
+
+void MainWindow::slotSetNewTargetForIsle()
+{
+    if(m_lastCalledPage != PAGE_HUMAN_ISLE)
+    {
+        qInfo() << "BUG in MainWindow::slotSetNewTargetForIsle() : wrong page saved";
+        return;
+    }
+    QVariant id_v = m_uiWaterObjectInfo->labelHumanIsleId->property("ISLEID");
+    bool ok;
+    qInfo() << "retive id " << id_v.toUInt(&ok);
+    IsleInfo isleInfo;
+    m_universe->isleForId(id_v.toUInt(&ok), isleInfo);
+    m_universeView->toggleIsleWantsTarget(isleInfo.pos, isleInfo.id);
+}
+
+
+void MainWindow::slotClearIsleTarget()
+{
+    if(m_lastCalledPage != PAGE_HUMAN_ISLE)
+    {
+        qInfo() << "BUG in MainWindow::slotSetNewTargetForIsle() : wrong page saved";
+        return;
+    }
 }
 
 

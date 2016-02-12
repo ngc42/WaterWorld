@@ -38,6 +38,7 @@ public:
     QPointF shipPosById(const uint inShipId);
     float shipTechById(const uint inShipId);
 
+    void isleForId(const uint inIsleId, IsleInfo & outIsleInfo);
 
     // for communication with OverviewDialog (used in MainWindow::slotToggleOverviewDialog())
     void getAllIsleInfos(QList<IsleInfo> & outIsleInfos);
@@ -73,8 +74,6 @@ private:
      * @return isleInfo, if point is inside isle area, else isleInfo.id  == 0
      */
     void isleForPoint(const QPointF inScenePoint, IsleInfo & outIsleInfo);
-
-    void isleForId(const uint inIsleId, IsleInfo & outIsleInfo);
 
     void setIsleOwnerById(const uint inIsleId, const uint inNewOwner, const QColor inNewColor);
 
@@ -124,6 +123,8 @@ signals:
 public slots:
     void slotUniverseViewClicked(QPointF scenePos);
     void slotUniverseViewClickedFinishTarget(QPointF scenePos, uint shipId);
+    void slotUniverseViewClickedFinishIsleTarget(QPointF scenePos, uint isleId);
+
 };
 
 #endif // UNIVERSE_H

@@ -71,6 +71,8 @@ private slots:
     void slotDeleteShip();
     void slotSetShipPartrol();
     void slotSetNewTargetForShip();
+    void slotSetNewTargetForIsle();
+    void slotClearIsleTarget();
 
     // nextround
     void slotNextRound();

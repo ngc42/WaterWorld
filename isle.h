@@ -14,8 +14,11 @@
 #include <QColor>
 
 
+
+
 struct IsleInfo
 {
+    enum TargetEnum {T_NOTHING, T_WATER, T_ISLE};
     uint id;
     uint owner;
     QColor color;
@@ -23,6 +26,9 @@ struct IsleInfo
     float population;
     float technology;
     float buildlevel;
+    TargetEnum defaultTargetType;   // default target
+    uint defaultTargetIsle;
+    QPointF defaultTargetPos;
 };
 
 
@@ -43,6 +49,9 @@ public:
         outInfo.population = m_population;
         outInfo.technology = m_technology;
         outInfo.buildlevel = m_buildlevel;
+        outInfo.defaultTargetType = m_defaultTargetType;
+        outInfo.defaultTargetIsle = m_defaultTargetIsle;
+        outInfo.defaultTargetPos = m_defaultTargetPos;
         return outInfo;
     }
 
@@ -54,6 +63,11 @@ public:
     // set technology, if inTechnology is higher than isle's tech
     void setMaxTechnology(const float inTechnology);
 
+    void setDefaultTargetIsle(const QPointF inTargetPos, const uint inIsleId);
+    void setDefaultTargetWater(const QPointF inTargetPos);
+    void setDefaultTargetNothing();
+
+
     // test
     bool pointInIsle(const QPointF inPos);
 
@@ -64,6 +78,11 @@ private:
     QGraphicsEllipseItem *m_shape;      // display of the isle
     float m_population;                 // number of people on island
     float m_buildlevel;     // percentage of building a new ship. 1 means, release a new ship during nextRound()
+
+    // default target for newly created ships
+    IsleInfo::TargetEnum m_defaultTargetType;
+    uint m_defaultTargetIsle;   //
+    QPointF m_defaultTargetPos;
 };
 
 #endif // ISLE_H

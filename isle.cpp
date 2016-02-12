@@ -20,6 +20,7 @@ Isle::Isle(const uint inId, const uint inOwner, const QPointF inPos,
     m_population  = inOwner > 0 ? 100.1f : 0.0f;
     m_technology = inOwner > 0 ? 1.01f : 0.0f;
     m_buildlevel = 0.0f;
+    setDefaultTargetNothing();
 }
 
 
@@ -32,6 +33,7 @@ void Isle::setOwner(const uint inOwner, const QColor inColor)
     m_population  = inOwner > 0 ? 100.1 : 0.0f;
     m_technology = inOwner > 0 ? 1.01f : 0.0f;
     m_buildlevel = 0.0f;
+    setDefaultTargetNothing();
 }
 
 
@@ -45,6 +47,30 @@ void Isle::setPopulation(const float inPopulation)
 void Isle::setMaxTechnology(const float inTechnology)
 {
     m_technology = m_technology < inTechnology ? inTechnology : m_technology;
+}
+
+
+void Isle::setDefaultTargetIsle(const QPointF inTargetPos, const uint inIsleId)
+{
+    m_defaultTargetType = IsleInfo::T_ISLE;
+    m_defaultTargetIsle = inIsleId;
+    m_defaultTargetPos = inTargetPos;
+}
+
+
+void Isle::setDefaultTargetWater(const QPointF inTargetPos)
+{
+    m_defaultTargetType = IsleInfo::T_WATER;
+    m_defaultTargetIsle = 0;
+    m_defaultTargetPos = inTargetPos;
+}
+
+
+void Isle::setDefaultTargetNothing()
+{
+    m_defaultTargetType = IsleInfo::T_NOTHING;
+    m_defaultTargetIsle = 0;
+    m_defaultTargetPos = QPointF(0, 0);
 }
 
 

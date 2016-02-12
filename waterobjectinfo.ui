@@ -41,7 +41,7 @@
    <string>StackedWidget</string>
   </property>
   <property name="currentIndex">
-   <number>5</number>
+   <number>3</number>
   </property>
   <widget class="QWidget" name="pageReallyNothing"/>
   <widget class="QWidget" name="pageWater">
@@ -204,7 +204,7 @@
        <item>
         <widget class="QTabWidget" name="tabWidget">
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="pinfo">
           <attribute name="title">
@@ -244,6 +244,13 @@
                 </property>
                </widget>
               </item>
+              <item row="0" column="2">
+               <widget class="QPushButton" name="pbClearDefaultTarget">
+                <property name="text">
+                 <string>Clear Tgt</string>
+                </property>
+               </widget>
+              </item>
               <item row="0" column="0">
                <widget class="QLabel" name="label_9">
                 <property name="text">
@@ -251,10 +258,10 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="2">
-               <widget class="QPushButton" name="pbClearDefaultTarget">
+              <item row="1" column="0" colspan="3">
+               <widget class="QLabel" name="labelHumanIsleDefaultTarget">
                 <property name="text">
-                 <string>Clear Tgt</string>
+                 <string>TextLabel</string>
                 </property>
                </widget>
               </item>
