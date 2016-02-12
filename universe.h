@@ -36,6 +36,8 @@ public:
     void setShipPatrolsIsle(const uint inShipId);
 
     QPointF shipPosById(const uint inShipId);
+    float shipTechById(const uint inShipId);
+
 
     // for communication with OverviewDialog (used in MainWindow::slotToggleOverviewDialog())
     void getAllIsleInfos(QList<IsleInfo> & outIsleInfos);

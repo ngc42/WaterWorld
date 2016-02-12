@@ -88,6 +88,15 @@ QPointF Universe::shipPosById(const uint inShipId)
 }
 
 
+float Universe::shipTechById(const uint inShipId)
+{
+    for(Ship *s : m_ships)
+        if(s->id() == inShipId)
+            return s->info().technology;
+    return 1.0f;
+}
+
+
 void Universe::getAllIsleInfos(QList<IsleInfo> & outIsleInfos)
 {
     outIsleInfos.clear();

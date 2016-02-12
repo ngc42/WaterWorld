@@ -10,6 +10,7 @@
 
 #include <QGraphicsView>
 #include <QGraphicsLineItem>
+#include <QGraphicsSimpleTextItem>
 
 
 class UniverseView : public QGraphicsView
@@ -19,7 +20,7 @@ public:
     explicit UniverseView(QWidget *inParent = 0);
 
     // ship wants a new target. And exactly this here is the message we receive on it
-    void toggleShipWantsTarget(const QPointF inShipSourcePos, const uint inShipId);
+    void toggleShipWantsTarget(const QPointF inShipSourcePos, const uint inShipId, const float inShipVelocity);
 
     void setScene(QGraphicsScene *inScene);
 
@@ -27,7 +28,10 @@ private:
     bool m_shipWantsTarget;     // true, if we are in search for a ship's target
     QPointF m_shipSourcePos;    // we save it here for the rubber band
     uint m_shipSourceId;        // we need ship id again, when we are finished
+    float m_shipVelocity;       // for calculation of the length of the journey. Display a hint at rubber band.
     QGraphicsLineItem *m_rubberBandLine;  // we show, if ship wants a new target
+    QGraphicsSimpleTextItem *m_journeyLengthDisplay;
+
 
     void mousePressEvent(QMouseEvent *inMouseEvent);
     void mouseMoveEvent(QMouseEvent *inMouseEvent);

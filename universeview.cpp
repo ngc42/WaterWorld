@@ -5,30 +5,35 @@
 
 
 #include "universeview.h"
+#include <math.h>
 #include <QMouseEvent>
 #include <QDebug>
 
 
 UniverseView::UniverseView(QWidget *inParent) :
-    QGraphicsView(inParent), m_shipWantsTarget(false)
+    QGraphicsView(inParent), m_shipWantsTarget(false), m_shipVelocity(1.0f)
 {
     m_rubberBandLine = new QGraphicsLineItem(10, 10, 10, 10);
+    m_journeyLengthDisplay = new QGraphicsSimpleTextItem();
 }
 
 
-void UniverseView::toggleShipWantsTarget(const QPointF inShipSourcePos, const uint inShipId)
+void UniverseView::toggleShipWantsTarget(const QPointF inShipSourcePos, const uint inShipId, const float inShipVelocity)
 {
     if(m_shipWantsTarget)
     {
         m_shipWantsTarget = false;
         m_rubberBandLine->hide();
+        m_journeyLengthDisplay->hide();
     }
     else
     {
         m_shipWantsTarget = true;
         m_shipSourcePos = inShipSourcePos;
         m_shipSourceId = inShipId;
+        m_shipVelocity = inShipVelocity;
         m_rubberBandLine->show();
+        m_journeyLengthDisplay->show();
     }
     setMouseTracking(m_shipWantsTarget);
 }
@@ -38,6 +43,7 @@ void UniverseView::setScene(QGraphicsScene *inScene)
 {
     QGraphicsView::setScene(inScene);
     scene()->addItem(m_rubberBandLine);
+    scene()->addItem(m_journeyLengthDisplay);
 }
 
 
@@ -48,7 +54,7 @@ void UniverseView::mousePressEvent(QMouseEvent *inMouseEvent)
 
     if(m_shipWantsTarget)
     {
-        toggleShipWantsTarget({0, 0}, 0);
+        toggleShipWantsTarget({0, 0}, 0, 1.0f);
         //qInfo() << "UniverView pos=" << clickPoint;
         emit sigUniverseViewClickedFinishTarget(clickPoint, m_shipSourceId);
     }
@@ -62,6 +68,20 @@ void UniverseView::mouseMoveEvent(QMouseEvent *inMouseEvent)
     if(!m_shipWantsTarget)
         return;
     QPointF targetPos = mapToScene(inMouseEvent->pos());
+
+    // distance from source to target
+    qreal dx = targetPos.x() - m_shipSourcePos.x();
+    qreal dy = targetPos.y() - m_shipSourcePos.y();
+    uint journeyDuration = (uint) (std::sqrt( (dx * dx) + (dy * dy) ) / m_shipVelocity);
+
+    // write down
+    QString jds = QString("%1 rounds").arg(journeyDuration);
+    m_journeyLengthDisplay->setText(jds);
+
+    // display text at 2/3 of the rubber band
+    qreal px = m_shipSourcePos.x() + dx / 1.5f;
+    qreal py = m_shipSourcePos.y() + dy / 1.5f;
+    m_journeyLengthDisplay->setPos(px, py);
 
     m_rubberBandLine->setLine(m_shipSourcePos.x(), m_shipSourcePos.y(),
                               targetPos.x(), targetPos.y());
