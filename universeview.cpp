@@ -72,7 +72,7 @@ void UniverseView::mouseMoveEvent(QMouseEvent *inMouseEvent)
     // distance from source to target
     qreal dx = targetPos.x() - m_shipSourcePos.x();
     qreal dy = targetPos.y() - m_shipSourcePos.y();
-    uint journeyDuration = (uint) (std::sqrt( (dx * dx) + (dy * dy) ) / m_shipVelocity);
+    uint journeyDuration = (uint) (std::sqrt( (dx * dx) + (dy * dy) ) / m_shipVelocity) + 1;
 
     // write down
     QString jds = QString("%1 rounds").arg(journeyDuration);

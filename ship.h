@@ -13,7 +13,7 @@
 #include <QGraphicsRectItem>
 #include <QPointF>
 #include <QColor>
-
+#include <math.h>
 
 struct Target
 {
@@ -42,6 +42,7 @@ struct ShipInfo
     bool hasTarget;
     float damage;
     float technology;
+    uint distanceTime;  // time till distance as uint
 };
 
 
@@ -69,6 +70,14 @@ public:
         outInfo.hasTarget = m_target.validTarget;
         outInfo.damage = m_damage;
         outInfo.technology = m_technology;
+        if(outInfo.hasTarget)
+        {
+            qreal dx = m_pos.x() - m_target.pos.x();
+            qreal dy = m_pos.y() - m_target.pos.y();
+            outInfo.distanceTime = (uint) (std::sqrt( dx * dx + dy * dy ) / m_technology) + 1;
+        }
+        else
+            outInfo.distanceTime = 0.0f;
         return outInfo;
     }
 

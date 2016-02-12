@@ -212,7 +212,8 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, Target shipTar
     else
         s = {"no"};
     m_uiWaterObjectInfo->labelHumanShipHasTarget->setText(s);
-
+    s = QString("%1 rnd").arg(shipInfo.distanceTime);
+    m_uiWaterObjectInfo->labelHumanShipDistance->setText(s);
     // set page and save last state
     m_waterObjectInfo->setCurrentIndex(PAGE_HUMAN_SHIP);
     m_lastCalledPage = PAGE_HUMAN_SHIP;
