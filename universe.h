@@ -122,7 +122,7 @@ signals:
 
 public slots:
     void slotUniverseViewClicked(QPointF scenePos);
-    void slotUniverseViewClickedFinishTarget(QPointF scenePos, uint shipId);
+    void slotUniverseViewClickedFinishShipTarget(QPointF scenePos, uint shipId);
     void slotUniverseViewClickedFinishIsleTarget(QPointF scenePos, uint isleId);
 
 };

@@ -38,12 +38,15 @@ private:
     QPointF m_isleSourcePos;        // pos of isle
     uint m_isleSourceId;            // id of isle
 
+    // user presses mouse button inside view
     void mousePressEvent(QMouseEvent *inMouseEvent);
+
+    // shows the rubber band. Is only activem when toggleSomethingWantsTaget() activates mouse tracking
     void mouseMoveEvent(QMouseEvent *inMouseEvent);
 
 signals:
     void sigUniverseViewClicked(QPointF scenePos);
-    void sigUniverseViewClickedFinishTarget(QPointF scenePos, uint shipId);
+    void sigUniverseViewClickedFinishShipTarget(QPointF scenePos, uint shipId);
     void sigUniverseViewClickedFinishIsleTarget(QPointF scenePos, uint isleId);
 
 public slots:

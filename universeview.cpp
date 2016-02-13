@@ -11,7 +11,7 @@
 
 
 UniverseView::UniverseView(QWidget *inParent) :
-    QGraphicsView(inParent), m_shipWantsTarget(false), m_isleWantsDefaultTarget(false), m_shipVelocity(1.0f)
+    QGraphicsView(inParent), m_shipWantsTarget(false), m_shipVelocity(1.0f), m_isleWantsDefaultTarget(false)
 {
     m_rubberBandLine = new QGraphicsLineItem(10, 10, 10, 10);
     m_journeyLengthDisplay = new QGraphicsSimpleTextItem();
@@ -45,7 +45,6 @@ void UniverseView::toggleIsleWantsTarget(const QPointF inIsleSourcePos, const ui
 {
     if(m_shipWantsTarget)
         return;                     // we don't want to get confused
-    //m_journeyLengthDisplay->hide(); // should be off: just to get sure
     if(m_isleWantsDefaultTarget)
     {
         m_isleWantsDefaultTarget = false;
@@ -73,13 +72,11 @@ void UniverseView::setScene(QGraphicsScene *inScene)
 void UniverseView::mousePressEvent(QMouseEvent *inMouseEvent)
 {
     QPointF clickPoint = mapToScene(inMouseEvent->pos());
-    qInfo()  << "UniverseView sends Click: " << clickPoint;
 
     if(m_shipWantsTarget)
     {
         toggleShipWantsTarget({0, 0}, 0, 1.0f);
-        //qInfo() << "UniverView pos=" << clickPoint;
-        emit sigUniverseViewClickedFinishTarget(clickPoint, m_shipSourceId);
+        emit sigUniverseViewClickedFinishShipTarget(clickPoint, m_shipSourceId);
     }
     else if(m_isleWantsDefaultTarget)
     {
@@ -120,14 +117,12 @@ void UniverseView::mouseMoveEvent(QMouseEvent *inMouseEvent)
     {
         m_rubberBandLine->setLine(m_isleSourcePos.x(), m_isleSourcePos.y(),
                                   targetPos.x(), targetPos.y());
-
     }
 }
 
 
 void UniverseView::slotMinimapClicked( QPointF scenePos )
 {
-    //qDebug() << "Universe received MinimapClick: " << scenePos;
     ensureVisible(scenePos.x() - 100, scenePos.y() - 100, 200, 200);
 }
 

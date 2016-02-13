@@ -10,7 +10,7 @@
 #include <QDebug>
 
 ShipListItem::ShipListItem(const ShipListItemType inType, const ShipInfo inShipInfo, const QString inTitle)
-    : QTableWidgetItem(), m_myType(inType), m_shipId(inShipInfo.id)
+    : QTableWidgetItem(QTableWidgetItem::UserType + 1000), m_myType(inType), m_shipId(inShipInfo.id)
 {
     if(inType == ShipListItemType::SLIT_NAME)
     {
@@ -74,6 +74,7 @@ ShipListItem::ShipListItem(const ShipListItemType inType, const ShipInfo inShipI
         QString text = QString("T: %1").arg(inShipInfo.technology, 1);
         setText(text);
     }
+    setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled|Qt::ItemNeverHasChildren);
 }
 
 

@@ -67,8 +67,8 @@ MainWindow::MainWindow(QWidget *inParent) :
     connect(m_ui->actionOverview, SIGNAL(triggered()), this, SLOT(slotToggleOverviewDialog()));
 
     connect(m_universeView, SIGNAL(sigUniverseViewClicked(QPointF)), m_universe, SLOT(slotUniverseViewClicked(QPointF)));
-    connect(m_universeView, SIGNAL(sigUniverseViewClickedFinishTarget(QPointF,uint)),
-            m_universe, SLOT(slotUniverseViewClickedFinishTarget(QPointF,uint)));
+    connect(m_universeView, SIGNAL(sigUniverseViewClickedFinishShipTarget(QPointF,uint)),
+            m_universe, SLOT(slotUniverseViewClickedFinishShipTarget(QPointF,uint)));
     connect(m_universeView, SIGNAL(sigUniverseViewClickedFinishIsleTarget(QPointF,uint)),
             m_universe, SLOT(slotUniverseViewClickedFinishIsleTarget(QPointF,uint)));
 

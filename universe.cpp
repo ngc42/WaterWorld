@@ -785,7 +785,7 @@ void Universe::slotUniverseViewClicked(QPointF scenePos)
 }
 
 
-void Universe::slotUniverseViewClickedFinishTarget(QPointF scenePos, uint shipId)
+void Universe::slotUniverseViewClickedFinishShipTarget(QPointF scenePos, uint shipId)
 {
     // find the source ship which needs new target
     Ship *sourceShip = 0;
