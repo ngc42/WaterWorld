@@ -126,6 +126,7 @@ void Universe::getAllShipInfos(QList<ShipInfo> & outShipInfo)
         outShipInfo.append(ship->info());
 }
 
+
 void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 {
     qInfo() << "BEGIN NEXTROUND ==================";
@@ -206,15 +207,13 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                             ShipInfo isleShipInfo = isleShip->info();
                             if(isleShipInfo.posType == ShipPositionEnum::S_ONISLE and
                                isleShipInfo.isleId == target.id)
-                            {
-                                qDebug() << "ISLE SHIP: ship " << isleShipInfo.id << " with owner " << isleShipInfo.owner <<
-                                            " gets new owner " << shipInfo.owner;
+                            {   // set new owner
                                 isleShip->setOwner(shipInfo.owner, shipInfo.color);
                                 // find the maximum technology for pirated ships
                                 local_tech_max = isleShipInfo.technology > local_tech_max ? isleShipInfo.technology : local_tech_max;
                             }
                             if(local_tech_max > shipInfo.technology)
-                            {   // maxbe, one of the pirated ships has higher tech than the ship which landed
+                            {   // maybe, one of the pirated ships has higher tech than the ship which landed
                                 for(Isle *newShipsIsle : m_isles)
                                     if(newShipsIsle->id() == target.id)
                                     {
@@ -270,8 +269,6 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
             }
         }
     }
-
-    qDebug() << "-- start delete part";
 
     // empty trash
     for(Ship *deleteThatShip : m_ships)
@@ -384,6 +381,19 @@ void Universe::createShipOnIsle(UniverseScene *& inOutUniverseScene, uint inIsle
             Ship *s = new Ship(inOutUniverseScene, m_lastInsertedId++, isleInfo.owner,
                                isleInfo.pos, isleInfo.color, ShipPositionEnum::S_ONISLE,
                                isleInfo.id, isleInfo.technology);
+            // default target
+            switch(isleInfo.defaultTargetType)
+            {
+                case IsleInfo::T_ISLE:
+                    s->setTargetIsle(isleInfo.defaultTargetIsle, isleInfo.defaultTargetPos);
+                    break;
+                case IsleInfo::T_WATER:
+                    s->setTargetWater(isleInfo.defaultTargetPos);
+                    break;
+                default:
+                    break;
+            }
+
             m_ships.push_back(s);
             break;
         }
