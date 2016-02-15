@@ -21,7 +21,6 @@ Ship::Ship(UniverseScene *& inOutRefScene, const uint inId, const uint inOwner,
     m_shape->hide();
     inOutRefScene->addItem(m_shape);
     m_shape->setBrush(QBrush(inColor));
-    m_target.validTarget = false;
 }
 
 
@@ -46,8 +45,8 @@ ShipInfo Ship::info() const
     if(outInfo.hasTarget)
     {
         Target t = m_targetList.at(m_currentTargetIndex);
-        qreal dx = m_pos.x() - t.x();
-        qreal dy = m_pos.y() - t.y();
+        qreal dx = m_pos.x() - t.pos.x();
+        qreal dy = m_pos.y() - t.pos.y();
         outInfo.distanceTime = (uint) (std::sqrt( dx * dx + dy * dy ) / m_technology) + 1;
     }
     else

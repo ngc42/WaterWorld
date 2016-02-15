@@ -79,9 +79,13 @@ private:
 
     void setIslePopulationById(const uint inIsleId, const float inNewPopulation);
 
-    void shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo, Target & outShipTarget);
+    void shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo, QVector<Target> & outShipTargets);
+    // @fixme: duplicate code
+    void shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo);
 
-    void shipForId(const uint inShipId, ShipInfo & outShipInfo, Target & outShipTarget);
+    void shipForId(const uint inShipId, ShipInfo & outShipInfo, QVector<Target> & outShipTargets);
+    // @fixme: duplicate code
+    void shipForId(const uint inShipId, ShipInfo & outShipInfo);
 
     // really delete a ship
     void deleteShip(const uint inShipId);
@@ -118,7 +122,7 @@ signals:
     void sigShowInfoIsle(IsleInfo isleInfo);
     void sigShowInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo> sList);
     void sigShowInfoShip(ShipInfo shipInfo);
-    void sigShowInfoHumanShip(ShipInfo shipInfo, Target target);
+    void sigShowInfoHumanShip(ShipInfo shipInfo, QVector<Target> targets);
 
 public slots:
     void slotUniverseViewClicked(QPointF scenePos);

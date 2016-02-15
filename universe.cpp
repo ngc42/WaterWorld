@@ -330,20 +330,18 @@ void Universe::callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsle
     else if(inPage == InfoscreenPage::PAGE_SHIP)
     {
         ShipInfo shipInfo;
-        Target targetUnused;
-        shipForId(inShipInfo.id, shipInfo, targetUnused);
+        QVector<Target> targetsUnused;
+        shipForId(inShipInfo.id, shipInfo, targetsUnused);
         emit sigShowInfoShip(inShipInfo);
     }
     else if(inPage == InfoscreenPage::PAGE_WATER)
         emit sigShowInfoWater();
     else if(inPage == InfoscreenPage::PAGE_HUMAN_SHIP)
     {
-        for(Ship *s : m_ships)
-            if(inShipInfo.id == s->id())
-            {
-                emit sigShowInfoHumanShip(s->info(), s->target());
-                break;
-            }
+        ShipInfo sInfo;
+        QVector<Target> targetList;
+        shipForId(inShipInfo.id, sInfo, targetList);
+        emit sigShowInfoHumanShip(sInfo, targetList);
     }
     // else -> PAGE_NOTHING -> ignore
 }
@@ -529,14 +527,19 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
 
 void Universe::shipLandOnIsle(Ship *& inOutShipToLand)
 {
-    Target targetInfo = inOutShipToLand->target();
-    if(! targetInfo.validTarget or (targetInfo.tType != Target::TargetEnum::T_ISLE))
+    ShipInfo shipInfo = inOutShipToLand->info();
+    if(! shipInfo.hasTarget)
+    {   // we don'd have a target but are forced to land on an target isle, stange!
+        qInfo() << "ERR 1002 in Universe::shipLandOnIsle()";
+        return;
+    }
+    Target targetInfo = inOutShipToLand->currentTarget();
+    if(targetInfo.tType != Target::TargetEnum::T_ISLE)
     {   // just to get sure
         qDebug() << "ERR 1 in Universe::shipLandOnIsle()";
         return;
     }
 
-    ShipInfo shipInfo = inOutShipToLand->info();
     Isle *targetIsle = 0;
     IsleInfo isleInfo;
     isleInfo.id = 0;
@@ -599,7 +602,7 @@ void Universe::setIslePopulationById(const uint inIsleId, const float inNewPopul
 }
 
 
-void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo, Target & outShipTarget)
+void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo, QVector<Target> & outShipTargets)
 {
     outShipInfo.id = 0;
     for(Ship *ship : m_ships)
@@ -607,14 +610,28 @@ void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo, 
         if(ship->pointInShip(inScenePoint))
         {
             outShipInfo = ship->info();
-            outShipTarget = ship->target();
+            outShipTargets = ship->targets();
             break;
         }
     }
 }
 
 
-void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo, Target & outShipTarget)
+void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo)
+{
+    outShipInfo.id = 0;
+    for(Ship *ship : m_ships)
+    {
+        if(ship->pointInShip(inScenePoint))
+        {
+            outShipInfo = ship->info();
+            break;
+        }
+    }
+}
+
+
+void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo, QVector<Target> & outShipTargets)
 {
     outShipInfo.id = 0;
     for(Ship *ship : m_ships)
@@ -622,7 +639,21 @@ void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo, Target & o
         if(ship->id() == inShipId)
         {
             outShipInfo = ship->info();
-            outShipTarget = ship->target();
+            outShipTargets = ship->targets();
+            break;
+        }
+    }
+}
+
+
+void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo)
+{
+    outShipInfo.id = 0;
+    for(Ship *ship : m_ships)
+    {
+        if(ship->id() == inShipId)
+        {
+            outShipInfo = ship->info();
             break;
         }
     }
@@ -641,9 +672,8 @@ void Universe::deleteShip(const uint inShipId)
         ShipInfo shipInfo = s->info();
         if(shipInfo.hasTarget and shipInfo.id != inShipId)
         {
-            Target target = s->target();
-            if(target.tType == Target::T_SHIP and target.id == inShipId)
-                s->setTargetFinished();
+            // @fixme: we call really every other's ship deleteTargetShip() method, expensive!
+            s->deleteTargetShip(inShipId);
         }
 
         if(s->id() == inShipId)
@@ -753,8 +783,7 @@ void Universe::processStrategyCommands(const uint inOwner, const QList<StrategyC
         else if(cmd.targetType == Target::TargetEnum::T_SHIP)
         {
             ShipInfo shipInfo;
-            Target shipTargetUnused;
-            shipForId(cmd.targetId, shipInfo, shipTargetUnused);
+            shipForId(cmd.targetId, shipInfo);
             // check valid ship
             if(shipInfo.id == 0)
                 return;
@@ -787,12 +816,12 @@ void Universe::slotUniverseViewClicked(QPointF scenePos)
     else
     {   // ship or water
         ShipInfo shipInfo;
-        Target target;
-        shipForPoint(scenePos, shipInfo, target);
+        QVector<Target> targets;
+        shipForPoint(scenePos, shipInfo, targets);
         if(shipInfo.id > 0)
         {   // human or enemy ship?
             if(shipInfo.owner == 1)
-                emit sigShowInfoHumanShip(shipInfo, target);
+                emit sigShowInfoHumanShip(shipInfo, targets);
             else
                 emit sigShowInfoShip(shipInfo);
         }
@@ -824,16 +853,13 @@ void Universe::slotUniverseViewClickedFinishShipTarget(QPointF scenePos, uint sh
     else
     {
         ShipInfo targetShipInfo;
-        Target targetUnused;
-        shipForPoint(scenePos, targetShipInfo, targetUnused);
+        shipForPoint(scenePos, targetShipInfo);
         if(targetShipInfo.id > 0 and targetShipInfo.id != sourceShipInfo.id)
         {   // target other ship
-            //qInfo() << "SET Target SHIP at " << scenePos << " id= " << sourceShipInfo.id;
             sourceShip->setTargetShip(targetShipInfo.id, targetShipInfo.pos);
         }
         else
         {   // ship with id shipId wants target water at scenePos
-            //qInfo() << "SET Target WATER at " << scenePos;
             sourceShip->setTargetWater(scenePos);
         }
     }

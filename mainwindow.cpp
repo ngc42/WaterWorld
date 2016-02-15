@@ -77,7 +77,8 @@ MainWindow::MainWindow(QWidget *inParent) :
     connect(m_universe, SIGNAL(sigShowInfoHumanIsle(IsleInfo, QList<ShipInfo>)),
             this, SLOT(slotShowUniverseInfoHumanIsle(IsleInfo, QList<ShipInfo>)));
     connect(m_universe, SIGNAL(sigShowInfoShip(ShipInfo)), this, SLOT(slotShowUniverseInfoShip(ShipInfo)));
-    connect(m_universe, SIGNAL(sigShowInfoHumanShip(ShipInfo, Target)), this, SLOT(slotShowUniverseInfoHumanShip(ShipInfo, Target)));
+    connect(m_universe, SIGNAL(sigShowInfoHumanShip(ShipInfo, QVector<Target>)),
+            this, SLOT(slotShowUniverseInfoHumanShip(ShipInfo, QVector<Target>)));
 
     // Push buttons on Info -> human isle
     connect(m_uiWaterObjectInfo->pbDelete, SIGNAL(clicked()), this, SLOT(slotDeleteShip()));
@@ -204,7 +205,7 @@ void MainWindow::slotShowUniverseInfoShip(ShipInfo shipInfo)
 }
 
 
-void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, Target shipTarget)
+void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target> shipTargets)
 {
     QPixmap pix(30, 20);
     pix.fill(shipInfo.color);
@@ -215,9 +216,11 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, Target shipTar
     s = QString("Tech: %1").arg(shipInfo.technology, 2);
     m_uiWaterObjectInfo->labelHumanShipTechnology->setText(s);
 
-    if(shipTarget.validTarget)
+    m_uiWaterObjectInfo->tableHTargets->clear();
+    for(Target t : shipTargets)
     {
-        switch(shipTarget.tType)
+
+        switch(t.tType)
         {
         case Target::TargetEnum::T_ISLE:
             s = "isle";
@@ -229,10 +232,13 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, Target shipTar
             s = "water";
             break;
         }
+        m_uiWaterObjectInfo->tableHTargets->insertRow(0);
+        QTableWidgetItem *itm = new QTableWidgetItem(s);
+        m_uiWaterObjectInfo->tableHTargets->setItem(0, 0, itm);
+
+
     }
-    else
-        s = {"no"};
-    m_uiWaterObjectInfo->labelHumanShipHasTarget->setText(s);
+
     s = QString("%1 rnd").arg(shipInfo.distanceTime);
     m_uiWaterObjectInfo->labelHumanShipDistance->setText(s);
     // set page and save last state

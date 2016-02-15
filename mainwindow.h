@@ -65,7 +65,7 @@ private slots:
     void slotShowUniverseInfoIsle(IsleInfo isleInfo);
     void slotShowUniverseInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo> sList);
     void slotShowUniverseInfoShip(ShipInfo shipInfo);
-    void slotShowUniverseInfoHumanShip(ShipInfo shipInfo, Target shipTarget);
+    void slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target> shipTargets);
 
     // user clicked a button on info view -> human isle
     void slotDeleteShip();

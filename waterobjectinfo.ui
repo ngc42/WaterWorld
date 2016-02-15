@@ -41,7 +41,7 @@
    <string>StackedWidget</string>
   </property>
   <property name="currentIndex">
-   <number>3</number>
+   <number>5</number>
   </property>
   <widget class="QWidget" name="pageReallyNothing"/>
   <widget class="QWidget" name="pageWater">
@@ -204,7 +204,7 @@
        <item>
         <widget class="QTabWidget" name="tabWidget">
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="pinfo">
           <attribute name="title">
@@ -453,6 +453,13 @@
   </widget>
   <widget class="QWidget" name="pageHumanShip">
    <layout class="QGridLayout" name="gridLayout_4">
+    <item row="1" column="1">
+     <widget class="QLabel" name="labelHumanShipId">
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+    </item>
     <item row="2" column="0">
      <widget class="QLabel" name="labelHumanShipTechnology">
       <property name="text">
@@ -462,13 +469,6 @@
     </item>
     <item row="1" column="0">
      <widget class="QLabel" name="labelHumanShipDamage">
-      <property name="text">
-       <string>TextLabel</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLabel" name="labelHumanShipId">
       <property name="text">
        <string>TextLabel</string>
       </property>
@@ -484,7 +484,7 @@
       </property>
      </widget>
     </item>
-    <item row="5" column="0">
+    <item row="6" column="0">
      <spacer name="verticalSpacer_4">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -496,13 +496,6 @@
        </size>
       </property>
      </spacer>
-    </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="labelHumanShipHasTarget">
-      <property name="text">
-       <string>TextLabel</string>
-      </property>
-     </widget>
     </item>
     <item row="0" column="0">
      <widget class="QLabel" name="label_7">
@@ -531,6 +524,9 @@
        <string>TextLabel</string>
       </property>
      </widget>
+    </item>
+    <item row="5" column="0" colspan="2">
+     <widget class="QTableWidget" name="tableHTargets"/>
     </item>
    </layout>
   </widget>
