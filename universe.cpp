@@ -61,8 +61,7 @@ void Universe::setShipPatrolsIsle(const uint inShipId)
             ShipInfo sInfo = s->info();
             if(sInfo.posType == ShipPositionEnum::S_OCEAN)
                 return;
-            if(sInfo.hasTarget)
-                s->setTargetFinished();
+            s->removeTargets();
             // toggle Patruille status:
             if(sInfo.posType == ShipPositionEnum::S_ONISLE)
                 s->setPositionType(ShipPositionEnum::S_PATROL);
@@ -72,7 +71,6 @@ void Universe::setShipPatrolsIsle(const uint inShipId)
             IsleInfo iInfo;
             isleForId(sInfo.isleId, iInfo);
             showHumanIsle(iInfo);
-
             break;
         }
     }
@@ -153,27 +151,14 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                 qDebug() << " -- WRONG: id:" << shipInfo.id  << " owner:" << shipInfo.owner << shipInfo.damage;
             continue;
         }
-        Target target = ship->target();
 
+        if( ship->nextRound() ) // ship->nextRound() returns true on arrive
+        {   // arrived
 
-        // update the target position for ships with T_SHIP,
-        // because they move
-        if(target.validTarget and target.tType == Target::TargetEnum::T_SHIP)
-        {
-            for(Ship *targetShip : m_ships)
-            {
-                ShipInfo targetShipInfo = targetShip->info();
-                if(targetShipInfo.id == target.id)
-                {
-                    ship->updateTargetPos(targetShipInfo.pos);
-                    break;
-                }
-            }
-        }
+            // as ships which arrived in heaven get cought above, the ships here MUST
+            // have a target, so it is save to call:
+            Target target = ship->currentTarget();
 
-        if( ship->nextRound() )
-        {
-            // arrived
             if(target.tType == Target::TargetEnum::T_ISLE)
             {
                 // land or fight
@@ -283,6 +268,38 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
             deleteShip(deleteThatShip->id());
         }
     }
+
+
+    // update the target position for ships with tType T_SHIP, because they could have moved
+    // this is very straight forward (for every ship check target ships and update pos or delete target entry)
+    // but it is worse in the meaning of complexity O(n^4) :-(
+    for( Ship *updateShip : m_ships )
+    {
+        QVector<Target> targets = updateShip->targets();
+        for(Target t : targets)
+        {
+            if(t.tType == Target::T_SHIP)
+            {
+                bool targetIsAlive = false;
+                for( Ship *otherShip : m_ships)
+                {
+                    ShipInfo otherShipInfo = otherShip->info();
+                    if(otherShipInfo.id == t.id)
+                    {
+                        targetIsAlive = true;
+                        updateShip->updateTargetPos(t.id, otherShipInfo.pos);
+                        break;
+                    }
+                }
+                if(! targetIsAlive)
+                {
+                    // the target ship was deleted, so delete the target too
+                    updateShip->deleteTargetShip(t.id);
+                }
+            }
+        }
+    }
+
     qInfo() << "END NEXTROUND ==================";
 }
 

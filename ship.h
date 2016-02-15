@@ -63,7 +63,12 @@ public:
 
     ShipPositionEnum positionType() const { return m_positionType; }
 
+    // check, if ship REALLY has a valid target, else this breaks
+    Target currentTarget() const { return m_targetList.at(m_currentTargetIndex); }
+
     QVector<Target> targets() const { return m_targetList; }
+
+    void removeTargets() { m_targetList.clear(); m_currentTargetIndex = -1; }
 
     // setter
 
@@ -79,6 +84,8 @@ public:
 
     void setTargetShip(const uint inTargetShipId, const QPointF inPos);
 
+    void deleteTargetShip(const uint inShipId);
+
     void setTargetWater(const QPointF inPos);
 
     void setTargetFinished();
@@ -89,7 +96,7 @@ public:
 
     /* if a ship has target T_SHIP, then we need to
     update the target pos every round */
-    void updateTargetPos(const QPointF inPos);
+    void updateTargetPos(const uint inShipId, const QPointF inPos);
 
     bool nextRound();
 

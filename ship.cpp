@@ -98,6 +98,19 @@ void Ship::setTargetShip(const uint inTargetShipId, const QPointF inPos)
 }
 
 
+void Ship::deleteTargetShip(const uint inShipId)
+{
+    for(int idx = m_targetList.count()-1; idx > -1 ; idx--)
+    {
+        Target t = m_targetList.at(idx);
+        if(t.tType == Target::T_SHIP and t.id == inShipId)
+        {
+            m_targetList.removeAt(idx);
+        }
+    }
+}
+
+
 void Ship::setTargetWater(const QPointF inPos)
 {
     Target t;
