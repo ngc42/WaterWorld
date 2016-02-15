@@ -216,7 +216,10 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
     s = QString("Tech: %1").arg(shipInfo.technology, 2);
     m_uiWaterObjectInfo->labelHumanShipTechnology->setText(s);
 
-    m_uiWaterObjectInfo->tableHTargets->clear();
+    m_uiWaterObjectInfo->tableHTargets->clearContents();
+    m_uiWaterObjectInfo->tableHTargets->setRowCount(shipTargets.count());
+
+    int i = 0;
     for(Target t : shipTargets)
     {
 
@@ -232,11 +235,10 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
             s = "water";
             break;
         }
-        m_uiWaterObjectInfo->tableHTargets->insertRow(0);
+
         QTableWidgetItem *itm = new QTableWidgetItem(s);
-        m_uiWaterObjectInfo->tableHTargets->setItem(0, 0, itm);
-
-
+        m_uiWaterObjectInfo->tableHTargets->setItem(0, i, itm);
+        i++;
     }
 
     s = QString("%1 rnd").arg(shipInfo.distanceTime);

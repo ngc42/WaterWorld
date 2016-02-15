@@ -182,6 +182,9 @@ bool Ship::nextRound()
         return true;    // arrived in heaven;
     }
 
+    if(m_targetList.count() > 0 and m_currentTargetIndex < 0)
+        m_currentTargetIndex = 0;   // start to sail
+
     if(m_targetList.count() > 0 and m_currentTargetIndex >= 0)
     {
         // Rod_Steward::Sailing, YouTube::DyIw0gcgfik
