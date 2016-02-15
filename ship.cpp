@@ -14,7 +14,7 @@ Ship::Ship(UniverseScene *& inOutRefScene, const uint inId, const uint inOwner,
            const uint inIsleId, const float inTechnology)
     :  WaterObject(inId, inOwner, inPos, inColor, inTechnology),
       m_positionType(inPosType), m_onIsleById(inIsleId),
-      m_damage(0.0f)
+      m_damage(0.0f), m_cycleTargetList(false), m_currentTargetIndex(-1)
 {
     m_shape = new QGraphicsRectItem(-7.0f, -7.0f, 14.0f, 14.0f);
     m_shape->setPos(inPos.x(), inPos.y());
@@ -31,13 +31,39 @@ Ship::~Ship()
 }
 
 
+ShipInfo Ship::info() const
+{
+    ShipInfo outInfo;
+    outInfo.id = m_id;
+    outInfo.owner = m_owner;
+    outInfo.color = m_color;
+    outInfo.pos = m_pos;
+    outInfo.posType = m_positionType;
+    outInfo.isleId = m_onIsleById;
+    outInfo.hasTarget = m_currentTargetIndex >= 0;
+    outInfo.damage = m_damage;
+    outInfo.technology = m_technology;
+    if(outInfo.hasTarget)
+    {
+        Target t = m_targetList.at(m_currentTargetIndex);
+        qreal dx = m_pos.x() - t.x();
+        qreal dy = m_pos.y() - t.y();
+        outInfo.distanceTime = (uint) (std::sqrt( dx * dx + dy * dy ) / m_technology) + 1;
+    }
+    else
+        outInfo.distanceTime = 0.0f;
+    return outInfo;
+}
+
+
 void Ship::setOwner(const uint inOwner, const QColor inColor)
 {
     m_owner = inOwner;
     m_color = inColor;
     m_shape->setBrush(QBrush(inColor));
-    m_target.validTarget = false;
-    m_damage = 0.0f;
+    m_targetList.clear();
+    m_currentTargetIndex = -1;
+    m_damage = 0.0f;        // @fixme: really?
 }
 
 
@@ -49,13 +75,12 @@ void Ship::setPositionType(ShipPositionEnum inType)
 
 void Ship::setTargetIsle(const uint inTargetIsleId, const QPointF inPos)
 {
-    if((inTargetIsleId != m_onIsleById) or (m_positionType == ShipPositionEnum::S_OCEAN))
-    {
-        m_target.id = inTargetIsleId;
-        m_target.pos = inPos;
-        m_target.tType = Target::TargetEnum::T_ISLE;
-        m_target.validTarget = true;
-    }
+    Target t;
+    t.id = inTargetIsleId;
+    t.pos = inPos;
+    t.tType = Target::TargetEnum::T_ISLE;
+    t.validTarget = true;
+    m_targetList.append(t);
 }
 
 
@@ -63,29 +88,48 @@ void Ship::setTargetShip(const uint inTargetShipId, const QPointF inPos)
 {
     if(inTargetShipId != m_id)
     {
-        m_target.id = inTargetShipId;
-        m_target.pos = inPos;
-        m_target.tType = Target::TargetEnum::T_SHIP;
-        m_target.validTarget = true;
+        Target t;
+        t.id = inTargetShipId;
+        t.pos = inPos;
+        t.tType = Target::TargetEnum::T_SHIP;
+        t.validTarget = true;
+        m_targetList.append(t);
     }
 }
 
 
 void Ship::setTargetWater(const QPointF inPos)
 {
-    m_target.id = 0;
-    m_target.pos = inPos;
-    m_target.tType = Target::TargetEnum::T_WATER;
-    m_target.validTarget = true;
+    Target t;
+    t.id = 0;
+    t.pos = inPos;
+    t.tType = Target::TargetEnum::T_WATER;
+    t.validTarget = true;
+    m_targetList.append(t);
 }
 
 
 void Ship::setTargetFinished()
 {
-    m_target.id = 0;
-    m_target.pos = {0.0f, 0.0f};
-    m_target.tType = Target::TargetEnum::T_WATER;
-    m_target.validTarget = false;
+    int numTargets = m_targetList.count();
+    if(numTargets > 0)
+    {
+        m_currentTargetIndex++; // next target
+        if(m_currentTargetIndex >= numTargets)
+        {
+            if(m_cycleTargetList)
+            {
+                // start from 0 again
+                m_currentTargetIndex = 0;
+            }
+            else
+            {
+                // finished the list
+                m_targetList.clear();       // nothing
+                m_currentTargetIndex = -1;  // invalid index
+            }
+        }
+    }
 }
 
 
@@ -105,16 +149,17 @@ void Ship::addDamage(const float inDamageToAdd)
     if(m_damage > 0.999f)
     {
         setPositionType(ShipPositionEnum::S_TRASH);
-        setTargetFinished();
+        m_targetList.clear();
+        m_currentTargetIndex = -1;
     }
-
-    qDebug() << "Ship " << id() <<  " has damage " << m_damage;
 }
 
 
-void Ship::updateTargetPos(const QPointF inPos)
+void Ship::updateTargetPos(const uint inShipId, const QPointF inPos)
 {
-    m_target.pos = inPos;
+    for(Target & t : m_targetList)
+        if(t.tType == Target::T_SHIP and t.id == inShipId)
+            t.pos = inPos;
 }
 
 
@@ -124,16 +169,15 @@ bool Ship::nextRound()
     {
         return true;    // arrived in heaven;
     }
-    if(m_target.validTarget)
+
+    if(m_targetList.count() > 0 and m_currentTargetIndex >= 0)
     {
         // Rod_Steward::Sailing, YouTube::DyIw0gcgfik
-
-        //qInfo() << "sailing";
-
+        Target currentTarget = m_targetList[m_currentTargetIndex];
         m_positionType = ShipPositionEnum::S_OCEAN;
         m_shape->show();
-        float dx = m_target.pos.x() - m_pos.x();
-        float dy = m_target.pos.y() - m_pos.y();
+        float dx = currentTarget.pos.x() - m_pos.x();
+        float dy = currentTarget.pos.y() - m_pos.y();
 
         float d = sqrt( dx * dx + dy * dy );
 
