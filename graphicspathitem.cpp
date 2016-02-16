@@ -56,8 +56,6 @@ void GraphicsPathItem::setShipUnvisitedPath(const QPointF inStartPoint,
 
     p.moveTo(inStartPoint);
 
-
-
     for(int i = 0; i < inUnvisitedPath.count(); i++)
     {
         p.lineTo(inUnvisitedPath.at(i));
@@ -71,8 +69,22 @@ void GraphicsPathItem::setShipUnvisitedPath(const QPointF inStartPoint,
 void GraphicsPathItem::paint(QPainter *inPainter, const QStyleOptionGraphicsItem *, QWidget *)
 {
     QPen pen;
-    pen.setStyle(Qt::DashLine);
-    pen.setColor(Qt::green);
+    switch(m_thisItemsType)
+    {
+        case PathType::P_ISLE:
+            pen.setStyle(Qt::DashLine);
+            pen.setColor(Qt::green);
+            break;
+        case PathType::P_UNVISITED:
+            pen.setStyle(Qt::SolidLine);
+            pen.setColor(Qt::green);
+            break;
+        case PathType::P_VISITED:
+            pen.setStyle(Qt::DotLine);
+            pen.setColor(Qt::lightGray);
+            break;
+    }
+
     inPainter->setPen(pen);
     inPainter->drawPath(path());
 }

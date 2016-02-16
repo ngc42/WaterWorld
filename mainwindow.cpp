@@ -132,6 +132,7 @@ void MainWindow::slotShowUniverseInfoIsle(IsleInfo isleInfo)
 
 void MainWindow::slotShowUniverseInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo> sList)
 {
+    m_universeView->hidePathItem();
     QPixmap pix(30, 20);
     pix.fill(isleInfo.color);
     m_uiWaterObjectInfo->labelHumanIsleId->setText(QString("%1").arg(isleInfo.id));
@@ -184,8 +185,6 @@ void MainWindow::slotShowUniverseInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo
     m_lastCalledIsleInfo = isleInfo;
     if(isleInfo.defaultTargetType != IsleInfo::T_NOTHING)
         m_universeView->showIslePath(isleInfo.pos, isleInfo.defaultTargetPos);
-    else
-        m_universeView->hidePathItem();
 }
 
 
@@ -213,6 +212,7 @@ void MainWindow::slotShowUniverseInfoShip(ShipInfo shipInfo)
 
 void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target> shipTargets)
 {
+    m_universeView->hidePathItem();
     QPixmap pix(30, 20);
     pix.fill(shipInfo.color);
     m_uiWaterObjectInfo->labelHumanShipId->setText(QString("%1").arg(shipInfo.id));
@@ -259,9 +259,8 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
         // @fixme: the repeat-parameter must be used some time
         m_universeView->showShipPath(shipInfo.pos, shipTargets, false);
     }
-    else
-        m_universeView->hidePathItem();
 }
+
 
 void MainWindow::slotDeleteShip()
 {

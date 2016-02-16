@@ -88,7 +88,6 @@ void UniverseView::showIslePath(const QPointF inStartPoint, const QPointF inEndP
 
 void UniverseView::showShipPath(const QPointF inCurrentPos, const QVector<Target> inTargetList, const bool inRepeatPath)
 {
-
     if(inTargetList.isEmpty())
         return;
     int numTargets = inTargetList.count();
