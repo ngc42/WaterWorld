@@ -3,25 +3,30 @@
  * WaterWorld is (C) 2016 by Eike Lange (eike@ngc42.de)
  */
 
+
 #include <math.h>
 #include "graphicspathitem.h"
 #include <QDebug>
 
+
 GraphicsPathItem::GraphicsPathItem(QGraphicsItem *inParent)
-    : QGraphicsPathItem(inParent), m_isIslePath(true)
+    : QGraphicsPathItem(inParent), m_thisItemsType(PathType::P_ISLE)
 {
 }
 
 
 void GraphicsPathItem::setIslePath(const QPointF inStartPoint, const QPointF inEndPoint)
 {
-    m_isIslePath = true;
-    QPainterPath p;
-    p.moveTo(inStartPoint);
+    m_thisItemsType = PathType::P_ISLE;
+    QPainterPath p(inStartPoint);
+    // midpoint
     QPointF q = (inStartPoint + inEndPoint) / 2;
     p.lineTo(q);
-    QPointF q_dir = directionVector(q);
+    // direction vector
+    QPointF q_dir = directionVector(inEndPoint - inStartPoint);
+    // orthogonal to direction vector
     QPointF q_ortho = QPointF(-q_dir.y(), q_dir.x());
+    // polygon like an arrow
     QPolygonF poly;
     poly << q << q + 10 * q_ortho <<  q + 10 * q_dir << q - 10 * q_ortho << q;
     p.addPolygon(poly);
@@ -30,15 +35,41 @@ void GraphicsPathItem::setIslePath(const QPointF inStartPoint, const QPointF inE
 }
 
 
+void GraphicsPathItem::setShipVisitedPath(const QVector<QPointF> inVisitedPath)
+{
+    m_thisItemsType = PathType::P_VISITED;
+    QPainterPath p(inVisitedPath.at(0));
+
+    for(int i = 1; i < inVisitedPath.count(); i++)
+    {
+        p.lineTo(inVisitedPath.at(i));
+    }
+    setPath(p);
+}
+
+
+void GraphicsPathItem::setShipUnvisitedPath(const QPointF inStartPoint,
+                          const QVector<QPointF> inUnvisitedPath, const bool inRepeatPath)
+{
+    m_thisItemsType = PathType::P_UNVISITED;
+    QPainterPath p(inUnvisitedPath.at(0));
+
+    for(int i = 1; i < inUnvisitedPath.count(); i++)
+    {
+        p.lineTo(inUnvisitedPath.at(i));
+    }
+    if(inRepeatPath)
+        p.lineTo(inStartPoint);
+    setPath(p);
+}
+
+
 void GraphicsPathItem::paint(QPainter *inPainter, const QStyleOptionGraphicsItem *, QWidget *)
 {
     QPen pen;
-    if(m_isIslePath)
-    {
-        pen.setStyle(Qt::DashLine);
-        pen.setColor(Qt::green);
-        inPainter->setPen(pen);
-    }
+    pen.setStyle(Qt::DashLine);
+    pen.setColor(Qt::green);
+    inPainter->setPen(pen);
     inPainter->drawPath(path());
 }
 

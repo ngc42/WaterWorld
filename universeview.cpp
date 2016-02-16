@@ -15,8 +15,13 @@ UniverseView::UniverseView(QWidget *inParent) :
 {
     m_rubberBandLine = new QGraphicsLineItem(10, 10, 10, 10);
     m_journeyLengthDisplay = new QGraphicsSimpleTextItem();
-    m_pathItem = new GraphicsPathItem();
-    m_pathItem->hide();
+    m_islePathItem = new GraphicsPathItem();
+    m_islePathItem->hide();
+    m_ShipVisitedPathItem = new GraphicsPathItem();
+    m_ShipVisitedPathItem->hide();
+    m_ShipUnvisitedPathItem = new GraphicsPathItem();
+    m_ShipUnvisitedPathItem->hide();
+
 }
 
 
@@ -68,20 +73,24 @@ void UniverseView::setScene(QGraphicsScene *inScene)
     QGraphicsView::setScene(inScene);
     scene()->addItem(m_rubberBandLine);
     scene()->addItem(m_journeyLengthDisplay);
-    scene()->addItem(m_pathItem);
+    scene()->addItem(m_islePathItem);
+    scene()->addItem(m_ShipVisitedPathItem);
+    scene()->addItem(m_ShipUnvisitedPathItem);
 }
 
 
 void UniverseView::showIslePath(const QPointF inStartPoint, const QPointF inEndPoint)
 {
-    m_pathItem->setIslePath(inStartPoint, inEndPoint);
-    m_pathItem->show();
+    m_islePathItem->setIslePath(inStartPoint, inEndPoint);
+    m_islePathItem->show();
 }
 
 
 void UniverseView::hidePathItem()
 {
-    m_pathItem->hide();
+    m_islePathItem->hide();
+    m_ShipVisitedPathItem->hide();
+    m_ShipUnvisitedPathItem->hide();
 }
 
 
