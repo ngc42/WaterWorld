@@ -79,8 +79,10 @@ private:
 
     void setIslePopulationById(const uint inIsleId, const float inNewPopulation);
 
+    int shipIndexForPoint(const QPointF inScenePoint) const;
+
     void shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo, QVector<Target> & outShipTargets);
-    // @fixme: duplicate code
+
     void shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo);
 
     void shipForId(const uint inShipId, ShipInfo & outShipInfo, QVector<Target> & outShipTargets);

@@ -602,32 +602,36 @@ void Universe::setIslePopulationById(const uint inIsleId, const float inNewPopul
 }
 
 
+int Universe::shipIndexForPoint(const QPointF inScenePoint) const
+{
+    for(int index = 0; index < m_ships.count(); index++)
+    {
+        Ship *s = m_ships.at(index);
+        if(s->pointInShip(inScenePoint))
+            return index;
+    }
+    return -1;
+}
+
+
 void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo, QVector<Target> & outShipTargets)
 {
     outShipInfo.id = 0;
-    for(Ship *ship : m_ships)
-    {
-        if(ship->pointInShip(inScenePoint))
-        {
-            outShipInfo = ship->info();
-            outShipTargets = ship->targets();
-            break;
-        }
-    }
+    int index = shipIndexForPoint(inScenePoint);
+    if(index < 0)
+        return;
+    outShipInfo = m_ships.at(index)->info();
+    outShipTargets = m_ships.at(index)->targets();
 }
 
 
 void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo)
 {
     outShipInfo.id = 0;
-    for(Ship *ship : m_ships)
-    {
-        if(ship->pointInShip(inScenePoint))
-        {
-            outShipInfo = ship->info();
-            break;
-        }
-    }
+    int index = shipIndexForPoint(inScenePoint);
+    if(index < 0)
+        return;
+    outShipInfo = m_ships.at(index)->info();
 }
 
 
