@@ -253,7 +253,14 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
     m_waterObjectInfo->setCurrentIndex(PAGE_HUMAN_SHIP);
     m_lastCalledPage = PAGE_HUMAN_SHIP;
     m_lastCalledShipInfo = shipInfo;
-    m_universeView->hidePathItem();
+
+    if(shipInfo.hasTarget)
+    {
+        // @fixme: the repeat-parameter must be used some time
+        m_universeView->showShipPath(shipInfo.pos, shipTargets, false);
+    }
+    else
+        m_universeView->hidePathItem();
 }
 
 void MainWindow::slotDeleteShip()

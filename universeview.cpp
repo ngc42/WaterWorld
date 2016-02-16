@@ -86,6 +86,57 @@ void UniverseView::showIslePath(const QPointF inStartPoint, const QPointF inEndP
 }
 
 
+void UniverseView::showShipPath(const QPointF inCurrentPos, const QVector<Target> inTargetList, const bool inRepeatPath)
+{
+
+    if(inTargetList.isEmpty())
+        return;
+    int numTargets = inTargetList.count();
+
+    QVector<QPointF> visited;
+    QVector<QPointF> unvisited;
+
+    if(numTargets == 1)
+    {
+
+        unvisited.append(inTargetList.at(0).pos);
+        m_ShipUnvisitedPathItem->setShipUnvisitedPath(inCurrentPos, unvisited, false);
+        m_ShipUnvisitedPathItem->show();
+        return;
+    }
+
+    bool lastInsertVisited = true;
+    for(int i = 0; i < numTargets; i++)
+    {
+        Target t = inTargetList.at(i);
+        if(t.visited)
+        {
+            visited.append(t.pos);
+        }
+        else
+        {
+            if(lastInsertVisited)
+            {
+                visited.append(inCurrentPos);
+                lastInsertVisited = false;
+            }
+            unvisited.append(t.pos);
+        }
+
+    }
+    if(visited.count() > 1)
+    {
+        m_ShipVisitedPathItem->setShipVisitedPath(visited);
+        m_ShipVisitedPathItem->show();
+    }
+    if(unvisited.count() > 0)
+    {
+        m_ShipUnvisitedPathItem->setShipUnvisitedPath(inCurrentPos, unvisited, inRepeatPath);
+        m_ShipUnvisitedPathItem->show();
+    }
+}
+
+
 void UniverseView::hidePathItem()
 {
     m_islePathItem->hide();

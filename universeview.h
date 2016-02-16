@@ -30,7 +30,7 @@ public:
 
     // Methods to control if path is shown
     void showIslePath(const QPointF inStartPoint, const QPointF inEndPoint);
-    void showShipPath(const QPointF inCurrentPos, const QVector<Target> inTargetList);
+    void showShipPath(const QPointF inCurrentPos, const QVector<Target> inTargetList, const bool inRepeatPath);
     void hidePathItem();
 
 private:
