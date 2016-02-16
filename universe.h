@@ -36,6 +36,7 @@ public:
     void setShipPatrolsIsle(const uint inShipId);
 
     QPointF shipPosById(const uint inShipId);
+
     float shipTechById(const uint inShipId);
 
     void isleForId(const uint inIsleId, IsleInfo & outIsleInfo);
@@ -43,6 +44,8 @@ public:
     // for communication with OverviewDialog (used in MainWindow::slotToggleOverviewDialog())
     void getAllIsleInfos(QList<IsleInfo> & outIsleInfos);
     void getAllShipInfos(QList<ShipInfo> & outShipInfos);
+
+    void clearDefaultIsleTarget(const uint inIsleId);
 
     void nextRound(UniverseScene *& inOutUniverseScene);
 

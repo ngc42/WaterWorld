@@ -300,9 +300,9 @@ void MainWindow::slotSetNewTargetForIsle()
         qInfo() << "BUG in MainWindow::slotSetNewTargetForIsle() : wrong page saved";
         return;
     }
+    // id is stored in a property field
     QVariant id_v = m_uiWaterObjectInfo->labelHumanIsleId->property("ISLEID");
     bool ok;
-    qInfo() << "retive id " << id_v.toUInt(&ok);
     IsleInfo isleInfo;
     m_universe->isleForId(id_v.toUInt(&ok), isleInfo);
     m_universeView->toggleIsleWantsTarget(isleInfo.pos, isleInfo.id);
@@ -313,9 +313,18 @@ void MainWindow::slotClearIsleTarget()
 {
     if(m_lastCalledPage != PAGE_HUMAN_ISLE)
     {
-        qInfo() << "BUG in MainWindow::slotSetNewTargetForIsle() : wrong page saved";
+        qInfo() << "BUG in MainWindow::slotClearIsleTarget() : wrong page saved";
         return;
     }
+    // id is stored in a property field
+    QVariant id_v = m_uiWaterObjectInfo->labelHumanIsleId->property("ISLEID");
+    bool ok;
+    uint isleId = id_v.toUInt(&ok);
+    m_universe->clearDefaultIsleTarget(isleId);
+    IsleInfo isleInfo;
+    m_universe->isleForId(isleId, isleInfo);
+    m_lastCalledIsleInfo = isleInfo;
+    m_universe->callInfoScreen(m_lastCalledPage, m_lastCalledIsleInfo, m_lastCalledShipInfo);
 }
 
 

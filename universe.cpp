@@ -125,6 +125,17 @@ void Universe::getAllShipInfos(QList<ShipInfo> & outShipInfo)
 }
 
 
+void Universe::clearDefaultIsleTarget(const uint inIsleId)
+{
+    for(Isle *i : m_isles)
+        if(i->id() == inIsleId)
+        {
+            i->setDefaultTargetNothing();
+            break;
+        }
+}
+
+
 void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 {
     qInfo() << "BEGIN NEXTROUND ==================";
