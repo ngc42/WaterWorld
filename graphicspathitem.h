@@ -24,6 +24,7 @@ public:
 private:
     bool m_isIslePath;
 
+    QPointF directionVector(const QPointF inVector) const;
 
 };
 
