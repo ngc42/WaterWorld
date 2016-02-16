@@ -19,12 +19,12 @@ struct Target
 {
     // targets can be ships, isles and just a place on the water.
     enum TargetEnum {T_SHIP, T_ISLE, T_WATER};
-    bool validTarget;   // fixme: remove this field
     TargetEnum tType;
     unsigned int id;  // ship or isle id
     // current pos of object. if this means a ship,
     // the pos should get updated in Manager::nextRound
     QPointF pos;
+    bool visited;
 };
 
 

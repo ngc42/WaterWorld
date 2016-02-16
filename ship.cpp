@@ -78,7 +78,7 @@ void Ship::setTargetIsle(const uint inTargetIsleId, const QPointF inPos)
     t.id = inTargetIsleId;
     t.pos = inPos;
     t.tType = Target::TargetEnum::T_ISLE;
-    t.validTarget = true;
+    t.visited = false;
     m_targetList.append(t);
 }
 
@@ -91,7 +91,7 @@ void Ship::setTargetShip(const uint inTargetShipId, const QPointF inPos)
         t.id = inTargetShipId;
         t.pos = inPos;
         t.tType = Target::TargetEnum::T_SHIP;
-        t.validTarget = true;
+        t.visited = false;
         m_targetList.append(t);
     }
 }
@@ -116,7 +116,7 @@ void Ship::setTargetWater(const QPointF inPos)
     t.id = 0;
     t.pos = inPos;
     t.tType = Target::TargetEnum::T_WATER;
-    t.validTarget = true;
+    t.visited = false;
     m_targetList.append(t);
 }
 
@@ -126,6 +126,7 @@ void Ship::setTargetFinished()
     int numTargets = m_targetList.count();
     if(numTargets > 0)
     {
+        m_targetList[m_currentTargetIndex].visited = true;
         m_currentTargetIndex++; // next target
         if(m_currentTargetIndex >= numTargets)
         {
@@ -133,6 +134,8 @@ void Ship::setTargetFinished()
             {
                 // start from 0 again
                 m_currentTargetIndex = 0;
+                for(Target & t : m_targetList)
+                    t.visited = false;
             }
             else
             {
@@ -182,29 +185,29 @@ bool Ship::nextRound()
         return true;    // arrived in heaven;
     }
 
-    if(m_targetList.count() > 0 and m_currentTargetIndex < 0)
+    if(m_targetList.count() == 0)
+        return false;
+
+    if(m_currentTargetIndex < 0)
         m_currentTargetIndex = 0;   // start to sail
 
-    if(m_targetList.count() > 0 and m_currentTargetIndex >= 0)
-    {
-        // Rod_Steward::Sailing, YouTube::DyIw0gcgfik
-        Target currentTarget = m_targetList[m_currentTargetIndex];
-        m_positionType = ShipPositionEnum::S_OCEAN;
-        m_shape->show();
-        float dx = currentTarget.pos.x() - m_pos.x();
-        float dy = currentTarget.pos.y() - m_pos.y();
+    // Rod_Steward::Sailing, YouTube::DyIw0gcgfik
+    Target currentTarget = m_targetList[m_currentTargetIndex];
+    m_positionType = ShipPositionEnum::S_OCEAN;
+    m_shape->show();
+    float dx = currentTarget.pos.x() - m_pos.x();
+    float dy = currentTarget.pos.y() - m_pos.y();
 
-        float d = sqrt( dx * dx + dy * dy );
+    float d = sqrt( dx * dx + dy * dy );
 
-        if(d <= m_technology)
-            return true;
+    if(d <= m_technology)
+        return true;
 
-        float ex = dx / d;
-        float ey = dy / d;
+    float ex = dx / d;
+    float ey = dy / d;
 
-        m_pos = QPointF{m_pos.x() + m_technology * ex, m_pos.y() + m_technology * ey};
-        m_shape->setPos(m_pos);
-    }
+    m_pos = QPointF{m_pos.x() + m_technology * ex, m_pos.y() + m_technology * ey};
+    m_shape->setPos(m_pos);
     return false;
 }
 
