@@ -635,32 +635,36 @@ void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo)
 }
 
 
+int Universe::shipIndexForId(const uint inShipId) const
+{
+    for(int index = 0; index < m_ships.count(); index++)
+    {
+        Ship *s = m_ships.at(index);
+        if(s->id() == inShipId)
+            return index;
+    }
+    return -1;
+}
+
+
 void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo, QVector<Target> & outShipTargets)
 {
     outShipInfo.id = 0;
-    for(Ship *ship : m_ships)
-    {
-        if(ship->id() == inShipId)
-        {
-            outShipInfo = ship->info();
-            outShipTargets = ship->targets();
-            break;
-        }
-    }
+    int index = shipIndexForId(inShipId);
+    if(index < 0)
+        return;
+    outShipInfo = m_ships.at(index)->info();
+    outShipTargets = m_ships.at(index)->targets();
 }
 
 
 void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo)
 {
     outShipInfo.id = 0;
-    for(Ship *ship : m_ships)
-    {
-        if(ship->id() == inShipId)
-        {
-            outShipInfo = ship->info();
-            break;
-        }
-    }
+    int index = shipIndexForId(inShipId);
+    if(index < 0)
+        return;
+    outShipInfo = m_ships.at(index)->info();
 }
 
 

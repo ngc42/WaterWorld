@@ -85,8 +85,10 @@ private:
 
     void shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo);
 
+    int shipIndexForId(const uint inShipId) const;
+
     void shipForId(const uint inShipId, ShipInfo & outShipInfo, QVector<Target> & outShipTargets);
-    // @fixme: duplicate code
+
     void shipForId(const uint inShipId, ShipInfo & outShipInfo);
 
     // really delete a ship
