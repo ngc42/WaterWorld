@@ -8,13 +8,15 @@
 #include <math.h>
 #include <QMouseEvent>
 #include <QDebug>
-
+#include <QPainterPath>
 
 UniverseView::UniverseView(QWidget *inParent) :
     QGraphicsView(inParent), m_shipWantsTarget(false), m_shipVelocity(1.0f), m_isleWantsDefaultTarget(false)
 {
     m_rubberBandLine = new QGraphicsLineItem(10, 10, 10, 10);
     m_journeyLengthDisplay = new QGraphicsSimpleTextItem();
+    m_pathItem = new GraphicsPathItem();
+    m_pathItem->hide();
 }
 
 
@@ -66,6 +68,20 @@ void UniverseView::setScene(QGraphicsScene *inScene)
     QGraphicsView::setScene(inScene);
     scene()->addItem(m_rubberBandLine);
     scene()->addItem(m_journeyLengthDisplay);
+    scene()->addItem(m_pathItem);
+}
+
+
+void UniverseView::showIslePath(const QPointF inStartPoint, const QPointF inEndPoint)
+{
+    m_pathItem->setIslePath(inStartPoint, inEndPoint);
+    m_pathItem->show();
+}
+
+
+void UniverseView::hidePathItem()
+{
+    m_pathItem->hide();
 }
 
 

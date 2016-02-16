@@ -106,6 +106,7 @@ MainWindow::~MainWindow()
 void MainWindow::slotShowUniverseInfoWater()
 {
     m_waterObjectInfo->setCurrentIndex(1);
+    m_universeView->hidePathItem();
 }
 
 
@@ -125,6 +126,7 @@ void MainWindow::slotShowUniverseInfoIsle(IsleInfo isleInfo)
     m_waterObjectInfo->setCurrentIndex(PAGE_ISLE);
     m_lastCalledPage = PAGE_ISLE;
     m_lastCalledIsleInfo = isleInfo;
+    m_universeView->hidePathItem();
 }
 
 
@@ -180,12 +182,15 @@ void MainWindow::slotShowUniverseInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo
     m_waterObjectInfo->setCurrentIndex(PAGE_HUMAN_ISLE);
     m_lastCalledPage = PAGE_HUMAN_ISLE;
     m_lastCalledIsleInfo = isleInfo;
+    if(isleInfo.defaultTargetType != IsleInfo::T_NOTHING)
+        m_universeView->showIslePath(isleInfo.pos, isleInfo.defaultTargetPos);
+    else
+        m_universeView->hidePathItem();
 }
 
 
 void MainWindow::slotShowUniverseInfoShip(ShipInfo shipInfo)
 {
-
     QPixmap pix(30, 20);
     pix.fill(shipInfo.color);
 
@@ -202,6 +207,7 @@ void MainWindow::slotShowUniverseInfoShip(ShipInfo shipInfo)
     m_waterObjectInfo->setCurrentIndex(PAGE_SHIP);
     m_lastCalledPage = PAGE_SHIP;
     m_lastCalledShipInfo = shipInfo;
+    m_universeView->hidePathItem();
 }
 
 
@@ -247,7 +253,7 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
     m_waterObjectInfo->setCurrentIndex(PAGE_HUMAN_SHIP);
     m_lastCalledPage = PAGE_HUMAN_SHIP;
     m_lastCalledShipInfo = shipInfo;
-
+    m_universeView->hidePathItem();
 }
 
 void MainWindow::slotDeleteShip()
@@ -321,9 +327,6 @@ void MainWindow::slotClearIsleTarget()
     bool ok;
     uint isleId = id_v.toUInt(&ok);
     m_universe->clearDefaultIsleTarget(isleId);
-    IsleInfo isleInfo;
-    m_universe->isleForId(isleId, isleInfo);
-    m_lastCalledIsleInfo = isleInfo;
     m_universe->callInfoScreen(m_lastCalledPage, m_lastCalledIsleInfo, m_lastCalledShipInfo);
 }
 

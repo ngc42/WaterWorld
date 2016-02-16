@@ -8,10 +8,11 @@
 #define UNIVERSEVIEW_H
 
 
+#include "graphicspathitem.h"
 #include <QGraphicsView>
 #include <QGraphicsLineItem>
 #include <QGraphicsSimpleTextItem>
-
+#include <QGraphicsPathItem>
 
 class UniverseView : public QGraphicsView
 {
@@ -24,6 +25,10 @@ public:
     void toggleIsleWantsTarget(const QPointF inIsleSourcePos, const uint inIsleId);
 
     void setScene(QGraphicsScene *inScene);
+
+    // Methods to control if path is shown
+    void showIslePath(const QPointF inStartPoint, const QPointF inEndPoint);
+    void hidePathItem();
 
 private:
     bool m_shipWantsTarget;     // true, if we are in search for a ship's target
@@ -43,6 +48,9 @@ private:
 
     // shows the rubber band. Is only activem when toggleSomethingWantsTaget() activates mouse tracking
     void mouseMoveEvent(QMouseEvent *inMouseEvent);
+
+    // Path for Star (default target), Ships (list of targets)
+    GraphicsPathItem *m_pathItem;
 
 signals:
     void sigUniverseViewClicked(QPointF scenePos);
