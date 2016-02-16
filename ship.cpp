@@ -39,7 +39,7 @@ ShipInfo Ship::info() const
     outInfo.pos = m_pos;
     outInfo.posType = m_positionType;
     outInfo.isleId = m_onIsleById;
-    outInfo.hasTarget = m_currentTargetIndex >= 0;
+    outInfo.hasTarget = m_targetList.count() > 0;
     outInfo.damage = m_damage;
     outInfo.technology = m_technology;
     if(outInfo.hasTarget)
@@ -80,6 +80,8 @@ void Ship::setTargetIsle(const uint inTargetIsleId, const QPointF inPos)
     t.tType = Target::TargetEnum::T_ISLE;
     t.visited = false;
     m_targetList.append(t);
+    if(m_currentTargetIndex == -1)
+        m_currentTargetIndex = 0;
 }
 
 
@@ -93,6 +95,8 @@ void Ship::setTargetShip(const uint inTargetShipId, const QPointF inPos)
         t.tType = Target::TargetEnum::T_SHIP;
         t.visited = false;
         m_targetList.append(t);
+        if(m_currentTargetIndex == -1)
+            m_currentTargetIndex = 0;
     }
 }
 
@@ -118,6 +122,8 @@ void Ship::setTargetWater(const QPointF inPos)
     t.tType = Target::TargetEnum::T_WATER;
     t.visited = false;
     m_targetList.append(t);
+    if(m_currentTargetIndex == -1)
+        m_currentTargetIndex = 0;
 }
 
 
@@ -187,9 +193,6 @@ bool Ship::nextRound()
 
     if(m_targetList.count() == 0)
         return false;
-
-    if(m_currentTargetIndex < 0)
-        m_currentTargetIndex = 0;   // start to sail
 
     // Rod_Steward::Sailing, YouTube::DyIw0gcgfik
     Target currentTarget = m_targetList[m_currentTargetIndex];

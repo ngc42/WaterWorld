@@ -136,11 +136,9 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
     for(Isle *isle : m_isles)
     {
         if(isle->nextRound())
-        {
-            qDebug() << "isle " << isle->id() << "finished a ship";
             createShipOnIsle(inOutUniverseScene, isle->id());
-        }
     }
+
     for(Ship *ship : m_ships)
     {
         ShipInfo shipInfo = ship->info();
@@ -559,9 +557,7 @@ void Universe::shipLandOnIsle(Ship *& inOutShipToLand)
     }
 
     // transfer technology to the isle
-    qInfo() << "Set max technology: ship has" << shipInfo.technology << " isle has: " << targetIsle->info().technology;
     targetIsle->setMaxTechnology(shipInfo.technology);
-    qInfo() << " now isle has " << targetIsle->info().technology;
 
     // and realy land
     inOutShipToLand->landOnIsle(isleInfo.id, isleInfo.pos);

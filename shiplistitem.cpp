@@ -3,11 +3,13 @@
  * WaterWorld is (C) 2016 by Eike Lange (eike@ngc42.de)
  */
 
+
 #include "shiplistitem.h"
 #include <QPixmap>
 #include <QPainter>
 #include <QHBoxLayout>
 #include <QDebug>
+
 
 ShipListItem::ShipListItem(const ShipListItemType inType, const ShipInfo inShipInfo, const QString inTitle)
     : QTableWidgetItem(QTableWidgetItem::UserType + 1000), m_myType(inType), m_shipId(inShipInfo.id)
@@ -65,7 +67,6 @@ ShipListItem::ShipListItem(const ShipListItemType inType, const ShipInfo inShipI
         p.end();
         setIcon(circle);  // show damage
         QString text = QString("Dmg: %1").arg(inShipInfo.damage * 100.0f, 3);
-        qDebug() << " SLIT_STATUS: id: " << inShipInfo.id << " dmg: " << inShipInfo.damage;
         setText(text);
     }
     else

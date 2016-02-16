@@ -480,16 +480,6 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="1">
-     <widget class="QPushButton" name="pbHumanShipSetTarget">
-      <property name="text">
-       <string>target</string>
-      </property>
-      <property name="autoRepeatDelay">
-       <number>300</number>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="0">
      <widget class="QLabel" name="label_7">
       <property name="text">
@@ -504,26 +494,83 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="0">
+    <item row="3" column="0">
      <widget class="QLabel" name="label_10">
       <property name="text">
        <string>Distance</string>
       </property>
      </widget>
     </item>
-    <item row="4" column="1">
+    <item row="3" column="1">
      <widget class="QLabel" name="labelHumanShipDistance">
       <property name="text">
        <string>TextLabel</string>
       </property>
      </widget>
     </item>
-    <item row="5" column="0" colspan="2">
+    <item row="4" column="0" colspan="2">
      <widget class="QTableWidget" name="tableHTargets">
       <property name="columnCount">
        <number>1</number>
       </property>
       <column/>
+     </widget>
+    </item>
+    <item row="5" column="0" colspan="2">
+     <widget class="QWidget" name="widget_3" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="baseSize">
+       <size>
+        <width>0</width>
+        <height>50</height>
+       </size>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_7">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="pbHumanShipSetTarget">
+         <property name="text">
+          <string>Tgt</string>
+         </property>
+         <property name="autoRepeatDelay">
+          <number>300</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="pbHumanShipRepeatTargets">
+         <property name="text">
+          <string>Cycl</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QPushButton" name="pbHumanShipDelTarget">
+         <property name="text">
+          <string>DEL</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
