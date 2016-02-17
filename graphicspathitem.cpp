@@ -54,9 +54,9 @@ void GraphicsPathItem::setShipUnvisitedPath(const QPointF inStartPoint,
     m_thisItemsType = PathType::P_UNVISITED;
     QPainterPath p;
 
-    p.moveTo(inStartPoint);
+    p.moveTo(inUnvisitedPath.at(0));
 
-    for(int i = 0; i < inUnvisitedPath.count(); i++)
+    for(int i = 1; i < inUnvisitedPath.count(); i++)
     {
         p.lineTo(inUnvisitedPath.at(i));
     }

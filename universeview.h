@@ -57,8 +57,6 @@ private:
     GraphicsPathItem *m_ShipVisitedPathItem;
     GraphicsPathItem *m_ShipUnvisitedPathItem;
 
-
-
 signals:
     void sigUniverseViewClicked(QPointF scenePos);
     void sigUniverseViewClickedFinishShipTarget(QPointF scenePos, uint shipId);

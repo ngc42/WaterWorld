@@ -97,7 +97,6 @@ void UniverseView::showShipPath(const QPointF inCurrentPos, const QVector<Target
 
     if(numTargets == 1)
     {
-
         unvisited.append(inTargetList.at(0).pos);
         m_ShipUnvisitedPathItem->setShipUnvisitedPath(inCurrentPos, unvisited, false);
         m_ShipUnvisitedPathItem->show();
@@ -117,6 +116,7 @@ void UniverseView::showShipPath(const QPointF inCurrentPos, const QVector<Target
             if(lastInsertVisited)
             {
                 visited.append(inCurrentPos);
+                unvisited.append(inCurrentPos);
                 lastInsertVisited = false;
             }
             unvisited.append(t.pos);
@@ -130,7 +130,9 @@ void UniverseView::showShipPath(const QPointF inCurrentPos, const QVector<Target
     }
     if(unvisited.count() > 0)
     {
-        m_ShipUnvisitedPathItem->setShipUnvisitedPath(inCurrentPos, unvisited, inRepeatPath);
+        Target t = inTargetList.at(0);
+
+        m_ShipUnvisitedPathItem->setShipUnvisitedPath(t.pos, unvisited, inRepeatPath);
         m_ShipUnvisitedPathItem->show();
     }
 }
