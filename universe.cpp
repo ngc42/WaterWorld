@@ -321,8 +321,10 @@ void Universe::callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsle
         isleForId(inIsleInfo.id, isleInfo);
         // owner may have changed
         if(isleInfo.owner == 1)
+        {
             // human
             showHumanIsle(isleInfo);
+        }
         else
             emit sigShowInfoIsle(isleInfo);
     }
@@ -339,18 +341,31 @@ void Universe::callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsle
     else if(inPage == InfoscreenPage::PAGE_SHIP)
     {
         ShipInfo shipInfo;
-        QVector<Target> targetsUnused;
-        shipForId(inShipInfo.id, shipInfo, targetsUnused);
-        emit sigShowInfoShip(inShipInfo);
+        shipForId(inShipInfo.id, shipInfo);
+        emit sigShowInfoShip(shipInfo);
     }
     else if(inPage == InfoscreenPage::PAGE_WATER)
         emit sigShowInfoWater();
     else if(inPage == InfoscreenPage::PAGE_HUMAN_SHIP)
     {
-        ShipInfo sInfo;
+        ShipInfo shipInfo;
         QVector<Target> targetList;
-        shipForId(inShipInfo.id, sInfo, targetList);
-        emit sigShowInfoHumanShip(sInfo, targetList);
+        shipForId(inShipInfo.id, shipInfo, targetList);
+        if(shipInfo.owner == 1)
+            emit sigShowInfoHumanShip(shipInfo, targetList);
+        else
+        {   // ship is dead or captured
+            if(shipInfo.id == 0)
+            {
+                // ship is dead
+                emit sigShowInfoWater();
+            }
+            else
+            {
+                // captured
+                emit sigShowInfoShip(shipInfo);
+            }
+        }
     }
     // else -> PAGE_NOTHING -> ignore
 }
