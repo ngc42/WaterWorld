@@ -79,6 +79,7 @@ MainWindow::MainWindow(QWidget *inParent) :
     connect(m_universe, SIGNAL(sigShowInfoShip(ShipInfo)), this, SLOT(slotShowUniverseInfoShip(ShipInfo)));
     connect(m_universe, SIGNAL(sigShowInfoHumanShip(ShipInfo, QVector<Target>)),
             this, SLOT(slotShowUniverseInfoHumanShip(ShipInfo, QVector<Target>)));
+    connect(m_universe, SIGNAL(sigRecallInfoscreen()), this, SLOT(slotRecallInfoscreen()));
 
     // Push buttons on Info -> human isle
     connect(m_uiWaterObjectInfo->pbDelete, SIGNAL(clicked()), this, SLOT(slotDeleteShip()));
@@ -87,7 +88,8 @@ MainWindow::MainWindow(QWidget *inParent) :
     connect(m_uiWaterObjectInfo->pbHumanShipSetTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForShip()));
     connect(m_uiWaterObjectInfo->pbSetDefaultTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForIsle()));
     connect(m_uiWaterObjectInfo->pbClearDefaultTarget, SIGNAL(clicked()), this, SLOT(slotClearIsleTarget()));
-
+    connect(m_uiWaterObjectInfo->tableWidget, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
+            this, SLOT(slotSelectShipFromShipList(QTableWidgetItem*)));
 
     // show nothing at start
     m_waterObjectInfo->setCurrentIndex(PAGE_NOTHING);
@@ -100,6 +102,12 @@ MainWindow::~MainWindow()
     delete m_overviewDialog;
     delete m_uiWaterObjectInfo;
     delete m_ui;
+}
+
+
+void MainWindow::slotRecallInfoscreen()
+{
+    m_universe->callInfoScreen(m_lastCalledPage, m_lastCalledIsleInfo, m_lastCalledShipInfo);
 }
 
 
@@ -280,6 +288,24 @@ void MainWindow::slotSetShipPartrol()
         return;
     ShipListItem *item = (ShipListItem* ) m_uiWaterObjectInfo->tableWidget->currentItem();
     m_universe->setShipPatrolsIsle(item->id());
+}
+
+
+void MainWindow::slotSelectShipFromShipList(QTableWidgetItem *item)
+{
+    if(m_lastCalledPage != PAGE_HUMAN_ISLE)
+        return;
+    ShipListItem *slItem = dynamic_cast<ShipListItem*>(item);
+    if(slItem == 0)
+        return;
+    uint shipId = slItem->id();
+
+    qInfo() << "MainWindow::slotSelectShipFromShipList(), id = " << shipId;
+    ShipInfo shipInfo;
+    m_universe->shipForId(shipId, shipInfo);
+    m_lastCalledPage = PAGE_HUMAN_SHIP;
+    m_lastCalledShipInfo = shipInfo;
+    m_universe->callInfoScreen(m_lastCalledPage, m_lastCalledIsleInfo, m_lastCalledShipInfo);
 }
 
 

@@ -95,6 +95,16 @@ float Universe::shipTechById(const uint inShipId)
 }
 
 
+void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo)
+{
+    outShipInfo.id = 0;
+    int index = shipIndexForId(inShipId);
+    if(index < 0)
+        return;
+    outShipInfo = m_ships.at(index)->info();
+}
+
+
 void Universe::isleForId(const uint inIsleId, IsleInfo & outIsleInfo)
 {
     outIsleInfo.id = 0;
@@ -680,16 +690,6 @@ void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo, QVector<Ta
 }
 
 
-void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo)
-{
-    outShipInfo.id = 0;
-    int index = shipIndexForId(inShipId);
-    if(index < 0)
-        return;
-    outShipInfo = m_ships.at(index)->info();
-}
-
-
 void Universe::deleteShip(const uint inShipId)
 {
     Ship *shipToDelete = 0;
@@ -894,16 +894,8 @@ void Universe::slotUniverseViewClickedFinishShipTarget(QPointF scenePos, uint sh
         }
     }
 
-    // shipInfo describes old state. if this ship was on an isle
-    // then we have to show this isle again
-    // this updates the graphics which shows, that this ship has a target
-    if( (sourceShipInfo.posType == S_ONISLE) or (sourceShipInfo.posType == S_PATROL) )
-    {
-        // redraw isle info
-        IsleInfo iInfo;
-        isleForId(sourceShipInfo.isleId, iInfo);
-        showHumanIsle(iInfo);
-    }
+    // call the infoscreen again, as the reason for a new target is one of 2 infoscreen-buttons
+    emit sigRecallInfoscreen();
 }
 
 

@@ -41,7 +41,7 @@
    <string>StackedWidget</string>
   </property>
   <property name="currentIndex">
-   <number>5</number>
+   <number>3</number>
   </property>
   <widget class="QWidget" name="pageReallyNothing"/>
   <widget class="QWidget" name="pageWater">

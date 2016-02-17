@@ -220,11 +220,13 @@ bool Ship::nextRound()
 
 bool Ship::pointInShip(const QPointF inPos)
 {
+    if(m_positionType != ShipPositionEnum::S_OCEAN)
+        return false;
     QPointF myPos = pos();
-    return inPos.x() > (myPos.x() - 10.0f) and
-            inPos.x() < (myPos.x() + 10.0f) and
-            inPos.y() > (myPos.y() - 10.0f) and
-            inPos.y() < (myPos.y() + 10.0f);
+    return inPos.x() > (myPos.x() - 7.0f) and
+            inPos.x() < (myPos.x() + 7.0f) and
+            inPos.y() > (myPos.y() - 7.0f) and
+            inPos.y() < (myPos.y() + 7.0f);
 }
 
 

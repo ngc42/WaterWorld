@@ -39,6 +39,8 @@ public:
 
     float shipTechById(const uint inShipId);
 
+    void shipForId(const uint inShipId, ShipInfo & outShipInfo);
+
     void isleForId(const uint inIsleId, IsleInfo & outIsleInfo);
 
     // for communication with OverviewDialog (used in MainWindow::slotToggleOverviewDialog())
@@ -92,7 +94,6 @@ private:
 
     void shipForId(const uint inShipId, ShipInfo & outShipInfo, QVector<Target> & outShipTargets);
 
-    void shipForId(const uint inShipId, ShipInfo & outShipInfo);
 
     // really delete a ship
     void deleteShip(const uint inShipId);
@@ -130,6 +131,7 @@ signals:
     void sigShowInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo> sList);
     void sigShowInfoShip(ShipInfo shipInfo);
     void sigShowInfoHumanShip(ShipInfo shipInfo, QVector<Target> targets);
+    void sigRecallInfoscreen(); // ask MainWindow to update infoscreen
 
 public slots:
     void slotUniverseViewClicked(QPointF scenePos);

@@ -15,7 +15,7 @@
 #include <overviewdialog.h>
 #include <QMainWindow>
 #include <QStackedWidget>
-
+#include <QTableWidgetItem>
 
 namespace Ui {
 class MainWindow;
@@ -60,6 +60,8 @@ private:
 
 
 private slots:
+    // unverse wants us call infoscreen again
+    void slotRecallInfoscreen();
     // user clicked somewhere on the ocean
     void slotShowUniverseInfoWater();
     void slotShowUniverseInfoIsle(IsleInfo isleInfo);
@@ -70,6 +72,7 @@ private slots:
     // user clicked a button on info view -> human isle
     void slotDeleteShip();
     void slotSetShipPartrol();
+    void slotSelectShipFromShipList(QTableWidgetItem *item);    // double click on ship list on human isle
     void slotSetNewTargetForShip();
     void slotSetNewTargetForIsle();
     void slotClearIsleTarget();
