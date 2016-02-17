@@ -63,13 +63,6 @@ public:
 
     ShipPositionEnum positionType() const { return m_positionType; }
 
-    // check, if ship REALLY has a valid target, else this breaks
-    Target currentTarget() const { return m_targetList.at(m_currentTargetIndex); }
-
-    QVector<Target> targets() const { return m_targetList; }
-
-    void removeTargets() { m_targetList.clear(); m_currentTargetIndex = -1; }
-
     // setter
 
     /**
@@ -79,6 +72,15 @@ public:
     void setOwner(const uint inOwner, const QColor inColor);
 
     void setPositionType(ShipPositionEnum inType);
+
+    // -- Targets --
+
+    // check, if ship REALLY has a valid target, else this breaks
+    Target currentTarget() const { return m_targetList.at(m_currentTargetIndex); }
+
+    QVector<Target> targets() const { return m_targetList; }
+
+    void removeTargets() { m_targetList.clear(); m_currentTargetIndex = -1; }
 
     void setTargetIsle(const uint inTargetIsleId, const QPointF inPos);
 
@@ -90,13 +92,13 @@ public:
 
     void setTargetFinished();
 
-    void landOnIsle(const uint inIsleId, const QPointF inPos);
-
-    void addDamage(const float inDamageToAdd);
-
     /* if a ship has target T_SHIP, then we need to
     update the target pos every round */
     void updateTargetPos(const uint inShipId, const QPointF inPos);
+
+    void landOnIsle(const uint inIsleId, const QPointF inPos);
+
+    void addDamage(const float inDamageToAdd);
 
     bool nextRound();
 
@@ -111,10 +113,14 @@ private:
     float m_halfWidth;
 
     // all about targets
-    //Target m_target;
     QVector<Target> m_targetList;
     bool m_cycleTargetList;
     int m_currentTargetIndex;
+
+    /* add the current pos as a visted target in
+     * case there are no targets, this shows up a better path
+     */
+    void addCurrentPosToTarget();
 };
 
 #endif // SHIP_H

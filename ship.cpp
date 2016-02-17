@@ -74,6 +74,7 @@ void Ship::setPositionType(ShipPositionEnum inType)
 
 void Ship::setTargetIsle(const uint inTargetIsleId, const QPointF inPos)
 {
+    addCurrentPosToTarget();
     Target t;
     t.id = inTargetIsleId;
     t.pos = inPos;
@@ -89,6 +90,7 @@ void Ship::setTargetShip(const uint inTargetShipId, const QPointF inPos)
 {
     if(inTargetShipId != m_id)
     {
+        addCurrentPosToTarget();
         Target t;
         t.id = inTargetShipId;
         t.pos = inPos;
@@ -116,6 +118,7 @@ void Ship::deleteTargetShip(const uint inShipId)
 
 void Ship::setTargetWater(const QPointF inPos)
 {
+    addCurrentPosToTarget();
     Target t;
     t.id = 0;
     t.pos = inPos;
@@ -154,6 +157,14 @@ void Ship::setTargetFinished()
 }
 
 
+void Ship::updateTargetPos(const uint inShipId, const QPointF inPos)
+{
+    for(Target & t : m_targetList)
+        if(t.tType == Target::T_SHIP and t.id == inShipId)
+            t.pos = inPos;
+}
+
+
 void Ship::landOnIsle(const uint inIsleId, const QPointF inPos)
 {
     m_onIsleById = inIsleId;
@@ -173,14 +184,6 @@ void Ship::addDamage(const float inDamageToAdd)
         m_targetList.clear();
         m_currentTargetIndex = -1;
     }
-}
-
-
-void Ship::updateTargetPos(const uint inShipId, const QPointF inPos)
-{
-    for(Target & t : m_targetList)
-        if(t.tType == Target::T_SHIP and t.id == inShipId)
-            t.pos = inPos;
 }
 
 
@@ -224,3 +227,27 @@ bool Ship::pointInShip(const QPointF inPos)
             inPos.y() < (myPos.y() + 10.0f);
 }
 
+
+void Ship::addCurrentPosToTarget()
+{
+    // only add current pos to empty targets
+    if(m_targetList.isEmpty())
+    {
+        Target t;
+        switch(m_positionType)
+        {
+            case ShipPositionEnum::S_ONISLE:
+            case ShipPositionEnum::S_PATROL:    // fall trough
+                t.id = m_onIsleById;
+                t.tType = Target::T_ISLE;
+                break;
+            default:
+                t.id = 0;
+                t.tType = Target::T_WATER;
+                break;
+        }
+        t.pos = m_pos;
+        t.visited = true;
+        m_targetList.append(t);
+    }
+}
