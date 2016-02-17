@@ -146,7 +146,7 @@ void Universe::getAllShipInfos(QList<ShipInfo> & outShipInfo)
 }
 
 
-void Universe::clearDefaultIsleTarget(const uint inIsleId)
+void Universe::removeDefaultIsleTarget(const uint inIsleId)
 {
     for(Isle *i : m_isles)
         if(i->id() == inIsleId)
@@ -154,6 +154,15 @@ void Universe::clearDefaultIsleTarget(const uint inIsleId)
             i->setDefaultTargetNothing();
             break;
         }
+}
+
+
+void Universe::removeAllShipTargets(const uint inShipId)
+{
+    int index = shipIndexForId(inShipId);
+    if(index < 0)
+        return;
+    m_ships[index]->removeTargets();
 }
 
 

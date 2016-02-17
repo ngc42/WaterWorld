@@ -79,6 +79,7 @@ private slots:
 
     // user clicked a button on info view -> human ship
     void slotCycleShipTargets(bool cycle);
+    void slotDeleteTarget();
 
     // nextround
     void slotNextRound();

@@ -90,8 +90,11 @@ MainWindow::MainWindow(QWidget *inParent) :
     connect(m_uiWaterObjectInfo->pbClearDefaultTarget, SIGNAL(clicked()), this, SLOT(slotClearIsleTarget()));
     connect(m_uiWaterObjectInfo->tableWidget, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
             this, SLOT(slotSelectShipFromShipList(QTableWidgetItem*)));
+
+    // Push buttons on Info -> human ship
     connect(m_uiWaterObjectInfo->pbHumanShipRepeatTargets, SIGNAL(toggled(bool)),
             this, SLOT(slotCycleShipTargets(bool)));
+    connect(m_uiWaterObjectInfo->pbHumanShipDelTarget, SIGNAL(clicked()), this, SLOT(slotDeleteTarget()));
 
     // show nothing at start
     m_waterObjectInfo->setCurrentIndex(PAGE_NOTHING);
@@ -370,7 +373,7 @@ void MainWindow::slotClearIsleTarget()
     QVariant id_v = m_uiWaterObjectInfo->labelHumanIsleId->property("ISLEID");
     bool ok;
     uint isleId = id_v.toUInt(&ok);
-    m_universe->clearDefaultIsleTarget(isleId);
+    m_universe->removeDefaultIsleTarget(isleId);
     m_universe->callInfoScreen(m_lastCalledPage, m_lastCalledIsleInfo, m_lastCalledShipInfo);
 }
 
@@ -379,6 +382,14 @@ void MainWindow::slotCycleShipTargets(bool cycle)
 {
     qInfo() << "MainWindow::slotCycleShipTargets( " << cycle << " )";
     m_universe->shipSetCycleTargets(m_lastCalledShipInfo.id, cycle);
+}
+
+
+void MainWindow::slotDeleteTarget()
+{
+    qInfo() << "I delete all the targets";
+    m_universe->removeAllShipTargets(m_lastCalledShipInfo.id);
+    m_universe->callInfoScreen(m_lastCalledPage, m_lastCalledIsleInfo, m_lastCalledShipInfo);
 }
 
 

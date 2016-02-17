@@ -49,7 +49,9 @@ public:
     void getAllIsleInfos(QList<IsleInfo> & outIsleInfos);
     void getAllShipInfos(QList<ShipInfo> & outShipInfos);
 
-    void clearDefaultIsleTarget(const uint inIsleId);
+    void removeDefaultIsleTarget(const uint inIsleId);
+
+    void removeAllShipTargets(const uint inShipId);
 
     void shipSetCycleTargets(const uint inShipId, const uint inCycle);
 

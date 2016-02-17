@@ -67,9 +67,8 @@ void Ship::setOwner(const uint inOwner, const QColor inColor)
     m_owner = inOwner;
     m_color = inColor;
     m_shape->setBrush(QBrush(inColor));
-    m_targetList.clear();
+    removeTargets();
     m_cycleTargetList = false;
-    m_currentTargetIndex = -1;
     m_damage = 0.0f;        // @fixme: really?
 }
 
@@ -166,9 +165,7 @@ void Ship::setTargetFinished()
             else
             {
                 // finished the list
-                m_targetList.clear();       // nothing
-                m_currentTargetIndex = -1;  // invalid index
-
+                removeTargets();
             }
         }
     }
@@ -199,8 +196,7 @@ void Ship::addDamage(const float inDamageToAdd)
     if(m_damage > 0.999f)
     {
         setPositionType(ShipPositionEnum::S_TRASH);
-        m_targetList.clear();
-        m_currentTargetIndex = -1;
+        removeTargets();
     }
 }
 
