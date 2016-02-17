@@ -46,6 +46,7 @@ private:
 
     bool m_isIslePath;
 
+    // in fact, its a unit vector
     QPointF directionVector(const QPointF inVector) const;
 };
 

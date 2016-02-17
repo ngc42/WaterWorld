@@ -7,7 +7,7 @@
 #include <math.h>
 #include "graphicspathitem.h"
 #include <QDebug>
-
+#include <QPainterPathStroker>
 
 GraphicsPathItem::GraphicsPathItem(QGraphicsItem *inParent)
     : QGraphicsPathItem(inParent), m_thisItemsType(PathType::P_ISLE)
@@ -28,7 +28,7 @@ void GraphicsPathItem::setIslePath(const QPointF inStartPoint, const QPointF inE
     QPointF q_ortho = QPointF(-q_dir.y(), q_dir.x());
     // polygon like an arrow
     QPolygonF poly;
-    poly << q << q + 10 * q_ortho <<  q + 10 * q_dir << q - 10 * q_ortho << q;
+    poly << q << q + 4 * q_ortho <<  q + 10 * q_dir << q - 4 * q_ortho << q;
     p.addPolygon(poly);
     p.lineTo(inEndPoint);
     setPath(p);
@@ -72,8 +72,9 @@ void GraphicsPathItem::paint(QPainter *inPainter, const QStyleOptionGraphicsItem
     switch(m_thisItemsType)
     {
         case PathType::P_ISLE:
-            pen.setStyle(Qt::DashLine);
-            pen.setColor(Qt::green);
+            pen.setStyle(Qt::DotLine);
+            pen.setColor(Qt::black);
+            inPainter->setBrush( QBrush(Qt::black, Qt::SolidPattern) );
             break;
         case PathType::P_UNVISITED:
             pen.setStyle(Qt::SolidLine);
