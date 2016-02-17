@@ -41,6 +41,8 @@ public:
 
     void shipForId(const uint inShipId, ShipInfo & outShipInfo);
 
+    void shipForId(const uint inShipId, ShipInfo & outShipInfo, QVector<Target> & outShipTargets);
+
     void isleForId(const uint inIsleId, IsleInfo & outIsleInfo);
 
     // for communication with OverviewDialog (used in MainWindow::slotToggleOverviewDialog())
@@ -48,6 +50,8 @@ public:
     void getAllShipInfos(QList<ShipInfo> & outShipInfos);
 
     void clearDefaultIsleTarget(const uint inIsleId);
+
+    void shipSetCycleTargets(const uint inShipId, const uint inCycle);
 
     void nextRound(UniverseScene *& inOutUniverseScene);
 
@@ -91,8 +95,6 @@ private:
     void shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo);
 
     int shipIndexForId(const uint inShipId) const;
-
-    void shipForId(const uint inShipId, ShipInfo & outShipInfo, QVector<Target> & outShipTargets);
 
 
     // really delete a ship

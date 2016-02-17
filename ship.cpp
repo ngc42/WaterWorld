@@ -40,6 +40,7 @@ ShipInfo Ship::info() const
     outInfo.posType = m_positionType;
     outInfo.isleId = m_onIsleById;
     outInfo.hasTarget = m_targetList.count() > 0;
+    outInfo.cycleTargetList = m_cycleTargetList;
     outInfo.damage = m_damage;
     outInfo.technology = m_technology;
     if(outInfo.hasTarget)
@@ -67,6 +68,7 @@ void Ship::setOwner(const uint inOwner, const QColor inColor)
     m_color = inColor;
     m_shape->setBrush(QBrush(inColor));
     m_targetList.clear();
+    m_cycleTargetList = false;
     m_currentTargetIndex = -1;
     m_damage = 0.0f;        // @fixme: really?
 }
@@ -75,6 +77,12 @@ void Ship::setOwner(const uint inOwner, const QColor inColor)
 void Ship::setPositionType(ShipPositionEnum inType)
 {
     m_positionType = inType;
+}
+
+
+void Ship::setCycleTargets(const bool inCycleTarget)
+{
+    m_cycleTargetList = inCycleTarget;
 }
 
 
@@ -119,6 +127,9 @@ void Ship::deleteTargetShip(const uint inShipId)
             m_targetList.removeAt(idx);
         }
     }
+
+    if(m_targetList.isEmpty())
+        m_cycleTargetList = false;
 }
 
 
@@ -157,6 +168,7 @@ void Ship::setTargetFinished()
                 // finished the list
                 m_targetList.clear();       // nothing
                 m_currentTargetIndex = -1;  // invalid index
+
             }
         }
     }

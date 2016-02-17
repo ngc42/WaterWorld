@@ -77,6 +77,9 @@ private slots:
     void slotSetNewTargetForIsle();
     void slotClearIsleTarget();
 
+    // user clicked a button on info view -> human ship
+    void slotCycleShipTargets(bool cycle);
+
     // nextround
     void slotNextRound();
 

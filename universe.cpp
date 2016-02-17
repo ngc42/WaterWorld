@@ -105,6 +105,17 @@ void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo)
 }
 
 
+void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo, QVector<Target> & outShipTargets)
+{
+    outShipInfo.id = 0;
+    int index = shipIndexForId(inShipId);
+    if(index < 0)
+        return;
+    outShipInfo = m_ships.at(index)->info();
+    outShipTargets = m_ships.at(index)->targets();
+}
+
+
 void Universe::isleForId(const uint inIsleId, IsleInfo & outIsleInfo)
 {
     outIsleInfo.id = 0;
@@ -143,6 +154,15 @@ void Universe::clearDefaultIsleTarget(const uint inIsleId)
             i->setDefaultTargetNothing();
             break;
         }
+}
+
+
+void Universe::shipSetCycleTargets(const uint inShipId, const uint inCycle)
+{
+    int index = shipIndexForId(inShipId);
+    if(index < 0)
+        return;
+    m_ships[index]->setCycleTargets(inCycle);
 }
 
 
@@ -676,17 +696,6 @@ int Universe::shipIndexForId(const uint inShipId) const
             return index;
     }
     return -1;
-}
-
-
-void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo, QVector<Target> & outShipTargets)
-{
-    outShipInfo.id = 0;
-    int index = shipIndexForId(inShipId);
-    if(index < 0)
-        return;
-    outShipInfo = m_ships.at(index)->info();
-    outShipTargets = m_ships.at(index)->targets();
 }
 
 

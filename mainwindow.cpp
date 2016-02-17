@@ -90,6 +90,8 @@ MainWindow::MainWindow(QWidget *inParent) :
     connect(m_uiWaterObjectInfo->pbClearDefaultTarget, SIGNAL(clicked()), this, SLOT(slotClearIsleTarget()));
     connect(m_uiWaterObjectInfo->tableWidget, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
             this, SLOT(slotSelectShipFromShipList(QTableWidgetItem*)));
+    connect(m_uiWaterObjectInfo->pbHumanShipRepeatTargets, SIGNAL(toggled(bool)),
+            this, SLOT(slotCycleShipTargets(bool)));
 
     // show nothing at start
     m_waterObjectInfo->setCurrentIndex(PAGE_NOTHING);
@@ -233,6 +235,11 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
     m_uiWaterObjectInfo->tableHTargets->clearContents();
     m_uiWaterObjectInfo->tableHTargets->setRowCount(shipTargets.count());
 
+
+    m_uiWaterObjectInfo->pbHumanShipRepeatTargets->setEnabled(shipTargets.count() != 0);
+    m_uiWaterObjectInfo->pbHumanShipRepeatTargets->setChecked(shipInfo.cycleTargetList);
+
+
     int i = 0;
     for(Target t : shipTargets)
     {
@@ -265,7 +272,7 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
     if(shipInfo.hasTarget)
     {
         // @fixme: the repeat-parameter must be used some time
-        m_universeView->showShipPath(shipInfo.pos, shipTargets, false);
+        m_universeView->showShipPath(shipInfo.pos, shipTargets, shipInfo.cycleTargetList);
     }
 }
 
@@ -318,7 +325,11 @@ void MainWindow::slotSetNewTargetForShip()
         ShipListItem *item = (ShipListItem* ) m_uiWaterObjectInfo->tableWidget->currentItem();
         uint id = item->id();
         ShipInfo shipInfo;
-        m_universe->shipForId(id, shipInfo);
+        QVector<Target> shipTargets;
+        m_universe->shipForId(id, shipInfo, shipTargets);
+        if(shipTargets.count() > 0)
+            // @fixme: the repeat-parameter must be used some time
+            m_universeView->showShipPath(shipInfo.pos, shipTargets, false);
         m_universeView->toggleShipWantsTarget(shipInfo.attachPos, id, shipInfo.technology);
     }
     else if(m_lastCalledPage == PAGE_HUMAN_SHIP)
@@ -361,6 +372,13 @@ void MainWindow::slotClearIsleTarget()
     uint isleId = id_v.toUInt(&ok);
     m_universe->clearDefaultIsleTarget(isleId);
     m_universe->callInfoScreen(m_lastCalledPage, m_lastCalledIsleInfo, m_lastCalledShipInfo);
+}
+
+
+void MainWindow::slotCycleShipTargets(bool cycle)
+{
+    qInfo() << "MainWindow::slotCycleShipTargets( " << cycle << " )";
+    m_universe->shipSetCycleTargets(m_lastCalledShipInfo.id, cycle);
 }
 
 

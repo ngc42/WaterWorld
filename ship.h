@@ -41,6 +41,7 @@ struct ShipInfo
     ShipPositionEnum posType;
     uint isleId;        // if not on ocean
     bool hasTarget;
+    bool cycleTargetList;   // true, if repeat the list of targets over and over
     float damage;
     float technology;
     uint distanceTime;  // time till distance as uint
@@ -73,6 +74,8 @@ public:
     void setOwner(const uint inOwner, const QColor inColor);
 
     void setPositionType(ShipPositionEnum inType);
+
+    void setCycleTargets(const bool inCycleTarget);
 
     // -- Targets --
 
