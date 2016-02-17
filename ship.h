@@ -44,6 +44,7 @@ struct ShipInfo
     float damage;
     float technology;
     uint distanceTime;  // time till distance as uint
+    QPointF attachPos;  // pos of last target (or this pos) to attach rubber band line for next target
 };
 
 

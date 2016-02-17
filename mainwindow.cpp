@@ -317,13 +317,14 @@ void MainWindow::slotSetNewTargetForShip()
             return;
         ShipListItem *item = (ShipListItem* ) m_uiWaterObjectInfo->tableWidget->currentItem();
         uint id = item->id();
-        m_universeView->toggleShipWantsTarget(m_universe->shipPosById(id), id, m_universe->shipTechById(id));
+        ShipInfo shipInfo;
+        m_universe->shipForId(id, shipInfo);
+        m_universeView->toggleShipWantsTarget(shipInfo.attachPos, id, shipInfo.technology);
     }
     else if(m_lastCalledPage == PAGE_HUMAN_SHIP)
     {
-        //@fixme: storing ship's tech for last parameter
-        m_universeView->toggleShipWantsTarget(m_lastCalledShipInfo.pos, m_lastCalledShipInfo.id,
-                                              m_universe->shipTechById(m_lastCalledShipInfo.id));
+        m_universeView->toggleShipWantsTarget(m_lastCalledShipInfo.attachPos, m_lastCalledShipInfo.id,
+                                              m_lastCalledShipInfo.technology);
     }
     // now, its up to m_universeView to show visible feedback until target gets clicked.
     // -> then, m_universe sets up the target
