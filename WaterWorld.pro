@@ -27,7 +27,8 @@ SOURCES += main.cpp\
     shiplistitem.cpp \
     strategy.cpp \
     overviewdialog.cpp \
-    graphicspathitem.cpp
+    graphicspathitem.cpp \
+    pathlistitem.cpp
 
 HEADERS  += mainwindow.h \
     universescene.h \
@@ -40,7 +41,8 @@ HEADERS  += mainwindow.h \
     shiplistitem.h \
     strategy.h \
     overviewdialog.h \
-    graphicspathitem.h
+    graphicspathitem.h \
+    pathlistitem.h
 
 FORMS    += mainwindow.ui \
     waterobjectinfo.ui \

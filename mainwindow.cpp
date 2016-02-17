@@ -8,6 +8,8 @@
 #include "ui_mainwindow.h"
 #include "ui_waterobjectinfo.h"
 #include "shiplistitem.h"
+#include "pathlistitem.h"
+
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QDebug>
@@ -242,28 +244,25 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
     m_uiWaterObjectInfo->pbHumanShipRepeatTargets->setEnabled(shipTargets.count() != 0);
     m_uiWaterObjectInfo->pbHumanShipRepeatTargets->setChecked(shipInfo.cycleTargetList);
 
+    m_uiWaterObjectInfo->tableHTargets->setColumnCount(3);
+    m_uiWaterObjectInfo->tableHTargets->clearContents();
+    m_uiWaterObjectInfo->tableHTargets->setRowCount(0);
 
-    int i = 0;
-    for(Target t : shipTargets)
+    for(int i = 0; i < shipTargets.count(); i++)
     {
+        m_uiWaterObjectInfo->tableHTargets->insertRow(i);
 
-        switch(t.tType)
-        {
-        case Target::TargetEnum::T_ISLE:
-            s = "isle";
-            break;
-        case Target::TargetEnum::T_SHIP:
-            s = "ship";
-            break;
-        default:
-            s = "water";
-            break;
-        }
+        PathListItem *item1 = new PathListItem(PathListItem::PLIT_TYPE, i, 0, shipTargets.at(i));
+        m_uiWaterObjectInfo->tableHTargets->setItem(i, 0, item1);
 
-        QTableWidgetItem *itm = new QTableWidgetItem(s);
-        m_uiWaterObjectInfo->tableHTargets->setItem(0, i, itm);
-        i++;
+        PathListItem *item2 = new PathListItem(PathListItem::PLIT_OWNER, i, 0, shipTargets.at(i));
+        m_uiWaterObjectInfo->tableHTargets->setItem(i, 1, item2);
+
+        PathListItem *item3 = new PathListItem(PathListItem::PLIT_TIME, i, 0, shipTargets.at(i));
+        m_uiWaterObjectInfo->tableHTargets->setItem(i, 2, item3);
     }
+
+    m_uiWaterObjectInfo->tableHTargets->resizeColumnsToContents();
 
     s = QString("%1 rnd").arg(shipInfo.distanceTime);
     m_uiWaterObjectInfo->labelHumanShipDistance->setText(s);
