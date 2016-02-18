@@ -494,21 +494,7 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label_10">
-      <property name="text">
-       <string>Distance</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QLabel" name="labelHumanShipDistance">
-      <property name="text">
-       <string>TextLabel</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0" colspan="2">
+    <item row="3" column="0" colspan="2">
      <widget class="QTableWidget" name="tableHTargets">
       <property name="showDropIndicator" stdset="0">
        <bool>false</bool>
@@ -542,7 +528,7 @@
       </attribute>
      </widget>
     </item>
-    <item row="5" column="0" colspan="2">
+    <item row="4" column="0" colspan="2">
      <widget class="QWidget" name="widget_3" native="true">
       <property name="minimumSize">
        <size>

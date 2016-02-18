@@ -45,17 +45,11 @@ ShipInfo Ship::info() const
     outInfo.technology = m_technology;
     if(outInfo.hasTarget)
     {
-        Target t = m_targetList.at(m_currentTargetIndex);
-        qreal dx = m_pos.x() - t.pos.x();
-        qreal dy = m_pos.y() - t.pos.y();
-        outInfo.distanceTime = (uint) (std::sqrt( dx * dx + dy * dy ) / m_technology) + 1;
-
-        t = m_targetList.at( m_targetList.count() - 1 );
+        Target t = m_targetList.at( m_targetList.count() - 1 );
         outInfo.attachPos = t.pos;
     }
     else
     {
-        outInfo.distanceTime = 0.0f;
         outInfo.attachPos = m_pos;
     }
     return outInfo;

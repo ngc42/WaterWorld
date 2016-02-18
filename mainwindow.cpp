@@ -240,7 +240,6 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
     m_uiWaterObjectInfo->tableHTargets->clearContents();
     m_uiWaterObjectInfo->tableHTargets->setRowCount(shipTargets.count());
 
-
     m_uiWaterObjectInfo->pbHumanShipRepeatTargets->setEnabled(shipTargets.count() != 0);
     m_uiWaterObjectInfo->pbHumanShipRepeatTargets->setChecked(shipInfo.cycleTargetList);
 
@@ -248,24 +247,41 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
     m_uiWaterObjectInfo->tableHTargets->clearContents();
     m_uiWaterObjectInfo->tableHTargets->setRowCount(0);
 
+    // calculation of the time to spent
+    uint uTimeToTarget = 0;
+    bool firstUnvisited = false;
+    QPointF lastPos, delta;
     for(int i = 0; i < shipTargets.count(); i++)
     {
+        Target t = shipTargets.at(i);
+
+        if(! t.visited)
+        {
+            if(! firstUnvisited)
+            {
+                firstUnvisited = true;
+                lastPos = shipInfo.pos;
+            }
+            delta = t.pos - lastPos;
+            lastPos = t.pos;
+            uTimeToTarget = uTimeToTarget +
+                    (uint) (std::sqrt( delta.x() * delta.x() + delta.y() * delta.y() ) / shipInfo.technology) + 1;
+        }
+
         m_uiWaterObjectInfo->tableHTargets->insertRow(i);
 
-        PathListItem *item1 = new PathListItem(PathListItem::PLIT_TYPE, i, 0, shipTargets.at(i));
+        PathListItem *item1 = new PathListItem(PathListItem::PLIT_TYPE, i, uTimeToTarget, t);
         m_uiWaterObjectInfo->tableHTargets->setItem(i, 0, item1);
 
-        PathListItem *item2 = new PathListItem(PathListItem::PLIT_OWNER, i, 0, shipTargets.at(i));
+        PathListItem *item2 = new PathListItem(PathListItem::PLIT_OWNER, i, uTimeToTarget, t);
         m_uiWaterObjectInfo->tableHTargets->setItem(i, 1, item2);
 
-        PathListItem *item3 = new PathListItem(PathListItem::PLIT_TIME, i, 0, shipTargets.at(i));
+        PathListItem *item3 = new PathListItem(PathListItem::PLIT_TIME, i, uTimeToTarget, t);
         m_uiWaterObjectInfo->tableHTargets->setItem(i, 2, item3);
     }
 
     m_uiWaterObjectInfo->tableHTargets->resizeColumnsToContents();
 
-    s = QString("%1 rnd").arg(shipInfo.distanceTime);
-    m_uiWaterObjectInfo->labelHumanShipDistance->setText(s);
     // set page and save last state
     m_waterObjectInfo->setCurrentIndex(PAGE_HUMAN_SHIP);
     m_lastCalledPage = PAGE_HUMAN_SHIP;

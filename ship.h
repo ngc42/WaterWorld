@@ -44,7 +44,6 @@ struct ShipInfo
     bool cycleTargetList;   // true, if repeat the list of targets over and over
     float damage;
     float technology;
-    uint distanceTime;  // time till distance as uint
     QPointF attachPos;  // pos of last target (or this pos) to attach rubber band line for next target
 };
 
