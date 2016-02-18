@@ -30,7 +30,8 @@ public:
      * @param inShipInfo - info about the ship
      * @param inTarget - info about the target we display
      */
-    PathListItem(const PathListItemType inType, const int inIndex, uint inTimeToTarget, const Target inTarget);
+    PathListItem(const PathListItemType inType, const int inIndex, uint inTimeToTarget,
+                 const Target inTarget, const uint inTargetOwner, const QColor inTargetColor);
 
     /**
      * @brief id returns the target id, we show info about

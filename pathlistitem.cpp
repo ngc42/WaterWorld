@@ -5,13 +5,17 @@
 
 
 #include "pathlistitem.h"
+#include <QPixmap>
+#include <QIcon>
 
-
-PathListItem::PathListItem(const PathListItemType inType, const int inIndex, uint inTimeToTarget, const Target inTarget)
+PathListItem::PathListItem(const PathListItemType inType, const int inIndex, uint inTimeToTarget,
+                           const Target inTarget, const uint inTargetOwner, const QColor inTargetColor)
     : QTableWidgetItem(QTableWidgetItem::UserType + 2000), m_myType(inType), m_targetId(inIndex)
 {
     if(inType == PathListItemType::PLIT_TYPE)
     {
+        setSizeHint(QSize(80, 20));
+
         switch(inTarget.tType)
         {
             case Target::T_ISLE:
@@ -27,16 +31,36 @@ PathListItem::PathListItem(const PathListItemType inType, const int inIndex, uin
     }
     else if(inType == PathListItemType::PLIT_OWNER)
     {
+        setSizeHint(QSize(50, 20));
+
+        QString ownerText = QString("%1").arg(inTargetOwner);
         switch(inTarget.tType)
         {
             case Target::T_ISLE:
-                setText("unknown");
+            {
+                QPixmap pixmap(10, 10);
+                pixmap.fill(inTargetColor);
+                QIcon icon(pixmap);
+                setText(ownerText);
+                setIcon(icon);
+            }
                 break;
             case Target::T_SHIP:
-                setText("unknown");
+            {
+                QPixmap pixmap(10, 10);
+                pixmap.fill(inTargetColor);
+                QIcon icon(pixmap);
+                setText(ownerText);
+                setIcon(icon);
+            }
                 break;
             default:    // T_WATER
-                setText("-");
+            {
+                QPixmap pixmap(36, 10);
+                pixmap.fill(Qt::darkBlue);
+                QIcon icon(pixmap);
+                setIcon(icon);
+            }
                 break;
         }
     }

@@ -270,13 +270,38 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
 
         m_uiWaterObjectInfo->tableHTargets->insertRow(i);
 
-        PathListItem *item1 = new PathListItem(PathListItem::PLIT_TYPE, i, uTimeToTarget, t);
+        PathListItem *item1 = new PathListItem(PathListItem::PLIT_TYPE, i, uTimeToTarget, t, 0, Qt::black);
         m_uiWaterObjectInfo->tableHTargets->setItem(i, 0, item1);
 
-        PathListItem *item2 = new PathListItem(PathListItem::PLIT_OWNER, i, uTimeToTarget, t);
+        // owner of target
+        uint owner = 0;
+        QColor color = Qt::black;
+        switch (t.tType)
+        {
+            case Target::T_ISLE:
+            {
+                IsleInfo isleInfo;
+                m_universe->isleForId(t.id, isleInfo);
+                owner = isleInfo.owner;
+                color = isleInfo.color;
+                break;
+            }
+            case Target::T_SHIP:
+            {
+                ShipInfo shipInfo;
+                m_universe->shipForId(t.id, shipInfo);
+                owner = shipInfo.owner;
+                color = shipInfo.color;
+                break;
+            }
+            default:    // T_WATER
+                break;
+        }
+
+        PathListItem *item2 = new PathListItem(PathListItem::PLIT_OWNER, i, uTimeToTarget, t, owner, color);
         m_uiWaterObjectInfo->tableHTargets->setItem(i, 1, item2);
 
-        PathListItem *item3 = new PathListItem(PathListItem::PLIT_TIME, i, uTimeToTarget, t);
+        PathListItem *item3 = new PathListItem(PathListItem::PLIT_TIME, i, uTimeToTarget, t, 0, Qt::black);
         m_uiWaterObjectInfo->tableHTargets->setItem(i, 2, item3);
     }
 
