@@ -57,22 +57,22 @@ ShipListItem::ShipListItem(const ShipListItemType inType, const ShipInfo inShipI
     {
         // give visual feedback over the damage of the ship.
         setSizeHint(QSize(40, 20));
-        QPixmap circle(20, 10);
-        circle.fill(Qt::green);
+        QPixmap damageBar(20, 10);
+        damageBar.fill(Qt::green);
         QPainter p;
-        p.begin(&circle);
+        p.begin(&damageBar);
         p.setBrush(QBrush(Qt::red));
         int width = 20 * inShipInfo.damage;
         p.fillRect(20 - width, 0, width, 10, Qt::red);
         p.end();
-        setIcon(circle);  // show damage
-        QString text = QString("Dmg: %1").arg(inShipInfo.damage * 100.0f, 3);
-        setText(text);
+        setIcon(damageBar);  // show damage
+        QString text = QString("Damage: %1%").arg(inShipInfo.damage * 100.0f, 3, 'F', 0);
+        setToolTip(text);
     }
     else
     {
         setSizeHint(QSize(40, 20));
-        QString text = QString("T: %1").arg(inShipInfo.technology, 1);
+        QString text = QString("Tech: %1").arg(inShipInfo.technology, 1, 'F', 1);
         setText(text);
     }
     setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled|Qt::ItemNeverHasChildren);

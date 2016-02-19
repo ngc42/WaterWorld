@@ -19,10 +19,10 @@ PathListItem::PathListItem(const PathListItemType inType, const int inIndex, uin
         switch(inTarget.tType)
         {
             case Target::T_ISLE:
-                setText("Isle");
+                setText(QString("Isle %1").arg(inTarget.id));
                 break;
             case Target::T_SHIP:
-                setText("Ship");
+                setText(QString("Ship %1").arg(inTarget.id));
                 break;
             default:    // T_WATER
                 setText("Water");

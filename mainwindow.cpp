@@ -132,9 +132,9 @@ void MainWindow::slotShowUniverseInfoIsle(IsleInfo isleInfo)
     m_uiWaterObjectInfo->labelIsleId->setText(QString("%1").arg(isleInfo.id));
     m_uiWaterObjectInfo->labelIsleColor->setPixmap(pix);
 
-    QString s = QString("P: %1").arg(isleInfo.population);
+    QString s = QString("Population: %1").arg(isleInfo.population, 0, 'F', 0);
     m_uiWaterObjectInfo->labelIslePopulation->setText(s);
-    s = QString("T: %1").arg(isleInfo.technology, 0);
+    s = QString("Technology: %1").arg(isleInfo.technology, 0, 'F', 0);
     m_uiWaterObjectInfo->labelIsleTechnology->setText(s);
 
     // set page and save last state
@@ -158,10 +158,10 @@ void MainWindow::slotShowUniverseInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo
     m_uiWaterObjectInfo->tableWidget->clearContents();
     m_uiWaterObjectInfo->tableWidget->setRowCount(0);
 
-    QString s = QString("Pop: %1").arg((uint)isleInfo.population);
+    QString s = QString("Population: %1").arg(isleInfo.population, 0, 'F', 0);
     m_uiWaterObjectInfo->labelHumanIslePopulation->setText(s);
 
-    s = QString("Tech: %1").arg((uint)isleInfo.technology);
+    s = QString("Technology: %1").arg(isleInfo.technology, 0, 'F', 0);
     m_uiWaterObjectInfo->labelHumanIsleTechnology->setText(s);
 
     for(ShipInfo info : sList)
@@ -211,10 +211,10 @@ void MainWindow::slotShowUniverseInfoShip(ShipInfo shipInfo)
     m_uiWaterObjectInfo->labelShipId->setText(QString("%1").arg(shipInfo.id));
     m_uiWaterObjectInfo->labelShipColor->setPixmap(pix);
 
-    QString s = QString("Dmg: %1").arg(shipInfo.damage, 2);
+    QString s = QString("Damage: %1%").arg(shipInfo.damage * 100.0f, 0, 'F', 0);
     m_uiWaterObjectInfo->labelShipDamage->setText(s);
 
-    s = QString("Tech: %1").arg(shipInfo.technology, 2);
+    s = QString("Tech: %1").arg(shipInfo.technology, 3, 'F', 0);
     m_uiWaterObjectInfo->labelShipTechnology->setText(s);
 
     // set page and save last state
@@ -232,9 +232,9 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
     pix.fill(shipInfo.color);
     m_uiWaterObjectInfo->labelHumanShipId->setText(QString("%1").arg(shipInfo.id));
     m_uiWaterObjectInfo->labelHumanShipColor->setPixmap(pix);
-    QString s = QString("Dmg: %1").arg(shipInfo.damage, 2);
+    QString s = QString("Damage: %1%").arg(shipInfo.damage * 100.0f, 3, 'F', 0);
     m_uiWaterObjectInfo->labelHumanShipDamage->setText(s);
-    s = QString("Tech: %1").arg(shipInfo.technology, 2);
+    s = QString("Technology: %1").arg(shipInfo.technology, 2, 'F', 1);
     m_uiWaterObjectInfo->labelHumanShipTechnology->setText(s);
 
     m_uiWaterObjectInfo->tableHTargets->clearContents();
