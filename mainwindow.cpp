@@ -10,6 +10,7 @@
 #include "shiplistitem.h"
 #include "pathlistitem.h"
 
+#include <QPaintEvent>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QDebug>
@@ -109,6 +110,13 @@ MainWindow::~MainWindow()
     delete m_overviewDialog;
     delete m_uiWaterObjectInfo;
     delete m_ui;
+}
+
+
+void MainWindow::paintEvent(QPaintEvent *inEvent)
+{
+     QPainter painter(this);
+     painter.fillRect(inEvent->rect(), Qt::blue);
 }
 
 

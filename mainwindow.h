@@ -59,6 +59,9 @@ private:
     IsleInfo m_lastCalledIsleInfo;
 
 
+protected:
+    void paintEvent(QPaintEvent *inEvent);
+
 private slots:
     // unverse wants us call infoscreen again
     void slotRecallInfoscreen();
