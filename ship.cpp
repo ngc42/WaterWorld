@@ -88,8 +88,7 @@ void Ship::setTargetIsle(const uint inTargetIsleId, const QPointF inPos)
     t.tType = Target::TargetEnum::T_ISLE;
     t.visited = false;
     m_targetList.append(t);
-    if(m_currentTargetIndex == -1)
-        m_currentTargetIndex = 0;
+    fixTargetIndex();
 }
 
 
@@ -104,13 +103,19 @@ void Ship::setTargetShip(const uint inTargetShipId, const QPointF inPos)
         t.tType = Target::TargetEnum::T_SHIP;
         t.visited = false;
         m_targetList.append(t);
-        if(m_currentTargetIndex == -1)
-            m_currentTargetIndex = 0;
+        fixTargetIndex();
     }
 }
 
 
-void Ship::deleteTargetShip(const uint inShipId)
+void Ship::removeTargets()
+{
+    m_targetList.clear();
+    fixTargetIndex();
+}
+
+
+void Ship::removeTargetShip(const uint inShipId)
 {
     for(int idx = m_targetList.count()-1; idx > -1 ; idx--)
     {
@@ -120,9 +125,18 @@ void Ship::deleteTargetShip(const uint inShipId)
             m_targetList.removeAt(idx);
         }
     }
+    fixTargetIndex();
+}
 
-    if(m_targetList.isEmpty())
-        m_cycleTargetList = false;
+
+void Ship::removeTargetByIndex(const int inIndex)
+{
+    if( (inIndex + 1) > m_targetList.count() )
+        return;
+    if(inIndex >= m_targetList.count())
+        return;
+    m_targetList.remove(inIndex);
+    fixTargetIndex();
 }
 
 
@@ -135,8 +149,7 @@ void Ship::setTargetWater(const QPointF inPos)
     t.tType = Target::TargetEnum::T_WATER;
     t.visited = false;
     m_targetList.append(t);
-    if(m_currentTargetIndex == -1)
-        m_currentTargetIndex = 0;
+    fixTargetIndex();
 }
 
 
@@ -235,6 +248,42 @@ bool Ship::pointInShip(const QPointF inPos)
             inPos.x() < (myPos.x() + 7.0f) and
             inPos.y() > (myPos.y() - 7.0f) and
             inPos.y() < (myPos.y() + 7.0f);
+}
+
+
+void Ship::fixTargetIndex()
+{
+    int count = m_targetList.count();
+    if(count == 0)
+    {
+        // stop the engines
+        m_cycleTargetList = false;
+        m_currentTargetIndex = -1;
+        return;
+    }
+
+    // the target is now the first unvisited target
+    for(int i = 0; i < count; i++)
+    {
+        Target t = m_targetList.at(i);
+        if(! t.visited)
+        {
+            m_currentTargetIndex = i;
+            return;
+        }
+    }
+
+    // cycle again
+    if(m_cycleTargetList and count > 1)
+    {
+        m_currentTargetIndex = 0;
+        for(Target & t : m_targetList)
+            t.visited = false;
+        return;
+    }
+
+    // here, there is nothing to fix
+    removeTargets();
 }
 
 

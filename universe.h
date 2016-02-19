@@ -53,6 +53,8 @@ public:
 
     void removeAllShipTargets(const uint inShipId);
 
+    void removeShipTargetByIndex(const uint inShipId, const int inIndex);
+
     void shipSetCycleTargets(const uint inShipId, const uint inCycle);
 
     void nextRound(UniverseScene *& inOutUniverseScene);

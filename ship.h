@@ -74,22 +74,25 @@ public:
 
     void setPositionType(ShipPositionEnum inType);
 
-    void setCycleTargets(const bool inCycleTarget);
 
     // -- Targets --
+
+    void setCycleTargets(const bool inCycleTarget);
 
     // check, if ship REALLY has a valid target, else this breaks
     Target currentTarget() const { return m_targetList.at(m_currentTargetIndex); }
 
     QVector<Target> targets() const { return m_targetList; }
 
-    void removeTargets() { m_targetList.clear(); m_currentTargetIndex = -1; }
-
     void setTargetIsle(const uint inTargetIsleId, const QPointF inPos);
 
     void setTargetShip(const uint inTargetShipId, const QPointF inPos);
 
-    void deleteTargetShip(const uint inShipId);
+    void removeTargets();
+
+    void removeTargetShip(const uint inShipId);
+
+    void removeTargetByIndex(const int inIndex);
 
     void setTargetWater(const QPointF inPos);
 
@@ -119,6 +122,9 @@ private:
     QVector<Target> m_targetList;
     bool m_cycleTargetList;
     int m_currentTargetIndex;
+
+    // after inserting / removing targets, m_currentTargetIndex and m_cycleTargetList need to get fixed
+    void fixTargetIndex();
 
     /* add the current pos as a visted target in
      * case there are no targets, this shows up a better path

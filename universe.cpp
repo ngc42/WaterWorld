@@ -166,6 +166,15 @@ void Universe::removeAllShipTargets(const uint inShipId)
 }
 
 
+void Universe::removeShipTargetByIndex(const uint inShipId, const int inIndex)
+{
+    int index = shipIndexForId(inShipId);
+    if(index < 0)
+        return;
+    m_ships[index]->removeTargetByIndex(inIndex);
+}
+
+
 void Universe::shipSetCycleTargets(const uint inShipId, const uint inCycle)
 {
     int index = shipIndexForId(inShipId);
@@ -342,7 +351,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                 if(! targetIsAlive)
                 {
                     // the target ship was deleted, so delete the target too
-                    updateShip->deleteTargetShip(t.id);
+                    updateShip->removeTargetShip(t.id);
                 }
             }
         }
@@ -721,7 +730,7 @@ void Universe::deleteShip(const uint inShipId)
         if(shipInfo.hasTarget and shipInfo.id != inShipId)
         {
             // @fixme: we call really every other's ship deleteTargetShip() method, expensive!
-            s->deleteTargetShip(inShipId);
+            s->removeTargetShip(inShipId);
         }
 
         if(s->id() == inShipId)

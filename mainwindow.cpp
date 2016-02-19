@@ -427,8 +427,12 @@ void MainWindow::slotCycleShipTargets(bool cycle)
 
 void MainWindow::slotDeleteTarget()
 {
-    qInfo() << "I delete all the targets";
-    m_universe->removeAllShipTargets(m_lastCalledShipInfo.id);
+    int selectedRow = m_uiWaterObjectInfo->tableHTargets->currentRow();
+    qInfo() << "I delete all the targets or current " << selectedRow;
+    if(selectedRow < 0)
+        m_universe->removeAllShipTargets(m_lastCalledShipInfo.id);
+    else
+        m_universe->removeShipTargetByIndex(m_lastCalledShipInfo.id, selectedRow);
     m_universe->callInfoScreen(m_lastCalledPage, m_lastCalledIsleInfo, m_lastCalledShipInfo);
 }
 
