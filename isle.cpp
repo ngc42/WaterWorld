@@ -4,7 +4,9 @@
  */
 
 
-#include "isle.h"
+#include <isle.h>
+#include <player.h>
+
 #include <math.h>
 #include <QBrush>
 #include <QDebug>
@@ -89,7 +91,7 @@ bool Isle::nextRound()
         return false;
     if(m_population < 100.0f)
     {   // too few people on isle, they die by loneliness, sad but thats nature...
-        setOwner(0, Qt::gray);
+        setOwner(0, Player::colorForOwner(0));
         return false;
     }
     // population formula is based on a logistic function for populations,

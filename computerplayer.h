@@ -9,7 +9,6 @@
 
 
 #include <player.h>
-#include <strategy.h>
 #include <isle.h>
 #include <ship.h>
 #include <QColor>

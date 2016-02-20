@@ -4,7 +4,9 @@
  */
 
 
-#include "universe.h"
+#include <universe.h>
+#include <player.h>
+
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>
 #include <QBrush>
@@ -565,7 +567,7 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
 
         if(info1.posType == ShipPositionEnum::S_TRASH)
         {   // isle is now empty without owner
-            setIsleOwnerById(info2.id, 0, Qt::gray);
+            setIsleOwnerById(info2.id, 0, Player::colorForOwner(0));
             return false;   // ship is too damaged
         }
         else
@@ -585,12 +587,12 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
             setIslePopulationById(info2.id, new_population);
         else
             // want to buy a new isle?
-            setIsleOwnerById(info2.id, 0, Qt::gray);
+            setIsleOwnerById(info2.id, 0, Player::colorForOwner(0));
     }
     else
     {   // magic, if this happens: both forces are the same
         inOutAttacker->setPositionType(ShipPositionEnum::S_TRASH);
-        setIsleOwnerById(info2.id, 0, Qt::gray);
+        setIsleOwnerById(info2.id, 0, Player::colorForOwner(0));
     }
 
     return false;   // ship has lost

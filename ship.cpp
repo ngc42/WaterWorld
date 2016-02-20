@@ -4,7 +4,9 @@
  */
 
 
-#include "ship.h"
+#include <ship.h>
+#include <player.h>
+
 #include <QBrush>
 #include <QDebug>
 
@@ -60,7 +62,7 @@ void Ship::setOwner(const uint inOwner, const QColor inColor)
 {
     m_owner = inOwner;
     m_color = inColor;
-    m_shape->setBrush(QBrush(inColor));
+    m_shape->setBrush(QBrush(Player::colorForOwner(inOwner)));
     removeTargets();
     m_cycleTargetList = false;
     m_damage = 0.0f;        // @fixme: really?

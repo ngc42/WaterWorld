@@ -4,7 +4,9 @@
  */
 
 
-#include "shiplistitem.h"
+#include <shiplistitem.h>
+#include <player.h>
+
 #include <QPixmap>
 #include <QPainter>
 #include <QHBoxLayout>
@@ -25,8 +27,8 @@ ShipListItem::ShipListItem(const ShipListItemType inType, const ShipInfo inShipI
             circle.fill(Qt::black);
             QPainter p;
             p.begin(&circle);
-            p.setBrush(QBrush(Qt::green));
-            p.setPen(Qt::green);
+            p.setBrush(QBrush(Player::colorForOwner(inShipInfo.owner)));
+            p.setPen(Player::colorForOwner(inShipInfo.owner));
             p.drawEllipse(0, 0, 5, 5);
             p.drawEllipse(10, 10, 5, 5);
             p.end();
@@ -34,7 +36,7 @@ ShipListItem::ShipListItem(const ShipListItemType inType, const ShipInfo inShipI
         else if(inShipInfo.posType == ShipPositionEnum::S_ONISLE)
         {
             // ships sits arround on isle
-            circle.fill(Qt::green);
+            circle.fill(Player::colorForOwner(inShipInfo.owner));
         }
         else if(inShipInfo.posType == ShipPositionEnum::S_PATROL)
         {
@@ -43,9 +45,9 @@ ShipListItem::ShipListItem(const ShipListItemType inType, const ShipInfo inShipI
             QPainter p;
             p.begin(&circle);
             p.setBrush(QBrush(Qt::black));
-            p.setPen(Qt::green);
+            p.setPen(Player::colorForOwner(inShipInfo.owner));
             p.drawEllipse(0, 0, 15, 15);
-            p.setBrush(Qt::green);
+            p.setBrush(Player::colorForOwner(inShipInfo.owner));
             p.drawEllipse(5, 5, 5, 5);
             p.end();
         }
