@@ -4,16 +4,19 @@
  */
 
 
-#ifndef STRATEGY_H
-#define STRATEGY_H
+#ifndef COMPUTERPLAYER_H
+#define COMPUTERPLAYER_H
 
 
+#include <player.h>
+#include <strategy.h>
 #include <isle.h>
 #include <ship.h>
+#include <QColor>
 #include <QList>
 
 
-struct StrategyCommand
+struct ComputerMove
 {
     uint owner;
     uint shipId;
@@ -23,12 +26,10 @@ struct StrategyCommand
 };
 
 
-class Strategy
+class ComputerPlayer : public Player
 {
 public:
-    Strategy(const uint inOwner);
-
-    uint owner() const {return m_owner; }
+    ComputerPlayer(uint inOwner);
 
     /**
      * @brief setIsles
@@ -44,13 +45,21 @@ public:
      */
     void setShips(const QList<ShipInfo> inPublicShipInfos, const QList<ShipInfo> inPrivateShipInfos);
 
-    void nextRound(QList<StrategyCommand> & outCommands);
+    /**
+     * @brief nextRound - processes the strategy and returns a list of moves to the caller
+     * @param outMoves  - a list of moves
+     */
+    void nextRound(QList<ComputerMove> & outMoves);
+
+private:
 
 protected:
+    /**
+     * @brief orderedUnsettledOrEnemyIsleFromCenter
+     * @param inSetUnsettled - true: return a list of unsettled isles, false: enemy isles
+     * @return
+     */
     QList<uint> orderedUnsettledOrEnemyIsleFromCenter(const bool inSetUnsettled) const;
-
-
-    uint m_owner;   // this strategy belongs to this owner
 
     QList<IsleInfo> m_publicIsles;
     QList<IsleInfo> m_privateIsles;
@@ -62,4 +71,4 @@ protected:
     QPointF m_centerOfMyIsles;
 };
 
-#endif // STRATEGY_H
+#endif // COMPUTERPLAYER_H

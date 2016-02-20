@@ -4,20 +4,20 @@
  */
 
 
-#include "strategy.h"
+#include "computerplayer.h"
 #include <QPair>
 #include <QSet>
 #include <QDebug>
 
 
-Strategy::Strategy(const uint inOwner)
-    : m_owner(inOwner), m_thereAreUnownedIsles(false)
+ComputerPlayer::ComputerPlayer(const uint inOwner)
+    : Player(inOwner)
 {
 
 }
 
 
-void Strategy::setIsles(const QList<IsleInfo> inPublicIsleInfos, const QList<IsleInfo> inPrivateIsleInfos)
+void ComputerPlayer::setIsles(const QList<IsleInfo> inPublicIsleInfos, const QList<IsleInfo> inPrivateIsleInfos)
 {
     m_publicIsles = inPublicIsleInfos;
     m_privateIsles = inPrivateIsleInfos;
@@ -39,14 +39,14 @@ void Strategy::setIsles(const QList<IsleInfo> inPublicIsleInfos, const QList<Isl
 }
 
 
-void Strategy::setShips(const QList<ShipInfo> inPublicShipInfos, const QList<ShipInfo> inPrivateShipInfos)
+void ComputerPlayer::setShips(const QList<ShipInfo> inPublicShipInfos, const QList<ShipInfo> inPrivateShipInfos)
 {
     m_publicShips = inPublicShipInfos;
     m_privateShips = inPrivateShipInfos;
 }
 
 
-void Strategy::nextRound(QList<StrategyCommand> & outCommands)
+void ComputerPlayer::nextRound(QList<ComputerMove> & outMoves)
 {
     QSet<uint> shipsAlreadyProcessed;
 
@@ -62,12 +62,12 @@ void Strategy::nextRound(QList<StrategyCommand> & outCommands)
                 {
                     shipsAlreadyProcessed.insert(shipInfo.id);
                     shipsAvailable = true;
-                    StrategyCommand cmd;
+                    ComputerMove cmd;
                     cmd.owner = owner();
                     cmd.shipId = shipInfo.id;
                     cmd.targetType = Target::TargetEnum::T_ISLE;
                     cmd.targetId = isleId;
-                    outCommands.append(cmd);
+                    outMoves.append(cmd);
 
                     break;
                 }
@@ -87,12 +87,12 @@ void Strategy::nextRound(QList<StrategyCommand> & outCommands)
                 if(shipInfo.posType == ShipPositionEnum::S_ONISLE and !shipsAlreadyProcessed.contains(shipInfo.id))
                 {
                     shipsAlreadyProcessed.insert(shipInfo.id);
-                    StrategyCommand cmd;
+                    ComputerMove cmd;
                     cmd.owner = owner();
                     cmd.shipId = shipInfo.id;
                     cmd.targetType = Target::TargetEnum::T_ISLE;
                     cmd.targetId = isleId;
-                    outCommands.append(cmd);
+                    outMoves.append(cmd);
 
                     sendNumShips++;
                 }
@@ -106,13 +106,13 @@ void Strategy::nextRound(QList<StrategyCommand> & outCommands)
 }
 
 
-QList<uint> Strategy::orderedUnsettledOrEnemyIsleFromCenter(const bool inSetUnsettled) const
+QList<uint> ComputerPlayer::orderedUnsettledOrEnemyIsleFromCenter(const bool inSetUnsettled) const
 {
     QList< QPair<qreal, uint> > uList;
 
     for(IsleInfo isleInfo : m_publicIsles)
     {
-        if( (inSetUnsettled and isleInfo.owner == 0) or (!inSetUnsettled and isleInfo.owner  != m_owner) )
+        if( (inSetUnsettled and isleInfo.owner == 0) or (!inSetUnsettled and isleInfo.owner  != owner()) )
         {
             qreal dx = isleInfo.pos.x() - m_centerOfMyIsles.x();
             qreal dy = isleInfo.pos.y() - m_centerOfMyIsles.y();

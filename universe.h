@@ -10,7 +10,7 @@
 
 #include <isle.h>
 #include <ship.h>
-#include <strategy.h>
+#include <computerplayer.h>
 #include <universescene.h>
 #include <QVector>
 #include <QList>
@@ -116,9 +116,9 @@ private:
 
     // send isle and ship infos to strategy
     void prepareStrategies();
-    void processStrategyCommands(const uint inOwner, const QList<StrategyCommand> inCommands);
+    void processStrategyCommands(const uint inOwner, const QList<ComputerMove> inComputerMoves);
 
-    Strategy *m_strategy;
+    ComputerPlayer *m_computerPlayer;
 
 
 signals:

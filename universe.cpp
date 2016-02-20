@@ -24,7 +24,7 @@ Universe::Universe(QObject *inParent, UniverseScene *& inOutUniverseScene, const
     }
 
     // @fixme: hardcoded owner number, shared with createIsles()
-    m_strategy = new Strategy(2);
+    m_computerPlayer = new ComputerPlayer(2);
 }
 
 
@@ -188,9 +188,9 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 {
     qInfo() << "BEGIN NEXTROUND ==================";
     prepareStrategies();
-    QList<StrategyCommand> strategyCommands;
-    m_strategy->nextRound(strategyCommands);
-    processStrategyCommands(m_strategy->owner(), strategyCommands);
+    QList<ComputerMove> computerMoves;
+    m_computerPlayer->nextRound(computerMoves);
+    processStrategyCommands(m_computerPlayer->owner(), computerMoves);
 
     for(Isle *isle : m_isles)
     {
@@ -446,15 +446,15 @@ void Universe::createIsles(const qreal inUniverseWidth, const qreal inUniverseHe
             }
         } while(tooClose);
 
-        Isle *isle = new Isle(m_lastInsertedId++, 0, QPointF(x, y), Qt::gray);
+        Isle *isle = new Isle(m_lastInsertedId++, 0, QPointF(x, y), Player::colorForOwner(0));
         m_isles.append(isle);
     }
 
     Isle *isle = m_isles.at(0);
-    isle->setOwner(1, Qt::green);
+    isle->setOwner(1, Player::colorForOwner(1));
 
     isle = m_isles.at(1);
-    isle->setOwner(2, Qt::red);
+    isle->setOwner(2, Player::colorForOwner(2));
 }
 
 
@@ -769,13 +769,13 @@ void Universe::prepareStrategies()
     for(Isle *isle : m_isles)
     {
         IsleInfo isleInfo = isle->info();
-        if(isleInfo.owner == m_strategy->owner())
+        if(isleInfo.owner == m_computerPlayer->owner())
             isleInfosPrivate.append(isleInfo);
         else
             isleInfosPublic.append(isleInfo);
 
     }
-    m_strategy->setIsles(isleInfosPublic, isleInfosPrivate);
+    m_computerPlayer->setIsles(isleInfosPublic, isleInfosPrivate);
 
     QList<ShipInfo> shipInfosPublic;
     QList<ShipInfo> shipInfosPrivate;
@@ -783,7 +783,7 @@ void Universe::prepareStrategies()
     for(Ship *ship : m_ships)
     {
         ShipInfo shipInfo = ship->info();
-        if(shipInfo.owner == m_strategy->owner())
+        if(shipInfo.owner == m_computerPlayer->owner())
             shipInfosPrivate.append(shipInfo);
         else
         {
@@ -792,16 +792,16 @@ void Universe::prepareStrategies()
                 shipInfosPublic.append(shipInfo);
         }
     }
-    m_strategy->setShips(shipInfosPublic, shipInfosPrivate);
+    m_computerPlayer->setShips(shipInfosPublic, shipInfosPrivate);
 }
 
 
-void Universe::processStrategyCommands(const uint inOwner, const QList<StrategyCommand> inCommands)
+void Universe::processStrategyCommands(const uint inOwner, const QList<ComputerMove> inComputerMoves)
 {
     // @fixme: we really need to check, if strategy is cheating
-    if(inCommands.isEmpty())
+    if(inComputerMoves.isEmpty())
         return;
-    for(StrategyCommand cmd : inCommands)
+    for(ComputerMove cmd : inComputerMoves)
     {
         qDebug() << "cmd owner=" << inOwner <<  " wants to send ship " << cmd.shipId << " to id " << cmd.targetId;
 

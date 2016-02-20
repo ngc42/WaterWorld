@@ -25,10 +25,11 @@ SOURCES += main.cpp\
     isle.cpp \
     ship.cpp \
     shiplistitem.cpp \
-    strategy.cpp \
     overviewdialog.cpp \
     graphicspathitem.cpp \
-    pathlistitem.cpp
+    pathlistitem.cpp \
+    computerplayer.cpp \
+    player.cpp
 
 HEADERS  += mainwindow.h \
     universescene.h \
@@ -39,10 +40,11 @@ HEADERS  += mainwindow.h \
     isle.h \
     ship.h \
     shiplistitem.h \
-    strategy.h \
     overviewdialog.h \
     graphicspathitem.h \
-    pathlistitem.h
+    pathlistitem.h \
+    computerplayer.h \
+    player.h
 
 FORMS    += mainwindow.ui \
     waterobjectinfo.ui \
