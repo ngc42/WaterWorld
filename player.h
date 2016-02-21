@@ -16,6 +16,14 @@ class Player
 {
 public:
 
+    /**
+     * @brief The PlayerEnum enum
+     *
+     * instead of using hardcoded number, this enum describes
+     * constants for owner-id. Enemies starting from PLAYER_ENEMY_BASE.
+     */
+    enum PlayerEnum {PLAYER_UNSETTLED = 0, PLAYER_HUMAN = 1, PLAYER_ENEMY_BASE = 2};
+
     Player(uint inOwner);
 
     uint owner() const { return m_owner; }

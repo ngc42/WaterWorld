@@ -283,7 +283,7 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
         m_uiWaterObjectInfo->tableHTargets->setItem(i, 0, item1);
 
         // owner of target
-        uint owner = 0;
+        uint owner = Player::PLAYER_UNSETTLED;
         QColor color = Qt::black;
         switch (t.tType)
         {

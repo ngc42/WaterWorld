@@ -19,8 +19,8 @@ Isle::Isle(const uint inId, const uint inOwner, const QPointF inPos,
     m_shape = new QGraphicsEllipseItem(inPos.x() - 10.0f, inPos.y() - 10.0f, 20.0f, 20.0f);
     m_shape->setBrush(QBrush(inColor));
 
-    m_population  = inOwner > 0 ? 100.1f : 0.0f;
-    m_technology = inOwner > 0 ? 1.01f : 0.0f;
+    m_population  = inOwner > Player::PLAYER_UNSETTLED ? 100.1f : 0.0f;
+    m_technology = inOwner > Player::PLAYER_UNSETTLED ? 1.01f : 0.0f;
     m_buildlevel = 0.0f;
     setDefaultTargetNothing();
 }
@@ -32,8 +32,8 @@ void Isle::setOwner(const uint inOwner, const QColor inColor)
     m_color = inColor;
     m_shape->setBrush(QBrush(inColor));
 
-    m_population  = inOwner > 0 ? 100.1 : 0.0f;
-    m_technology = inOwner > 0 ? 1.01f : 0.0f;
+    m_population  = inOwner > Player::PLAYER_UNSETTLED ? 100.1 : 0.0f;
+    m_technology = inOwner > Player::PLAYER_UNSETTLED ? 1.01f : 0.0f;
     m_buildlevel = 0.0f;
     setDefaultTargetNothing();
 }
@@ -87,11 +87,11 @@ bool Isle::pointInIsle(const QPointF inPos)
 
 bool Isle::nextRound()
 {
-    if(m_owner == 0)
+    if(m_owner == Player::PLAYER_UNSETTLED)
         return false;
     if(m_population < 100.0f)
     {   // too few people on isle, they die by loneliness, sad but thats nature...
-        setOwner(0, Player::colorForOwner(0));
+        setOwner(Player::PLAYER_UNSETTLED, Player::colorForOwner(Player::PLAYER_UNSETTLED));
         return false;
     }
     // population formula is based on a logistic function for populations,

@@ -28,11 +28,11 @@ Universe::Universe(QObject *inParent, UniverseScene *& inOutUniverseScene, const
     // @fixme: hardcoded owner number, shared with createIsles()
     for(uint i = 0; i < numEnemies; i++)
     {
-        m_computerPlayers.append( new ComputerPlayer(2 + i) );
+        m_computerPlayers.append( new ComputerPlayer(Player::PLAYER_ENEMY_BASE + i) );
     }
 
     Isle *isle = m_isles.at(0);
-    isle->setOwner(1, Player::colorForOwner(1));
+    isle->setOwner(Player::PLAYER_HUMAN, Player::colorForOwner(Player::PLAYER_HUMAN));
 
     // @fixme: make sure, that inNumEnemies < inNumIsles
     for(int i = 0; i < m_computerPlayers.count(); i++)
@@ -241,7 +241,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                 IsleInfo isleInfo;
                 isleForId(target.id, isleInfo);
 
-                if(isleInfo.owner == 0)
+                if(isleInfo.owner == Player::PLAYER_UNSETTLED)
                 {   // isle has no inhabitants
                     setIsleOwnerById(isleInfo.id, shipInfo.owner, shipInfo.color);
                     shipLandOnIsle(ship);
@@ -387,7 +387,7 @@ void Universe::callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsle
         IsleInfo isleInfo;
         isleForId(inIsleInfo.id, isleInfo);
         // owner may have changed
-        if(isleInfo.owner == 1)
+        if(isleInfo.owner == Player::PLAYER_HUMAN)
         {
             // human
             showHumanIsle(isleInfo);
@@ -400,7 +400,7 @@ void Universe::callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsle
         IsleInfo isleInfo;
         isleForId(inIsleInfo.id, isleInfo);
         // owner may have changed
-        if(isleInfo.owner == 1)
+        if(isleInfo.owner == Player::PLAYER_HUMAN)
             showHumanIsle(isleInfo);
         else
             emit sigShowInfoIsle(isleInfo);
@@ -418,7 +418,7 @@ void Universe::callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsle
         ShipInfo shipInfo;
         QVector<Target> targetList;
         shipForId(inShipInfo.id, shipInfo, targetList);
-        if(shipInfo.owner == 1)
+        if(shipInfo.owner == Player::PLAYER_HUMAN)
             emit sigShowInfoHumanShip(shipInfo, targetList);
         else
         {   // ship is dead or captured
@@ -465,7 +465,7 @@ void Universe::createIsles(const qreal inUniverseWidth, const qreal inUniverseHe
             }
         } while(tooClose);
 
-        Isle *isle = new Isle(m_lastInsertedId++, 0, QPointF(x, y), Player::colorForOwner(0));
+        Isle *isle = new Isle(m_lastInsertedId++, Player::PLAYER_UNSETTLED, QPointF(x, y), Player::colorForOwner(Player::PLAYER_UNSETTLED));
         m_isles.append(isle);
     }
 }
@@ -556,7 +556,7 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
     isleForId(inIsleId, info2);
     if(info1.posType == ShipPositionEnum::S_TRASH)
         return false;
-    if(info2.owner < 1 or info2.owner == info1.owner)
+    if(info2.owner == Player::PLAYER_UNSETTLED or info2.owner == info1.owner)
     {
         //qInfo() << "BUG: unsettled or own isle, automatic won, no damage added";
         return true;
@@ -578,7 +578,7 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
 
         if(info1.posType == ShipPositionEnum::S_TRASH)
         {   // isle is now empty without owner
-            setIsleOwnerById(info2.id, 0, Player::colorForOwner(0));
+            setIsleOwnerById(info2.id, Player::PLAYER_UNSETTLED, Player::colorForOwner(Player::PLAYER_UNSETTLED));
             return false;   // ship is too damaged
         }
         else
@@ -598,12 +598,12 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
             setIslePopulationById(info2.id, new_population);
         else
             // want to buy a new isle?
-            setIsleOwnerById(info2.id, 0, Player::colorForOwner(0));
+            setIsleOwnerById(info2.id, Player::PLAYER_UNSETTLED, Player::colorForOwner(Player::PLAYER_UNSETTLED));
     }
     else
     {   // magic, if this happens: both forces are the same
         inOutAttacker->setPositionType(ShipPositionEnum::S_TRASH);
-        setIsleOwnerById(info2.id, 0, Player::colorForOwner(0));
+        setIsleOwnerById(info2.id, Player::PLAYER_UNSETTLED, Player::colorForOwner(Player::PLAYER_UNSETTLED));
     }
 
     return false;   // ship has lost
@@ -764,7 +764,7 @@ void Universe::showHumanIsle(const IsleInfo inIsleInfo)
     for(Ship *ship : m_ships)
     {
         ShipInfo info = ship->info();
-        if(info.owner == 1 and
+        if(info.owner == Player::PLAYER_HUMAN and
                 (info.posType != ShipPositionEnum::S_OCEAN) and
                 info.isleId == inIsleInfo.id)
             sList.append(info);
@@ -878,7 +878,7 @@ void Universe::slotUniverseViewClicked(QPointF scenePos)
 
     if(isleInfo.id > 0)
     {
-        if(isleInfo.owner == 1)
+        if(isleInfo.owner == Player::PLAYER_HUMAN)
         {
             showHumanIsle(isleInfo);
         }
@@ -893,7 +893,7 @@ void Universe::slotUniverseViewClicked(QPointF scenePos)
         shipForPoint(scenePos, shipInfo, targets);
         if(shipInfo.id > 0)
         {   // human or enemy ship?
-            if(shipInfo.owner == 1)
+            if(shipInfo.owner == Player::PLAYER_HUMAN)
                 emit sigShowInfoHumanShip(shipInfo, targets);
             else
                 emit sigShowInfoShip(shipInfo);

@@ -25,7 +25,7 @@ void ComputerPlayer::setIsles(const QList<IsleInfo> inPublicIsleInfos, const QLi
     // test for unowned isles
     m_thereAreUnownedIsles = false;
     for(IsleInfo isleInfo : m_publicIsles)
-        if(isleInfo.owner == 0)
+        if(isleInfo.owner == Player::PLAYER_UNSETTLED)
         {
             m_thereAreUnownedIsles = true;
             break;
@@ -112,7 +112,7 @@ QList<uint> ComputerPlayer::orderedUnsettledOrEnemyIsleFromCenter(const bool inS
 
     for(IsleInfo isleInfo : m_publicIsles)
     {
-        if( (inSetUnsettled and isleInfo.owner == 0) or (!inSetUnsettled and isleInfo.owner  != owner()) )
+        if( (inSetUnsettled and isleInfo.owner == Player::PLAYER_UNSETTLED) or (!inSetUnsettled and isleInfo.owner  != owner()) )
         {
             qreal dx = isleInfo.pos.x() - m_centerOfMyIsles.x();
             qreal dy = isleInfo.pos.y() - m_centerOfMyIsles.y();

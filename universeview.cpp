@@ -21,7 +21,6 @@ UniverseView::UniverseView(QWidget *inParent) :
     m_ShipVisitedPathItem->hide();
     m_ShipUnvisitedPathItem = new GraphicsPathItem();
     m_ShipUnvisitedPathItem->hide();
-
 }
 
 
