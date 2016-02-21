@@ -56,10 +56,10 @@ MainWindow::MainWindow(QWidget *inParent) :
     infoLayout->addWidget(m_waterObjectInfo);
 
     // universe show isles
-    m_universe = new Universe(this, m_universeScene, 1000.0, 1000.0, 20);
+    m_universe = new Universe(this, m_universeScene, m_universeScene->width(), m_universeScene->height(), 20, 3);
 
     // overview dialog
-    m_overviewDialog = new OverviewDialog(2, this);
+    m_overviewDialog = new OverviewDialog(m_universe->numberOfEnemies() + 1, this);
     m_overviewDialog->hide();
 
     connect(m_minimapView, SIGNAL(sigMinimapClicked(QPointF)), m_universeView, SLOT(slotMinimapClicked(QPointF)));
@@ -115,8 +115,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::paintEvent(QPaintEvent *inEvent)
 {
+     QMainWindow::paintEvent(inEvent);
      QPainter painter(this);
-     painter.fillRect(inEvent->rect(), Qt::blue);
+     painter.fillRect(inEvent->rect(), Qt::lightGray);
 }
 
 

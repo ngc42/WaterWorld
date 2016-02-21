@@ -6,6 +6,7 @@
 
 #include "overviewdialog.h"
 #include "ui_overviewdialog.h"
+#include <player.h>
 #include <QStringList>
 #include <QVector>
 #include <QDebug>
@@ -25,7 +26,7 @@ OverviewDialog::OverviewDialog(const uint inNumPlayer, QWidget *inParent) :
     // Vertical Table Header
     QStringList vertLabels;
     for(uint i = 0; i <= m_numPlayer; i++)
-        vertLabels << QString("P %1").arg(i);
+        vertLabels << QString(Player::nameForOwner(i));
     vertLabels << "ALL";
     m_ui->tableWidget->setVerticalHeaderLabels(vertLabels);
 

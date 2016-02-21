@@ -14,7 +14,7 @@
 
 
 Universe::Universe(QObject *inParent, UniverseScene *& inOutUniverseScene, const qreal inUniverseWidth,
-                   const qreal inUniverseHeight, const uint inNumIsles)
+                   const qreal inUniverseHeight, const uint inNumIsles, const uint numEnemies)
     : QObject(inParent), m_lastInsertedId(10)
 {
     createIsles(inUniverseWidth, inUniverseHeight, inNumIsles);
@@ -26,7 +26,21 @@ Universe::Universe(QObject *inParent, UniverseScene *& inOutUniverseScene, const
     }
 
     // @fixme: hardcoded owner number, shared with createIsles()
-    m_computerPlayer = new ComputerPlayer(2);
+    for(uint i = 0; i < numEnemies; i++)
+    {
+        m_computerPlayers.append( new ComputerPlayer(2 + i) );
+    }
+
+    Isle *isle = m_isles.at(0);
+    isle->setOwner(1, Player::colorForOwner(1));
+
+    // @fixme: make sure, that inNumEnemies < inNumIsles
+    for(int i = 0; i < m_computerPlayers.count(); i++)
+    {
+        uint owner = m_computerPlayers.at(i)->owner();
+        isle = m_isles.at(1 + i);
+        isle->setOwner(owner, Player::colorForOwner(owner));
+    }
 }
 
 
@@ -190,9 +204,12 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 {
     qInfo() << "BEGIN NEXTROUND ==================";
     prepareStrategies();
-    QList<ComputerMove> computerMoves;
-    m_computerPlayer->nextRound(computerMoves);
-    processStrategyCommands(m_computerPlayer->owner(), computerMoves);
+    for(ComputerPlayer *player : m_computerPlayers)
+    {
+        QList<ComputerMove> computerMoves;
+        player->nextRound(computerMoves);
+        processStrategyCommands(player->owner(), computerMoves);
+    }
 
     for(Isle *isle : m_isles)
     {
@@ -451,12 +468,6 @@ void Universe::createIsles(const qreal inUniverseWidth, const qreal inUniverseHe
         Isle *isle = new Isle(m_lastInsertedId++, 0, QPointF(x, y), Player::colorForOwner(0));
         m_isles.append(isle);
     }
-
-    Isle *isle = m_isles.at(0);
-    isle->setOwner(1, Player::colorForOwner(1));
-
-    isle = m_isles.at(1);
-    isle->setOwner(2, Player::colorForOwner(2));
 }
 
 
@@ -765,36 +776,39 @@ void Universe::showHumanIsle(const IsleInfo inIsleInfo)
 
 void Universe::prepareStrategies()
 {
-    QList<IsleInfo> isleInfosPublic;
-    QList<IsleInfo> isleInfosPrivate;
-
-    for(Isle *isle : m_isles)
+    for(ComputerPlayer *player : m_computerPlayers)
     {
-        IsleInfo isleInfo = isle->info();
-        if(isleInfo.owner == m_computerPlayer->owner())
-            isleInfosPrivate.append(isleInfo);
-        else
-            isleInfosPublic.append(isleInfo);
+        QList<IsleInfo> isleInfosPublic;
+        QList<IsleInfo> isleInfosPrivate;
 
-    }
-    m_computerPlayer->setIsles(isleInfosPublic, isleInfosPrivate);
-
-    QList<ShipInfo> shipInfosPublic;
-    QList<ShipInfo> shipInfosPrivate;
-
-    for(Ship *ship : m_ships)
-    {
-        ShipInfo shipInfo = ship->info();
-        if(shipInfo.owner == m_computerPlayer->owner())
-            shipInfosPrivate.append(shipInfo);
-        else
+        for(Isle *isle : m_isles)
         {
-            if(shipInfo.posType == ShipPositionEnum::S_OCEAN)
-                // just append if visible to everyone
-                shipInfosPublic.append(shipInfo);
+            IsleInfo isleInfo = isle->info();
+            if(isleInfo.owner == player->owner())
+                isleInfosPrivate.append(isleInfo);
+            else
+                isleInfosPublic.append(isleInfo);
+
         }
+        player->setIsles(isleInfosPublic, isleInfosPrivate);
+
+        QList<ShipInfo> shipInfosPublic;
+        QList<ShipInfo> shipInfosPrivate;
+
+        for(Ship *ship : m_ships)
+        {
+            ShipInfo shipInfo = ship->info();
+            if(shipInfo.owner == player->owner())
+                shipInfosPrivate.append(shipInfo);
+            else
+            {
+                if(shipInfo.posType == ShipPositionEnum::S_OCEAN)
+                    // just append if visible to everyone
+                    shipInfosPublic.append(shipInfo);
+            }
+        }
+        player->setShips(shipInfosPublic, shipInfosPrivate);
     }
-    m_computerPlayer->setShips(shipInfosPublic, shipInfosPrivate);
 }
 
 

@@ -26,7 +26,10 @@ class Universe : public QObject
 
 public:
     explicit Universe(QObject *inParent, UniverseScene *& inOutUniverseScene, const qreal inUniverseWidth,
-                      const qreal inUniverseHeight, const uint inNumIsles);
+                      const qreal inUniverseHeight, const uint inNumIsles, const uint numEnemies);
+
+
+    uint numberOfEnemies() const { return m_computerPlayers.count(); }
 
     // delete a ship and reshow the human isle
     void deleteShipOnIsle(const uint inShipId);
@@ -100,7 +103,6 @@ private:
 
     int shipIndexForId(const uint inShipId) const;
 
-
     // really delete a ship
     void deleteShip(const uint inShipId);
 
@@ -118,7 +120,7 @@ private:
     void prepareStrategies();
     void processStrategyCommands(const uint inOwner, const QList<ComputerMove> inComputerMoves);
 
-    ComputerPlayer *m_computerPlayer;
+    QVector<ComputerPlayer*> m_computerPlayers;
 
 
 signals:
