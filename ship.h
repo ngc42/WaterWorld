@@ -30,6 +30,8 @@ struct Target
 
 enum ShipPositionEnum {S_ONISLE, S_PATROL, S_OCEAN, S_TRASH};
 
+enum ShipType {ST_BATTLESHIP, ST_COURIER};
+
 
 /* Things we get to know, if we click on a ship */
 struct ShipInfo
