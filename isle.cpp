@@ -14,7 +14,8 @@
 
 Isle::Isle(const uint inId, const uint inOwner, const QPointF inPos,
      const QColor inColor)
-    : WaterObject(inId, inOwner, inPos, inColor, 0.0f)
+    : WaterObject(inId, inOwner, inPos, inColor, 0.0f),
+      m_shipToBuild(ShipTypeEnum::ST_BATTLESHIP)
 {
     m_shape = new QGraphicsEllipseItem(inPos.x() - 10.0f, inPos.y() - 10.0f, 20.0f, 20.0f);
     m_shape->setBrush(QBrush(inColor));
@@ -43,6 +44,15 @@ void Isle::setOwner(const uint inOwner, const QColor inColor)
 void Isle::setPopulation(const float inPopulation)
 {
     m_population = inPopulation;
+}
+
+
+void Isle::setShipToBuild(const ShipTypeEnum inShipToBuild)
+{
+    if(inShipToBuild == m_shipToBuild)
+        return;
+    m_shipToBuild = inShipToBuild;
+    m_buildlevel = 0.0f;    // start fresh, sorry user
 }
 
 
