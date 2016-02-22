@@ -30,13 +30,15 @@ struct Target
 
 enum ShipPositionEnum {S_ONISLE, S_PATROL, S_OCEAN, S_TRASH};
 
-enum ShipType {ST_BATTLESHIP, ST_COURIER};
+
+enum ShipTypeEnum {ST_BATTLESHIP, ST_COURIER, ST_COLONY, ST_FLEET};
 
 
 /* Things we get to know, if we click on a ship */
 struct ShipInfo
 {
     uint id;
+    ShipTypeEnum shipType;
     uint owner;
     QColor color;
     QPointF pos;
@@ -56,6 +58,11 @@ public:
     Ship(UniverseScene *& inOutRefScene, const uint inId, const uint inOwner,
          const QPointF inPos, const QColor inColor, const ShipPositionEnum inPosType,
          const uint inIsleId, const float inTechnology);
+
+    Ship(UniverseScene *& inOutRefScene, const ShipTypeEnum inShipType, const uint inId, const uint inOwner,
+         const QPointF inPos, const QColor inColor, const ShipPositionEnum inPosType,
+         const uint inIsleId, const float inTechnology);
+
 
     ~Ship();
 
@@ -114,6 +121,7 @@ public:
     bool pointInShip(const QPointF inPos);
 
 private:
+    ShipTypeEnum m_shipType;
     QGraphicsRectItem *m_shape;
     ShipPositionEnum m_positionType;
     uint m_onIsleById;

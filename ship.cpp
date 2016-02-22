@@ -14,8 +14,18 @@
 Ship::Ship(UniverseScene *& inOutRefScene, const uint inId, const uint inOwner,
            const QPointF inPos, const QColor inColor, const ShipPositionEnum inPosType,
            const uint inIsleId, const float inTechnology)
+    : Ship(inOutRefScene, ShipTypeEnum::ST_BATTLESHIP, inId,
+           inOwner, inPos, inColor, inPosType, inIsleId, inTechnology)
+{
+
+}
+
+
+Ship::Ship(UniverseScene *& inOutRefScene, const ShipTypeEnum inShipType, const uint inId, const uint inOwner,
+           const QPointF inPos, const QColor inColor, const ShipPositionEnum inPosType,
+           const uint inIsleId, const float inTechnology)
     :  WaterObject(inId, inOwner, inPos, inColor, inTechnology),
-      m_positionType(inPosType), m_onIsleById(inIsleId),
+      m_shipType(inShipType), m_positionType(inPosType), m_onIsleById(inIsleId),
       m_damage(0.0f), m_cycleTargetList(false), m_currentTargetIndex(-1)
 {
     m_shape = new QGraphicsRectItem(-7.0f, -7.0f, 14.0f, 14.0f);
@@ -24,6 +34,9 @@ Ship::Ship(UniverseScene *& inOutRefScene, const uint inId, const uint inOwner,
     inOutRefScene->addItem(m_shape);
     m_shape->setBrush(QBrush(inColor));
 }
+
+
+
 
 
 Ship::~Ship()
@@ -36,6 +49,7 @@ ShipInfo Ship::info() const
 {
     ShipInfo outInfo;
     outInfo.id = m_id;
+    outInfo.shipType = m_shipType;
     outInfo.owner = m_owner;
     outInfo.color = m_color;
     outInfo.pos = m_pos;
@@ -43,7 +57,7 @@ ShipInfo Ship::info() const
     outInfo.isleId = m_onIsleById;
     outInfo.hasTarget = m_targetList.count() > 0;
     outInfo.cycleTargetList = m_cycleTargetList;
-    outInfo.damage = m_damage;
+    outInfo.damage = m_damage;          // only useful for ST_BATTLESHIP and ST_FLEET
     outInfo.technology = m_technology;
     if(outInfo.hasTarget)
     {
@@ -201,8 +215,10 @@ void Ship::landOnIsle(const uint inIsleId, const QPointF inPos)
 
 void Ship::addDamage(const float inDamageToAdd)
 {
+    // Courier and Colony ships cannot defend themselves
     m_damage = m_damage + inDamageToAdd;
-    if(m_damage > 0.999f)
+    if(m_damage > 0.999f or
+       (m_shipType == ShipTypeEnum::ST_COURIER) or (m_shipType == ShipTypeEnum::ST_COLONY))
     {
         setPositionType(ShipPositionEnum::S_TRASH);
         removeTargets();
