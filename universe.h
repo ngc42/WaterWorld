@@ -68,7 +68,7 @@ public:
 private:
     void createIsles(const qreal inUniverseWidth, const qreal inUniverseHeight, const uint inNumIsles);
 
-    void createShipOnIsle(UniverseScene *& inOutUniverseScene, const uint inIsleId);
+    void createShipOnIsle(UniverseScene *& inOutUniverseScene, const IsleInfo isleInfo);
 
     void shipFightShip(Ship *& inOutAttacker, Ship *& inOutDefender);
 

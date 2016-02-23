@@ -25,7 +25,6 @@ Universe::Universe(QObject *inParent, UniverseScene *& inOutUniverseScene, const
         inOutUniverseScene->addItem(isle->shape());
     }
 
-    // @fixme: hardcoded owner number, shared with createIsles()
     for(uint i = 0; i < numEnemies; i++)
     {
         m_computerPlayers.append( new ComputerPlayer(Player::PLAYER_ENEMY_BASE + i) );
@@ -34,9 +33,13 @@ Universe::Universe(QObject *inParent, UniverseScene *& inOutUniverseScene, const
     Isle *isle = m_isles.at(0);
     isle->setOwner(Player::PLAYER_HUMAN, Player::colorForOwner(Player::PLAYER_HUMAN));
 
-    // @fixme: make sure, that inNumEnemies < inNumIsles
     for(int i = 0; i < m_computerPlayers.count(); i++)
     {
+        // if there are more enemies than isles, the enemies don't get an own isle
+        // @fixme: should get marked as "dead".
+        uint idx = i + 1;   // prevent warning: comparison signed/unsigned
+        if( idx > inNumIsles )
+            break;
         uint owner = m_computerPlayers.at(i)->owner();
         isle = m_isles.at(1 + i);
         isle->setOwner(owner, Player::colorForOwner(owner));
@@ -135,6 +138,7 @@ void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo, QVector<Ta
 void Universe::isleForId(const uint inIsleId, IsleInfo & outIsleInfo)
 {
     outIsleInfo.id = 0;
+    // @fixme: this search is O(N), but better would be O(log2(N))
     for(Isle* isle : m_isles)
     {
         if(isle->id() == inIsleId)
@@ -164,6 +168,7 @@ void Universe::getAllShipInfos(QList<ShipInfo> & outShipInfo)
 
 void Universe::removeDefaultIsleTarget(const uint inIsleId)
 {
+    // @fixme: this search is O(N), but better would be O(log2(N))
     for(Isle *i : m_isles)
         if(i->id() == inIsleId)
         {
@@ -214,7 +219,9 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
     for(Isle *isle : m_isles)
     {
         if(isle->nextRound())
-            createShipOnIsle(inOutUniverseScene, isle->id());
+        {
+            createShipOnIsle(inOutUniverseScene, isle->info());
+        }
     }
 
     for(Ship *ship : m_ships)
@@ -243,6 +250,8 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 
                 if(isleInfo.owner == Player::PLAYER_UNSETTLED)
                 {   // isle has no inhabitants
+
+                    // @fixme: colony ship MUST land on isle first
                     setIsleOwnerById(isleInfo.id, shipInfo.owner, shipInfo.color);
                     shipLandOnIsle(ship);
                 }
@@ -290,6 +299,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
             {   // fight or rendez vous
 
                 // find the other ship
+                // @fixme: this search is O(N), but better would be O(log2(N))
                 Ship *otherShip;
                 for(Ship *s : m_ships)
                 {
@@ -471,33 +481,25 @@ void Universe::createIsles(const qreal inUniverseWidth, const qreal inUniverseHe
 }
 
 
-void Universe::createShipOnIsle(UniverseScene *& inOutUniverseScene, uint inIsleId)
+void Universe::createShipOnIsle(UniverseScene *& inOutUniverseScene, const IsleInfo isleInfo)
 {
-    for(Isle *isle : m_isles)
-    {
-        IsleInfo isleInfo = isle->info();
-        if(isleInfo.id == inIsleId)
-        {
-            Ship *s = new Ship(inOutUniverseScene, m_lastInsertedId++, isleInfo.owner,
-                               isleInfo.pos, isleInfo.color, ShipPositionEnum::S_ONISLE,
-                               isleInfo.id, isleInfo.technology);
-            // default target
-            switch(isleInfo.defaultTargetType)
-            {
-                case IsleInfo::T_ISLE:
-                    s->setTargetIsle(isleInfo.defaultTargetIsle, isleInfo.defaultTargetPos);
-                    break;
-                case IsleInfo::T_WATER:
-                    s->setTargetWater(isleInfo.defaultTargetPos);
-                    break;
-                default:
-                    break;
-            }
 
-            m_ships.push_back(s);
+    Ship *s = new Ship(inOutUniverseScene, isleInfo.shipToBuild, m_lastInsertedId++, isleInfo.owner,
+                       isleInfo.pos, isleInfo.color, ShipPositionEnum::S_ONISLE,
+                       isleInfo.id, isleInfo.technology);
+    // default target
+    switch(isleInfo.defaultTargetType)
+    {
+        case IsleInfo::T_ISLE:
+            s->setTargetIsle(isleInfo.defaultTargetIsle, isleInfo.defaultTargetPos);
             break;
-        }
+        case IsleInfo::T_WATER:
+            s->setTargetWater(isleInfo.defaultTargetPos);
+            break;
+        default:
+            break;
     }
+    m_ships.push_back(s);
 }
 
 
@@ -510,6 +512,26 @@ void Universe::shipFightShip(Ship *& inOutAttacker, Ship *& inOutDefender)
         return;
     if(info2.posType == ShipPositionEnum::S_TRASH)
         return;
+
+
+    // Battleship (attack) against colony or courier
+    if(info1.shipType == ShipTypeEnum::ST_BATTLESHIP and
+       (info2.shipType == ShipTypeEnum::ST_COLONY or info2.shipType == ShipTypeEnum::ST_COURIER))
+        inOutDefender->addDamage(2.0);
+
+    // Battleship (defender) against colony or courier
+    if(info2.shipType == ShipTypeEnum::ST_BATTLESHIP and
+       (info1.shipType == ShipTypeEnum::ST_COLONY or info1.shipType == ShipTypeEnum::ST_COURIER))
+        inOutAttacker->addDamage(2.0);
+
+    // both ships are courier or colony -> nothing happens
+    // @fixme: that way, diffent player can stay in the same orbit ???
+    if((info1.shipType == ShipTypeEnum::ST_COLONY or info1.shipType == ShipTypeEnum::ST_COURIER) and
+        (info2.shipType == ShipTypeEnum::ST_COLONY or info2.shipType == ShipTypeEnum::ST_COURIER))
+        return;
+
+    // the rest is about Battleships and/or fleets
+    // @fixme: make sure, fleets have something like a force !!!
 
     // ship 1 is in advantage, as this is the attacker
     float force1 = (1.0f - info1.damage) * info1.technology * 1.1f;
@@ -551,6 +573,9 @@ void Universe::shipFightIslePatol(Ship *& inOutAttacker, const uint inIsleId)
 
 bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
 {
+    // @fixme: need to select for ship types
+    // @fixme: need to check, if there are other ships in orbit of unowned isles
+
     ShipInfo info1 = inOutAttacker->info();
     IsleInfo info2;
     isleForId(inIsleId, info2);
@@ -612,6 +637,8 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
 
 void Universe::shipLandOnIsle(Ship *& inOutShipToLand)
 {
+    // @fixme: are we allowed to land on this isle?
+
     ShipInfo shipInfo = inOutShipToLand->info();
     if(! shipInfo.hasTarget)
     {   // we don'd have a target but are forced to land on an target isle, stange!
@@ -653,6 +680,7 @@ void Universe::shipLandOnIsle(Ship *& inOutShipToLand)
 
 void Universe::isleForPoint(const QPointF inScenePoint, IsleInfo & outIsleInfo)
 {
+    // @fixme: this search is O(N), but better would be O(log2(N))
     outIsleInfo.id = 0;
     for(Isle* isle : m_isles)
     {
@@ -667,6 +695,7 @@ void Universe::isleForPoint(const QPointF inScenePoint, IsleInfo & outIsleInfo)
 
 void Universe::setIsleOwnerById(const uint inIsleId, const uint inNewOwner, const QColor inNewColor)
 {
+    // @fixme: this search is O(N), but better would be O(log2(N))
     for(Isle *isle : m_isles)
     {
         if(isle->id() == inIsleId)
@@ -677,6 +706,7 @@ void Universe::setIsleOwnerById(const uint inIsleId, const uint inNewOwner, cons
 
 void Universe::setIslePopulationById(const uint inIsleId, const float inNewPopulation)
 {
+    // @fixme: this search is O(N), but better would be O(log2(N))
     for(Isle *isle : m_isles)
     {
         if(isle->id() == inIsleId)
@@ -687,6 +717,8 @@ void Universe::setIslePopulationById(const uint inIsleId, const float inNewPopul
 
 int Universe::shipIndexForPoint(const QPointF inScenePoint) const
 {
+    // @fixme: this search is O(N), but better would be O(log2(N))
+
     for(int index = 0; index < m_ships.count(); index++)
     {
         Ship *s = m_ships.at(index);
@@ -720,6 +752,8 @@ void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo)
 
 int Universe::shipIndexForId(const uint inShipId) const
 {
+    // @fixme: this search is O(N), but better would be O(log2(N))
+
     for(int index = 0; index < m_ships.count(); index++)
     {
         Ship *s = m_ships.at(index);
@@ -907,6 +941,8 @@ void Universe::slotUniverseViewClicked(QPointF scenePos)
 void Universe::slotUniverseViewClickedFinishShipTarget(QPointF scenePos, uint shipId)
 {
     // find the source ship which needs new target
+    // @fixme: this search is O(N), but better would be O(log2(N))
+
     Ship *sourceShip = 0;
     for(Ship *s : m_ships)
         if(s->id() == shipId)
@@ -947,6 +983,8 @@ void Universe::slotUniverseViewClickedFinishIsleTarget(QPointF scenePos, uint is
     Isle *sourceIsle = 0;
 
     // find source isle
+    // @fixme: this search is O(N), but better would be O(log2(N))
+
     for(Isle *s : m_isles)
         if(s->id() == isleId)
         {
