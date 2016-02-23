@@ -36,11 +36,16 @@ Universe::Universe(QObject *inParent, UniverseScene *& inOutUniverseScene, const
     for(int i = 0; i < m_computerPlayers.count(); i++)
     {
         // if there are more enemies than isles, the enemies don't get an own isle
-        // @fixme: should get marked as "dead".
+
         uint idx = i + 1;   // prevent warning: comparison signed/unsigned
+        ComputerPlayer *cPlayer = m_computerPlayers.at(i);
         if( idx > inNumIsles )
-            break;
-        uint owner = m_computerPlayers.at(i)->owner();
+        {
+            // too many player: marke as "dead".
+            cPlayer->setDead();
+            continue;
+        }
+        uint owner = cPlayer->owner();
         isle = m_isles.at(1 + i);
         isle->setOwner(owner, Player::colorForOwner(owner));
     }
@@ -197,6 +202,8 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
     prepareStrategies();
     for(ComputerPlayer *player : m_computerPlayers)
     {
+        if(player->isDead())
+            continue;
         QList<ComputerMove> computerMoves;
         player->nextRound(computerMoves);
         processStrategyCommands(player->owner(), computerMoves);
@@ -837,8 +844,12 @@ void Universe::showHumanIsle(const IsleInfo inIsleInfo)
 
 void Universe::prepareStrategies()
 {
+    bool playerIsAlive = true;
     for(ComputerPlayer *player : m_computerPlayers)
     {
+        if(player->isDead())
+            continue;
+
         QList<IsleInfo> isleInfosPublic;
         QList<IsleInfo> isleInfosPrivate;
 
@@ -849,8 +860,9 @@ void Universe::prepareStrategies()
                 isleInfosPrivate.append(isleInfo);
             else
                 isleInfosPublic.append(isleInfo);
-
         }
+
+        playerIsAlive = isleInfosPrivate.count() > 0;
         player->setIsles(isleInfosPublic, isleInfosPrivate);
 
         QList<ShipInfo> shipInfosPublic;
@@ -868,6 +880,7 @@ void Universe::prepareStrategies()
                     shipInfosPublic.append(shipInfo);
             }
         }
+        playerIsAlive = playerIsAlive and shipInfosPrivate.count() > 0;
         player->setShips(shipInfosPublic, shipInfosPrivate);
     }
 }

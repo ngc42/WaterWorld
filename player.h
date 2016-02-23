@@ -26,7 +26,11 @@ public:
 
     Player(uint inOwner);
 
+    void setDead() { m_isDead = true; }
+
     uint owner() const { return m_owner; }
+
+    bool isDead() const { return m_isDead; }
 
     static QColor colorForOwner(uint inOwnerId);
 
@@ -34,6 +38,7 @@ public:
 
 private:
     uint m_owner;
+    bool m_isDead;      // we do not process dead Player
 };
 
 #endif // PLAYER_H

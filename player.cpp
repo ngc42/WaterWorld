@@ -8,7 +8,7 @@
 
 
 Player::Player(const uint inOwner)
-    : m_owner(inOwner)
+    : m_owner(inOwner), m_isDead(false)
 {
 }
 
