@@ -91,6 +91,8 @@ private:
      */
     void isleForPoint(const QPointF inScenePoint, IsleInfo & outIsleInfo);
 
+    int isleIndexForId(const uint inIsleId) const;
+
     void setIsleOwnerById(const uint inIsleId, const uint inNewOwner, const QColor inNewColor);
 
     void setIslePopulationById(const uint inIsleId, const float inNewPopulation);

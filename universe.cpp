@@ -138,15 +138,9 @@ void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo, QVector<Ta
 void Universe::isleForId(const uint inIsleId, IsleInfo & outIsleInfo)
 {
     outIsleInfo.id = 0;
-    // @fixme: this search is O(N), but better would be O(log2(N))
-    for(Isle* isle : m_isles)
-    {
-        if(isle->id() == inIsleId)
-        {
-            outIsleInfo = isle->info();
-            break;
-        }
-    }
+    int isleIndex = isleIndexForId(inIsleId);
+    if(isleIndex >= -1)
+        outIsleInfo = m_isles.at(isleIndex)->info();
 }
 
 
@@ -168,13 +162,9 @@ void Universe::getAllShipInfos(QList<ShipInfo> & outShipInfo)
 
 void Universe::removeDefaultIsleTarget(const uint inIsleId)
 {
-    // @fixme: this search is O(N), but better would be O(log2(N))
-    for(Isle *i : m_isles)
-        if(i->id() == inIsleId)
-        {
-            i->setDefaultTargetNothing();
-            break;
-        }
+    int isleIndex = isleIndexForId(inIsleId);
+    if(isleIndex >= 0)
+        m_isles[isleIndex]->setDefaultTargetNothing();
 }
 
 
@@ -284,12 +274,9 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                             }
                             if(local_tech_max > shipInfo.technology)
                             {   // maybe, one of the pirated ships has higher tech than the ship which landed
-                                for(Isle *newShipsIsle : m_isles)
-                                    if(newShipsIsle->id() == target.id)
-                                    {
-                                        newShipsIsle->setMaxTechnology(local_tech_max);
-                                        break;
-                                    }
+                                int isleIndex = isleIndexForId(target.id);
+                                if(isleIndex >= 0)
+                                    m_isles[isleIndex]->setMaxTechnology(local_tech_max);
                             }
                         }
                     }
@@ -656,13 +643,13 @@ void Universe::shipLandOnIsle(Ship *& inOutShipToLand)
     IsleInfo isleInfo;
     isleInfo.id = 0;
 
-    for(Isle *isle : m_isles )
-        if(isle->id() == targetInfo.id)
-        {
-            targetIsle = isle;
-            isleInfo = isle->info();
-            break;
-        }
+    int isleIndex = isleIndexForId(targetInfo.id);
+    if(isleIndex >= 0)
+    {
+        targetIsle = m_isles[isleIndex];
+        isleInfo = targetIsle->info();
+    }
+
 
     if(isleInfo.id == 0 or shipInfo.owner != isleInfo.owner)
     {   // just to get sure
@@ -680,7 +667,6 @@ void Universe::shipLandOnIsle(Ship *& inOutShipToLand)
 
 void Universe::isleForPoint(const QPointF inScenePoint, IsleInfo & outIsleInfo)
 {
-    // @fixme: this search is O(N), but better would be O(log2(N))
     outIsleInfo.id = 0;
     for(Isle* isle : m_isles)
     {
@@ -693,25 +679,56 @@ void Universe::isleForPoint(const QPointF inScenePoint, IsleInfo & outIsleInfo)
 }
 
 
+int Universe::isleIndexForId(const uint inIsleId) const
+{
+    int upperIndex = m_isles.count() - 1;
+    int midIndex = upperIndex / 2;
+    int lowerIndex = 0;
+    bool found = false;
+    while(! found)
+    {
+        uint id = m_isles.at(midIndex)->id();
+        if(id < inIsleId)
+        {
+            lowerIndex = midIndex + 1;
+            midIndex = (lowerIndex + upperIndex) / 2;
+        }
+        else if(id > inIsleId)
+        {
+            upperIndex = midIndex - 1;
+            midIndex = (lowerIndex + upperIndex) / 2;
+        }
+        else
+        {   // equal
+            found = true;
+        }
+        if(lowerIndex > upperIndex)
+            break;
+    }
+    if(found)
+        return midIndex;
+    else
+    {
+        // this did not happen during lots of tests, so everything looks good here
+        Q_ASSERT(false);
+        return -1;
+    }
+}
+
+
 void Universe::setIsleOwnerById(const uint inIsleId, const uint inNewOwner, const QColor inNewColor)
 {
-    // @fixme: this search is O(N), but better would be O(log2(N))
-    for(Isle *isle : m_isles)
-    {
-        if(isle->id() == inIsleId)
-            isle->setOwner(inNewOwner, inNewColor);
-    }
+    int isleIndex = isleIndexForId(inIsleId);
+    if(isleIndex >= 0)
+        m_isles[isleIndex]->setOwner(inNewOwner, inNewColor);
 }
 
 
 void Universe::setIslePopulationById(const uint inIsleId, const float inNewPopulation)
 {
-    // @fixme: this search is O(N), but better would be O(log2(N))
-    for(Isle *isle : m_isles)
-    {
-        if(isle->id() == inIsleId)
-            isle->setPopulation(inNewPopulation);
-    }
+    int isleIndex = isleIndexForId(inIsleId);
+    if(isleIndex >= 0)
+        m_isles[isleIndex]->setPopulation(inNewPopulation);
 }
 
 
@@ -983,14 +1000,9 @@ void Universe::slotUniverseViewClickedFinishIsleTarget(QPointF scenePos, uint is
     Isle *sourceIsle = 0;
 
     // find source isle
-    // @fixme: this search is O(N), but better would be O(log2(N))
-
-    for(Isle *s : m_isles)
-        if(s->id() == isleId)
-        {
-            sourceIsle = s;
-            break;
-        }
+    int isleIndex = isleIndexForId(isleId);
+    if(isleIndex >= 0)
+        sourceIsle = m_isles[isleIndex];
 
     IsleInfo targetIsleInfo;
     isleForPoint(scenePos, targetIsleInfo);
