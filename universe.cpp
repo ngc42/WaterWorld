@@ -72,45 +72,42 @@ void Universe::deleteShipOnIsle(const uint inShipId)
 
 void Universe::setShipPatrolsIsle(const uint inShipId)
 {
-    for(Ship *s : m_ships)
+    int shipIndex = shipIndexForId(inShipId);
+    if(shipIndex >= 0)
     {
+        Ship *s = m_ships[shipIndex];
         ShipInfo sInfo = s->info();
-        if(sInfo.id == inShipId)
-        {
-            ShipInfo sInfo = s->info();
-            if(sInfo.posType == ShipPositionEnum::S_OCEAN)
-                return;
-            s->removeTargets();
-            // toggle Patruille status:
-            if(sInfo.posType == ShipPositionEnum::S_ONISLE)
-                s->setPositionType(ShipPositionEnum::S_PATROL);
-            else
-                s->setPositionType(ShipPositionEnum::S_ONISLE);
-            // redraw isle info
-            IsleInfo iInfo;
-            isleForId(sInfo.isleId, iInfo);
-            showHumanIsle(iInfo);
-            break;
-        }
+        if(sInfo.posType == ShipPositionEnum::S_OCEAN)
+            return;
+        s->removeTargets();
+        // toggle Patruille status:
+        if(sInfo.posType == ShipPositionEnum::S_ONISLE)
+            s->setPositionType(ShipPositionEnum::S_PATROL);
+        else
+            s->setPositionType(ShipPositionEnum::S_ONISLE);
+        // redraw isle info
+        IsleInfo iInfo;
+        isleForId(sInfo.isleId, iInfo);
+        showHumanIsle(iInfo);
     }
 }
 
 
 QPointF Universe::shipPosById(const uint inShipId)
 {
-    for(Ship *s : m_ships)
-        if(s->id() == inShipId)
-            return s->pos();
+    int shipIndex = shipIndexForId(inShipId);
+    if(shipIndex >= 0)
+        return m_ships.at(shipIndex)->pos();
     return QPointF(0, 0);
 }
 
 
 float Universe::shipTechById(const uint inShipId)
 {
-    for(Ship *s : m_ships)
-        if(s->id() == inShipId)
-            return s->info().technology;
-    return 1.0f;
+    int shipIndex = shipIndexForId(inShipId);
+    if(shipIndex >= 0)
+        return m_ships.at(shipIndex)->info().technology;
+    return 0.0f;
 }
 
 
@@ -118,9 +115,8 @@ void Universe::shipForId(const uint inShipId, ShipInfo & outShipInfo)
 {
     outShipInfo.id = 0;
     int index = shipIndexForId(inShipId);
-    if(index < 0)
-        return;
-    outShipInfo = m_ships.at(index)->info();
+    if(index >= 0)
+        outShipInfo = m_ships.at(index)->info();
 }
 
 
@@ -286,16 +282,11 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
             {   // fight or rendez vous
 
                 // find the other ship
-                // @fixme: this search is O(N), but better would be O(log2(N))
                 Ship *otherShip;
-                for(Ship *s : m_ships)
-                {
-                    if(s->id() == target.id)
-                    {
-                        otherShip = s;
-                        break;
-                    }
-                }
+
+                int shipIndex = shipIndexForId(target.id);
+                if(shipIndex >= 0)
+                    otherShip = m_ships[shipIndex];
 
                 ShipInfo otherShipInfo = otherShip->info();
 
@@ -354,16 +345,14 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
             if(t.tType == Target::T_SHIP)
             {
                 bool targetIsAlive = false;
-                for( Ship *otherShip : m_ships)
+                int shipIndex = shipIndexForId(t.id);
+                if(shipIndex >= 0)
                 {
-                    ShipInfo otherShipInfo = otherShip->info();
-                    if(otherShipInfo.id == t.id)
-                    {
-                        targetIsAlive = true;
-                        updateShip->updateTargetPos(t.id, otherShipInfo.pos);
-                        break;
-                    }
+                    targetIsAlive = true;
+                    QPointF newPos = m_ships.at(shipIndex)->info().pos;
+                    updateShip->updateTargetPos(t.id, newPos);
                 }
+
                 if(! targetIsAlive)
                 {
                     // the target ship was deleted, so delete the target too
@@ -734,8 +723,6 @@ void Universe::setIslePopulationById(const uint inIsleId, const float inNewPopul
 
 int Universe::shipIndexForPoint(const QPointF inScenePoint) const
 {
-    // @fixme: this search is O(N), but better would be O(log2(N))
-
     for(int index = 0; index < m_ships.count(); index++)
     {
         Ship *s = m_ships.at(index);
@@ -769,15 +756,38 @@ void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo)
 
 int Universe::shipIndexForId(const uint inShipId) const
 {
-    // @fixme: this search is O(N), but better would be O(log2(N))
-
-    for(int index = 0; index < m_ships.count(); index++)
+    int upperIndex = m_ships.count() - 1;
+    int midIndex = upperIndex / 2;
+    int lowerIndex = 0;
+    bool found = false;
+    while(! found)
     {
-        Ship *s = m_ships.at(index);
-        if(s->id() == inShipId)
-            return index;
+        uint id = m_ships.at(midIndex)->id();
+        if(id < inShipId)
+        {
+            lowerIndex = midIndex + 1;
+            midIndex = (lowerIndex + upperIndex) / 2;
+        }
+        else if(id > inShipId)
+        {
+            upperIndex = midIndex - 1;
+            midIndex = (lowerIndex + upperIndex) / 2;
+        }
+        else
+        {   // equal
+            found = true;
+        }
+        if(lowerIndex > upperIndex)
+            break;
     }
-    return -1;
+    if(found)
+        return midIndex;
+    else
+    {
+        // this did not happen during lots of tests, so everything looks good here
+        Q_ASSERT(false);
+        return -1;
+    }
 }
 
 
@@ -872,24 +882,13 @@ void Universe::processStrategyCommands(const uint inOwner, const QList<ComputerM
     {
         qDebug() << "cmd owner=" << inOwner <<  " wants to send ship " << cmd.shipId << " to id " << cmd.targetId;
 
-        Ship *sourceShip;
-        ShipInfo sourceShipInfo;
-        bool foundShip = false;
-
-        for(Ship *s : m_ships)
-        {
-            if(s->id() == cmd.shipId)
-            {
-                foundShip = true;
-                sourceShip = s;
-                sourceShipInfo = s->info();
-                break;
-            }
-        }
+        int shipIndex = shipIndexForId(cmd.shipId);
 
         // check nonexistent ships
-        if(! foundShip)
+        if(shipIndex < 0)
             return;
+        Ship *sourceShip = m_ships[shipIndex];
+        ShipInfo sourceShipInfo = sourceShip->info();
 
         // check for ownership
         if(sourceShipInfo.owner != inOwner)
@@ -958,15 +957,11 @@ void Universe::slotUniverseViewClicked(QPointF scenePos)
 void Universe::slotUniverseViewClickedFinishShipTarget(QPointF scenePos, uint shipId)
 {
     // find the source ship which needs new target
-    // @fixme: this search is O(N), but better would be O(log2(N))
+    int shipIndex = shipIndexForId(shipId);
+    Ship *sourceShip = m_ships[shipIndex];
 
-    Ship *sourceShip = 0;
-    for(Ship *s : m_ships)
-        if(s->id() == shipId)
-        {
-            sourceShip = s;
-            break;
-        }
+    Q_ASSERT(sourceShip);
+
     ShipInfo sourceShipInfo = sourceShip->info();
 
     IsleInfo isleInfo;
