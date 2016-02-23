@@ -170,7 +170,7 @@ void MainWindow::slotShowUniverseInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo
     QString s = QString("Population: %1").arg(isleInfo.population, 0, 'F', 0);
     m_uiWaterObjectInfo->labelHumanIslePopulation->setText(s);
 
-    s = QString("Technology: %1").arg(isleInfo.technology, 0, 'F', 0);
+    s = QString("Technology: %1").arg((int) isleInfo.technology);
     m_uiWaterObjectInfo->labelHumanIsleTechnology->setText(s);
 
     for(ShipInfo info : sList)
@@ -203,6 +203,28 @@ void MainWindow::slotShowUniverseInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo
         break;
     }
     m_uiWaterObjectInfo->labelHumanIsleDefaultTarget->setText(s);
+
+    // Buildlevel
+    // @fixme: hardcoded item numbers :-(
+    switch(isleInfo.shipToBuild)
+    {
+        case ShipTypeEnum::ST_BATTLESHIP:
+            m_uiWaterObjectInfo->cbHumanIsleShiptype->setCurrentIndex(0);
+            break;
+        case ShipTypeEnum::ST_COLONY:
+            m_uiWaterObjectInfo->cbHumanIsleShiptype->setCurrentIndex(1);
+            break;
+        case ShipTypeEnum::ST_COURIER:
+            m_uiWaterObjectInfo->cbHumanIsleShiptype->setCurrentIndex(2);
+            break;
+        case ShipTypeEnum::ST_FLEET:
+            m_uiWaterObjectInfo->cbHumanIsleShiptype->setCurrentIndex(3);
+            break;
+    }
+    s = QString("Build: %1%").arg(isleInfo.buildlevel * 100.0f, 0, 'F', 0);
+    m_uiWaterObjectInfo->labelHumanIsleBuildlevel->setText(s);
+
+
     // set page and save last state
     m_waterObjectInfo->setCurrentIndex(PAGE_HUMAN_ISLE);
     m_lastCalledPage = PAGE_HUMAN_ISLE;
@@ -226,6 +248,24 @@ void MainWindow::slotShowUniverseInfoShip(ShipInfo shipInfo)
     s = QString("Tech: %1").arg(shipInfo.technology, 3, 'F', 0);
     m_uiWaterObjectInfo->labelShipTechnology->setText(s);
 
+    // ship type
+    // @fixme: The related strings should go into static Ship::shipTypeName
+    switch(shipInfo.shipType)
+    {
+        case ShipTypeEnum::ST_BATTLESHIP:
+            m_uiWaterObjectInfo->labelShiptype->setText("Battleship");
+            break;
+        case ShipTypeEnum::ST_COLONY:
+            m_uiWaterObjectInfo->labelShiptype->setText("Colony");
+            break;
+        case ShipTypeEnum::ST_COURIER:
+            m_uiWaterObjectInfo->labelShiptype->setText("Courier");
+            break;
+        case ShipTypeEnum::ST_FLEET:
+            m_uiWaterObjectInfo->labelShiptype->setText("Fleet");
+            break;
+    }
+
     // set page and save last state
     m_waterObjectInfo->setCurrentIndex(PAGE_SHIP);
     m_lastCalledPage = PAGE_SHIP;
@@ -245,6 +285,24 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
     m_uiWaterObjectInfo->labelHumanShipDamage->setText(s);
     s = QString("Technology: %1").arg(shipInfo.technology, 2, 'F', 1);
     m_uiWaterObjectInfo->labelHumanShipTechnology->setText(s);
+
+    // ship type
+    // @fixme: The related strings should go into static Ship::shipTypeName
+    switch(shipInfo.shipType)
+    {
+        case ShipTypeEnum::ST_BATTLESHIP:
+            m_uiWaterObjectInfo->labelHumanShipShiptype->setText("Battleship");
+            break;
+        case ShipTypeEnum::ST_COLONY:
+            m_uiWaterObjectInfo->labelHumanShipShiptype->setText("Colony");
+            break;
+        case ShipTypeEnum::ST_COURIER:
+            m_uiWaterObjectInfo->labelHumanShipShiptype->setText("Courier");
+            break;
+        case ShipTypeEnum::ST_FLEET:
+            m_uiWaterObjectInfo->labelHumanShipShiptype->setText("Fleet");
+            break;
+    }
 
     m_uiWaterObjectInfo->tableHTargets->clearContents();
     m_uiWaterObjectInfo->tableHTargets->setRowCount(shipTargets.count());
@@ -323,7 +381,6 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
 
     if(shipInfo.hasTarget)
     {
-        // @fixme: the repeat-parameter must be used some time
         m_universeView->showShipPath(shipInfo.pos, shipTargets, shipInfo.cycleTargetList);
     }
 }
@@ -358,8 +415,6 @@ void MainWindow::slotSelectShipFromShipList(QTableWidgetItem *item)
     if(slItem == 0)
         return;
     uint shipId = slItem->id();
-
-    qInfo() << "MainWindow::slotSelectShipFromShipList(), id = " << shipId;
     ShipInfo shipInfo;
     m_universe->shipForId(shipId, shipInfo);
     m_lastCalledPage = PAGE_HUMAN_SHIP;
@@ -380,8 +435,7 @@ void MainWindow::slotSetNewTargetForShip()
         QVector<Target> shipTargets;
         m_universe->shipForId(id, shipInfo, shipTargets);
         if(shipTargets.count() > 0)
-            // @fixme: the repeat-parameter must be used some time
-            m_universeView->showShipPath(shipInfo.pos, shipTargets, false);
+            m_universeView->showShipPath(shipInfo.pos, shipTargets, shipInfo.cycleTargetList);
         m_universeView->toggleShipWantsTarget(shipInfo.attachPos, id, shipInfo.technology);
     }
     else if(m_lastCalledPage == PAGE_HUMAN_SHIP)
@@ -437,7 +491,6 @@ void MainWindow::slotCycleShipTargets(bool cycle)
 void MainWindow::slotDeleteTarget()
 {
     int selectedRow = m_uiWaterObjectInfo->tableHTargets->currentRow();
-    qInfo() << "I delete all the targets or current " << selectedRow;
     if(selectedRow < 0)
         m_universe->removeAllShipTargets(m_lastCalledShipInfo.id);
     else

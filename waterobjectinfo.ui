@@ -41,7 +41,7 @@
    <string>StackedWidget</string>
   </property>
   <property name="currentIndex">
-   <number>3</number>
+   <number>5</number>
   </property>
   <widget class="QWidget" name="pageReallyNothing"/>
   <widget class="QWidget" name="pageWater">
@@ -294,7 +294,7 @@
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QComboBox" name="comboBox">
+               <widget class="QComboBox" name="cbHumanIsleShiptype">
                 <item>
                  <property name="text">
                   <string>Battleship</string>
@@ -310,10 +310,15 @@
                   <string>Colony Ship</string>
                  </property>
                 </item>
+                <item>
+                 <property name="text">
+                  <string>Fleet</string>
+                 </property>
+                </item>
                </widget>
               </item>
               <item row="1" column="0" colspan="2">
-               <widget class="QLabel" name="label_10">
+               <widget class="QLabel" name="labelHumanIsleBuildlevel">
                 <property name="text">
                  <string>TextLabel</string>
                 </property>
@@ -448,6 +453,13 @@
     </size>
    </property>
    <layout class="QGridLayout" name="gridLayout_3">
+    <item row="2" column="1" colspan="2">
+     <widget class="QLabel" name="labelShipTechnology">
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="1">
      <widget class="QLabel" name="label_4">
       <property name="text">
@@ -462,7 +474,7 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="1">
+    <item row="4" column="1">
      <spacer name="verticalSpacer_3">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -489,8 +501,8 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="1" colspan="2">
-     <widget class="QLabel" name="labelShipTechnology">
+    <item row="3" column="1" colspan="2">
+     <widget class="QLabel" name="labelShiptype">
       <property name="text">
        <string>TextLabel</string>
       </property>
@@ -520,7 +532,7 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="0" colspan="3">
+    <item row="4" column="0" colspan="3">
      <widget class="QTableWidget" name="tableHTargets">
       <property name="showDropIndicator" stdset="0">
        <bool>false</bool>
@@ -554,7 +566,7 @@
       </attribute>
      </widget>
     </item>
-    <item row="4" column="0" colspan="3">
+    <item row="5" column="0" colspan="3">
      <widget class="QWidget" name="widget_3" native="true">
       <property name="minimumSize">
        <size>
@@ -630,6 +642,13 @@
     </item>
     <item row="2" column="0" colspan="2">
      <widget class="QLabel" name="labelHumanShipTechnology">
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0" colspan="2">
+     <widget class="QLabel" name="labelHumanShipShiptype">
       <property name="text">
        <string>TextLabel</string>
       </property>
