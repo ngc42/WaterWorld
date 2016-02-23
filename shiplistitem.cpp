@@ -64,8 +64,16 @@ ShipListItem::ShipListItem(const ShipListItemType inType, const ShipInfo inShipI
         QPainter p;
         p.begin(&damageBar);
         p.setBrush(QBrush(Qt::red));
-        int width = 20 * inShipInfo.damage;
+
+        // damage should be visible too, if damage is small
+        int width = 0;
+        if(inShipInfo.damage > 0.0f)
+            width = 5;
+        if(inShipInfo.damage > 0.25f)
+            width = 20 * inShipInfo.damage;
+
         p.fillRect(20 - width, 0, width, 10, Qt::red);
+
         p.end();
         setIcon(damageBar);  // show damage
         QString text = QString("Damage: %1%").arg(inShipInfo.damage * 100.0f, 3, 'F', 0);
