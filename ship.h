@@ -31,6 +31,10 @@ struct Target
 enum ShipPositionEnum {S_ONISLE, S_PATROL, S_OCEAN, S_TRASH};
 
 
+/**
+ * @brief The ShipTypeEnum enum describes different types of ships.
+ * If you modify this, have a look at Ship::typeName(const ShipTypeEnum inShipType).
+ */
 enum ShipTypeEnum {ST_BATTLESHIP, ST_COURIER, ST_COLONY, ST_FLEET};
 
 
@@ -119,6 +123,8 @@ public:
 
     // tester
     bool pointInShip(const QPointF inPos);
+
+    static QString typeName(const ShipTypeEnum inShipType);
 
 private:
     ShipTypeEnum m_shipType;

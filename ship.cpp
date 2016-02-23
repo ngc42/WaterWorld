@@ -269,6 +269,28 @@ bool Ship::pointInShip(const QPointF inPos)
 }
 
 
+QString Ship::typeName(const ShipTypeEnum inShipType)
+{
+    switch(inShipType)
+    {
+        case ShipTypeEnum::ST_BATTLESHIP:
+            return QString("Battleship");
+
+        case ShipTypeEnum::ST_COLONY:
+            return QString("Colony");
+
+        case ShipTypeEnum::ST_COURIER:
+            return QString("Courier");
+
+        case ShipTypeEnum::ST_FLEET:
+            return QString("Fleet");
+
+        default:    // whenever a stupid programmer forgets to add a type here ;-)
+            return QString("unknown type");
+    }
+}
+
+
 void Ship::fixTargetIndex()
 {
     int count = m_targetList.count();

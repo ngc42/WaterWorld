@@ -249,22 +249,7 @@ void MainWindow::slotShowUniverseInfoShip(ShipInfo shipInfo)
     m_uiWaterObjectInfo->labelShipTechnology->setText(s);
 
     // ship type
-    // @fixme: The related strings should go into static Ship::shipTypeName
-    switch(shipInfo.shipType)
-    {
-        case ShipTypeEnum::ST_BATTLESHIP:
-            m_uiWaterObjectInfo->labelShiptype->setText("Battleship");
-            break;
-        case ShipTypeEnum::ST_COLONY:
-            m_uiWaterObjectInfo->labelShiptype->setText("Colony");
-            break;
-        case ShipTypeEnum::ST_COURIER:
-            m_uiWaterObjectInfo->labelShiptype->setText("Courier");
-            break;
-        case ShipTypeEnum::ST_FLEET:
-            m_uiWaterObjectInfo->labelShiptype->setText("Fleet");
-            break;
-    }
+    m_uiWaterObjectInfo->labelShiptype->setText(Ship::typeName(shipInfo.shipType));
 
     // set page and save last state
     m_waterObjectInfo->setCurrentIndex(PAGE_SHIP);
@@ -287,22 +272,7 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
     m_uiWaterObjectInfo->labelHumanShipTechnology->setText(s);
 
     // ship type
-    // @fixme: The related strings should go into static Ship::shipTypeName
-    switch(shipInfo.shipType)
-    {
-        case ShipTypeEnum::ST_BATTLESHIP:
-            m_uiWaterObjectInfo->labelHumanShipShiptype->setText("Battleship");
-            break;
-        case ShipTypeEnum::ST_COLONY:
-            m_uiWaterObjectInfo->labelHumanShipShiptype->setText("Colony");
-            break;
-        case ShipTypeEnum::ST_COURIER:
-            m_uiWaterObjectInfo->labelHumanShipShiptype->setText("Courier");
-            break;
-        case ShipTypeEnum::ST_FLEET:
-            m_uiWaterObjectInfo->labelHumanShipShiptype->setText("Fleet");
-            break;
-    }
+    m_uiWaterObjectInfo->labelHumanShipShiptype->setText(Ship::typeName(shipInfo.shipType));
 
     m_uiWaterObjectInfo->tableHTargets->clearContents();
     m_uiWaterObjectInfo->tableHTargets->setRowCount(shipTargets.count());
