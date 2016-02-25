@@ -41,6 +41,24 @@ Ship::~Ship()
 }
 
 
+QString Ship::shipTypeName(const ShipTypeEnum inShipType)
+{
+    switch(inShipType)
+    {
+        case ShipTypeEnum::ST_BATTLESHIP:
+            return "Battleship";
+        case ShipTypeEnum::ST_COURIER:
+            return "Courier";
+        case ShipTypeEnum::ST_COLONY:
+            return "Colony";
+        case ShipTypeEnum::ST_FLEET:
+            return "Fleet";
+        default:
+            return "Only Programmer knows";
+    }
+}
+
+
 ShipInfo Ship::info() const
 {
     ShipInfo outInfo;

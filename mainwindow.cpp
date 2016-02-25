@@ -54,6 +54,11 @@ MainWindow::MainWindow(QWidget *inParent) :
     m_waterObjectInfo = new QStackedWidget;
     m_uiWaterObjectInfo->setupUi(m_waterObjectInfo);
     infoLayout->addWidget(m_waterObjectInfo);
+    m_uiWaterObjectInfo->cbHumanIsleShiptype->insertItem(ShipTypeEnum::ST_BATTLESHIP, Ship::shipTypeName(ShipTypeEnum::ST_BATTLESHIP));
+    m_uiWaterObjectInfo->cbHumanIsleShiptype->insertItem(ShipTypeEnum::ST_COURIER, Ship::shipTypeName(ShipTypeEnum::ST_COURIER));
+    m_uiWaterObjectInfo->cbHumanIsleShiptype->insertItem(ShipTypeEnum::ST_COLONY, Ship::shipTypeName(ShipTypeEnum::ST_COLONY));
+    m_uiWaterObjectInfo->cbHumanIsleShiptype->insertItem(ShipTypeEnum::ST_FLEET, Ship::shipTypeName(ShipTypeEnum::ST_FLEET));
+
 
     // universe show isles
     m_universe = new Universe(this, m_universeScene, m_universeScene->width(), m_universeScene->height(), 20, 3);
@@ -93,6 +98,8 @@ MainWindow::MainWindow(QWidget *inParent) :
     connect(m_uiWaterObjectInfo->pbClearDefaultTarget, SIGNAL(clicked()), this, SLOT(slotClearIsleTarget()));
     connect(m_uiWaterObjectInfo->tableWidget, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
             this, SLOT(slotSelectShipFromShipList(QTableWidgetItem*)));
+    connect(m_uiWaterObjectInfo->cbHumanIsleShiptype, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(slotBuildNewShipType(int)));
 
     // Push buttons on Info -> human ship
     connect(m_uiWaterObjectInfo->pbHumanShipRepeatTargets, SIGNAL(toggled(bool)),
@@ -176,7 +183,7 @@ void MainWindow::slotShowUniverseInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo
     for(ShipInfo info : sList)
     {
         m_uiWaterObjectInfo->tableWidget->insertRow(0);
-        QString shipName = QString("Sailor %1").arg(info.id);
+        QString shipName = QString("%1 %2").arg(Ship::typeName(info.shipType)).arg(info.id);
         ShipListItem *item1 = new ShipListItem(ShipListItem::SLIT_NAME, info, shipName);
         m_uiWaterObjectInfo->tableWidget->setItem(0, 0, item1);
 
@@ -205,20 +212,19 @@ void MainWindow::slotShowUniverseInfoHumanIsle(IsleInfo isleInfo, QList<ShipInfo
     m_uiWaterObjectInfo->labelHumanIsleDefaultTarget->setText(s);
 
     // Buildlevel
-    // @fixme: hardcoded item numbers :-(
     switch(isleInfo.shipToBuild)
     {
         case ShipTypeEnum::ST_BATTLESHIP:
-            m_uiWaterObjectInfo->cbHumanIsleShiptype->setCurrentIndex(0);
-            break;
-        case ShipTypeEnum::ST_COLONY:
-            m_uiWaterObjectInfo->cbHumanIsleShiptype->setCurrentIndex(1);
+            m_uiWaterObjectInfo->cbHumanIsleShiptype->setCurrentIndex(ShipTypeEnum::ST_BATTLESHIP);
             break;
         case ShipTypeEnum::ST_COURIER:
-            m_uiWaterObjectInfo->cbHumanIsleShiptype->setCurrentIndex(2);
+            m_uiWaterObjectInfo->cbHumanIsleShiptype->setCurrentIndex(ShipTypeEnum::ST_COURIER);
+            break;
+        case ShipTypeEnum::ST_COLONY:
+            m_uiWaterObjectInfo->cbHumanIsleShiptype->setCurrentIndex(ShipTypeEnum::ST_COLONY);
             break;
         case ShipTypeEnum::ST_FLEET:
-            m_uiWaterObjectInfo->cbHumanIsleShiptype->setCurrentIndex(3);
+            m_uiWaterObjectInfo->cbHumanIsleShiptype->setCurrentIndex(ShipTypeEnum::ST_FLEET);
             break;
     }
     s = QString("Build: %1%").arg(isleInfo.buildlevel * 100.0f, 0, 'F', 0);
@@ -448,6 +454,17 @@ void MainWindow::slotClearIsleTarget()
     uint isleId = id_v.toUInt(&ok);
     m_universe->removeDefaultIsleTarget(isleId);
     m_universe->callInfoScreen(m_lastCalledPage, m_lastCalledIsleInfo, m_lastCalledShipInfo);
+}
+
+
+void MainWindow::slotBuildNewShipType(int newType)
+{
+    if(m_lastCalledPage != PAGE_HUMAN_ISLE)
+        // new settled isle
+        return;
+    qInfo() << "isle " << m_lastCalledIsleInfo.id << " wants to build ship type: " << newType ;
+    m_universe->isleSetShipToBuild( m_lastCalledIsleInfo.id, (ShipTypeEnum) newType );
+
 }
 
 

@@ -41,7 +41,7 @@
    <string>StackedWidget</string>
   </property>
   <property name="currentIndex">
-   <number>5</number>
+   <number>3</number>
   </property>
   <widget class="QWidget" name="pageReallyNothing"/>
   <widget class="QWidget" name="pageWater">
@@ -294,28 +294,7 @@
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QComboBox" name="cbHumanIsleShiptype">
-                <item>
-                 <property name="text">
-                  <string>Battleship</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Courier</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Colony Ship</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Fleet</string>
-                 </property>
-                </item>
-               </widget>
+               <widget class="QComboBox" name="cbHumanIsleShiptype"/>
               </item>
               <item row="1" column="0" colspan="2">
                <widget class="QLabel" name="labelHumanIsleBuildlevel">

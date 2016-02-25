@@ -48,6 +48,8 @@ public:
 
     void isleForId(const uint inIsleId, IsleInfo & outIsleInfo);
 
+    void isleSetShipToBuild(const uint inIsleId, const ShipTypeEnum inShipToBuild);
+
     // for communication with OverviewDialog (used in MainWindow::slotToggleOverviewDialog())
     void getAllIsleInfos(QList<IsleInfo> & outIsleInfos);
     void getAllShipInfos(QList<ShipInfo> & outShipInfos);

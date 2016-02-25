@@ -145,6 +145,15 @@ void Universe::isleForId(const uint inIsleId, IsleInfo & outIsleInfo)
 }
 
 
+void Universe::isleSetShipToBuild(const uint inIsleId, const ShipTypeEnum inShipToBuild)
+{
+    int isleIndex = isleIndexForId(inIsleId);
+    if(isleIndex < 0)
+        return;
+    m_isles[isleIndex]->setShipToBuild(inShipToBuild);
+}
+
+
 void Universe::getAllIsleInfos(QList<IsleInfo> & outIsleInfos)
 {
     outIsleInfos.clear();
@@ -244,9 +253,21 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                 if(isleInfo.owner == Player::PLAYER_UNSETTLED)
                 {   // isle has no inhabitants
 
-                    // @fixme: colony ship MUST land on isle first
-                    setIsleOwnerById(isleInfo.id, shipInfo.owner, shipInfo.color);
-                    shipLandOnIsle(ship);
+                    shipFightIslePatol(ship, target.id);
+                    if(ship->positionType() == ShipPositionEnum::S_TRASH)
+                        continue;   // ship is destroyed
+
+                    if(shipInfo.shipType == ShipTypeEnum::ST_COLONY)
+                    {
+                        setIsleOwnerById(isleInfo.id, shipInfo.owner, shipInfo.color);
+                        shipLandOnIsle(ship);
+                    }
+                    else
+                    {
+                        // send to orbit
+                        ship->landOnIsle(target.id, target.pos);
+                        ship->setPositionType(ShipPositionEnum::S_PATROL);
+                    }
                 }
                 else if(isleInfo.owner == shipInfo.owner)
                 {   // own isle
@@ -550,8 +571,12 @@ void Universe::shipFightIslePatol(Ship *& inOutAttacker, const uint inIsleId)
     for(Ship *defender : m_ships)
     {
         ShipInfo defenderInfo = defender->info();
+
+        // for unowned isles we check, that there is no friendly fire
+        ShipInfo attackerInfo = inOutAttacker->info();
         if(defenderInfo.posType == ShipPositionEnum::S_PATROL and
-                defenderInfo.isleId == inIsleId)
+                defenderInfo.isleId == inIsleId and
+           attackerInfo.owner != defenderInfo.owner)
             shipFightShip(inOutAttacker, defender);
     }
 }

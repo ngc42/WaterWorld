@@ -35,7 +35,7 @@ enum ShipPositionEnum {S_ONISLE, S_PATROL, S_OCEAN, S_TRASH};
  * @brief The ShipTypeEnum enum describes different types of ships.
  * If you modify this, have a look at Ship::typeName(const ShipTypeEnum inShipType).
  */
-enum ShipTypeEnum {ST_BATTLESHIP, ST_COURIER, ST_COLONY, ST_FLEET};
+enum ShipTypeEnum {ST_BATTLESHIP = 0, ST_COURIER = 1, ST_COLONY = 2, ST_FLEET = 3};
 
 
 /* Things we get to know, if we click on a ship */
@@ -70,6 +70,9 @@ public:
     ~Ship();
 
     // getter
+
+    static QString shipTypeName(const ShipTypeEnum inShipType);
+
     QGraphicsRectItem* shape() const { return m_shape; }
 
     ShipInfo info() const;
