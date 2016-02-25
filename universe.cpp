@@ -466,7 +466,6 @@ void Universe::createIsles(const qreal inUniverseWidth, const qreal inUniverseHe
 
 void Universe::createShipOnIsle(UniverseScene *& inOutUniverseScene, const IsleInfo isleInfo)
 {
-
     Ship *s = new Ship(inOutUniverseScene, isleInfo.shipToBuild, m_lastInsertedId++, isleInfo.owner,
                        isleInfo.pos, isleInfo.color, ShipPositionEnum::S_ONISLE,
                        isleInfo.id, isleInfo.technology);
@@ -496,7 +495,6 @@ void Universe::shipFightShip(Ship *& inOutAttacker, Ship *& inOutDefender)
     if(info2.posType == ShipPositionEnum::S_TRASH)
         return;
 
-
     // Battleship (attack) against colony or courier
     if(info1.shipType == ShipTypeEnum::ST_BATTLESHIP and
        (info2.shipType == ShipTypeEnum::ST_COLONY or info2.shipType == ShipTypeEnum::ST_COURIER))
@@ -507,11 +505,16 @@ void Universe::shipFightShip(Ship *& inOutAttacker, Ship *& inOutDefender)
        (info1.shipType == ShipTypeEnum::ST_COLONY or info1.shipType == ShipTypeEnum::ST_COURIER))
         inOutAttacker->addDamage(2.0);
 
-    // both ships are courier or colony -> nothing happens
-    // @fixme: that way, diffent player can stay in the same orbit ???
+    // both ships are courier or colony -> both die
     if((info1.shipType == ShipTypeEnum::ST_COLONY or info1.shipType == ShipTypeEnum::ST_COURIER) and
         (info2.shipType == ShipTypeEnum::ST_COLONY or info2.shipType == ShipTypeEnum::ST_COURIER))
+    {
+        inOutAttacker->addDamage(2.0);
+        inOutAttacker->setPositionType(ShipPositionEnum::S_TRASH);
+        inOutDefender->addDamage(2.0);
+        inOutDefender->setPositionType(ShipPositionEnum::S_TRASH);
         return;
+    }
 
     // the rest is about Battleships and/or fleets
     // @fixme: make sure, fleets have something like a force !!!
@@ -556,14 +559,20 @@ void Universe::shipFightIslePatol(Ship *& inOutAttacker, const uint inIsleId)
 
 bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
 {
-    // @fixme: need to select for ship types
-    // @fixme: need to check, if there are other ships in orbit of unowned isles
+    // @fixme: Fleets unsupported
 
     ShipInfo info1 = inOutAttacker->info();
     IsleInfo info2;
     isleForId(inIsleId, info2);
     if(info1.posType == ShipPositionEnum::S_TRASH)
         return false;
+
+    // if it is really a fight (the reason for this method)
+    // then only Battelships and fleets have something to fight. Colony ships and couriers
+    // don't have something to fight.
+    if(info1.shipType == ShipTypeEnum::ST_COLONY or info1.shipType == ShipTypeEnum::ST_COURIER)
+        return false;
+
     if(info2.owner == Player::PLAYER_UNSETTLED or info2.owner == info1.owner)
     {
         //qInfo() << "BUG: unsettled or own isle, automatic won, no damage added";
@@ -619,8 +628,7 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
 
 
 void Universe::shipLandOnIsle(Ship *& inOutShipToLand)
-{
-    // @fixme: are we allowed to land on this isle?
+{   // This method is only called, whenever a ship lands on its own isle.
 
     ShipInfo shipInfo = inOutShipToLand->info();
     if(! shipInfo.hasTarget)
@@ -645,7 +653,6 @@ void Universe::shipLandOnIsle(Ship *& inOutShipToLand)
         targetIsle = m_isles[isleIndex];
         isleInfo = targetIsle->info();
     }
-
 
     if(isleInfo.id == 0 or shipInfo.owner != isleInfo.owner)
     {   // just to get sure
@@ -742,10 +749,12 @@ int Universe::shipIndexForPoint(const QPointF inScenePoint) const
 
 void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo, QVector<Target> & outShipTargets)
 {
-    outShipInfo.id = 0;
     int index = shipIndexForPoint(inScenePoint);
     if(index < 0)
+    {
+        outShipInfo.id = 0; // invalidate id;
         return;
+    }
     outShipInfo = m_ships.at(index)->info();
     outShipTargets = m_ships.at(index)->targets();
 }
@@ -753,10 +762,12 @@ void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo, 
 
 void Universe::shipForPoint(const QPointF inScenePoint, ShipInfo & outShipInfo)
 {
-    outShipInfo.id = 0;
     int index = shipIndexForPoint(inScenePoint);
     if(index < 0)
+    {
+        outShipInfo.id = 0;
         return;
+    }
     outShipInfo = m_ships.at(index)->info();
 }
 
@@ -1011,6 +1022,8 @@ void Universe::slotUniverseViewClickedFinishIsleTarget(QPointF scenePos, uint is
     int isleIndex = isleIndexForId(isleId);
     if(isleIndex >= 0)
         sourceIsle = m_isles[isleIndex];
+
+    Q_ASSERT(sourceIsle);
 
     IsleInfo targetIsleInfo;
     isleForPoint(scenePos, targetIsleInfo);

@@ -17,7 +17,6 @@ Ship::Ship(UniverseScene *& inOutRefScene, const uint inId, const uint inOwner,
     : Ship(inOutRefScene, ShipTypeEnum::ST_BATTLESHIP, inId,
            inOwner, inPos, inColor, inPosType, inIsleId, inTechnology)
 {
-
 }
 
 
@@ -34,9 +33,6 @@ Ship::Ship(UniverseScene *& inOutRefScene, const ShipTypeEnum inShipType, const 
     inOutRefScene->addItem(m_shape);
     m_shape->setBrush(QBrush(inColor));
 }
-
-
-
 
 
 Ship::~Ship()

@@ -67,7 +67,6 @@ public:
          const QPointF inPos, const QColor inColor, const ShipPositionEnum inPosType,
          const uint inIsleId, const float inTechnology);
 
-
     ~Ship();
 
     // getter
