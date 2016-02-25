@@ -12,12 +12,11 @@
 #include <ship.h>
 #include <computerplayer.h>
 #include <universescene.h>
+#include <waterobjectinfo.h>
+
 #include <QVector>
 #include <QList>
 #include <QPointF>
-
-
-enum InfoscreenPage {PAGE_NOTHING = 0, PAGE_WATER = 1, PAGE_ISLE = 2, PAGE_HUMAN_ISLE = 3, PAGE_SHIP = 4, PAGE_HUMAN_SHIP = 5};
 
 
 class Universe : public QObject
@@ -65,7 +64,8 @@ public:
     void nextRound(UniverseScene *& inOutUniverseScene);
 
     // update InfoScreen after MainWindow::nextRound()
-    void callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsleInfo, const ShipInfo inShipInfo);
+    void callInfoScreen(const InfoscreenPageEnum inPage, const IsleInfo inIsleInfo, const ShipInfo inShipInfo);
+
 
 private:
     void createIsles(const qreal inUniverseWidth, const qreal inUniverseHeight, const uint inNumIsles);

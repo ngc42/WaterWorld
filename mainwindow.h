@@ -13,13 +13,12 @@
 #include <minimapview.h>
 #include <universe.h>
 #include <overviewdialog.h>
+#include <waterobjectinfo.h>
+
 #include <QMainWindow>
-#include <QStackedWidget>
-#include <QTableWidgetItem>
 
 namespace Ui {
 class MainWindow;
-class StackedWidget;
 }
 
 
@@ -42,29 +41,20 @@ private:
     // Player overview
     OverviewDialog *m_overviewDialog;
 
-    // Info about water objects
-    Ui::StackedWidget *m_uiWaterObjectInfo;
-    QStackedWidget *m_waterObjectInfo;
+    // Info about water objects, the infoscreen
+    WaterObjectInfo *m_waterObjectInfo;
 
     // Universe
     Universe *m_universe;
-
-    /*
-     *  last info screen issued with sigShow***
-     * This is stored here, because after each nextRound(), we need to show the
-     * infoscreen again.
-     */
-    InfoscreenPage m_lastCalledPage;
-    ShipInfo m_lastCalledShipInfo;
-    IsleInfo m_lastCalledIsleInfo;
-
 
 protected:
     void paintEvent(QPaintEvent *inEvent);
 
 private slots:
-    // unverse wants us call infoscreen again
+    // unverse or infoscreen wants us call infoscreen again
     void slotRecallInfoscreen();
+    void slotRecallInfoscreenById(uint objectId);
+
     // user clicked somewhere on the ocean
     void slotShowUniverseInfoWater();
     void slotShowUniverseInfoIsle(IsleInfo isleInfo);
@@ -72,18 +62,19 @@ private slots:
     void slotShowUniverseInfoShip(ShipInfo shipInfo);
     void slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target> shipTargets);
 
+
     // user clicked a button on info view -> human isle
-    void slotDeleteShip();
-    void slotSetShipPartrol();
-    void slotSelectShipFromShipList(QTableWidgetItem *item);    // double click on ship list on human isle
-    void slotSetNewTargetForShip();
-    void slotSetNewTargetForIsle();
-    void slotClearIsleTarget();
-    void slotBuildNewShipType(int newType);
+    void slotDeleteShip(uint shipId);
+    void slotSetShipPartrol(uint shipId);
+    void slotSetNewTargetForShip(uint shipId);
+    void slotSetNewTargetForIsle(uint isleId);
+    void slotRemoveIsleTarget(uint isleId);
+    void slotBuildNewShipType(uint isleId, ShipTypeEnum newType);
 
     // user clicked a button on info view -> human ship
-    void slotCycleShipTargets(bool cycle);
-    void slotDeleteTarget();
+    void slotRepeatShipTargets(uint shipId, bool repeat);
+    void slotDeleteTarget(uint shipId, int index);
+
 
     // nextround
     void slotNextRound();

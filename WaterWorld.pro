@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     graphicspathitem.cpp \
     pathlistitem.cpp \
     computerplayer.cpp \
-    player.cpp
+    player.cpp \
+    waterobjectinfo.cpp
 
 HEADERS  += mainwindow.h \
     universescene.h \
@@ -44,7 +45,8 @@ HEADERS  += mainwindow.h \
     graphicspathitem.h \
     pathlistitem.h \
     computerplayer.h \
-    player.h
+    player.h \
+    waterobjectinfo.h
 
 FORMS    += mainwindow.ui \
     waterobjectinfo.ui \

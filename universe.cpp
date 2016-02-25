@@ -394,9 +394,9 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 }
 
 
-void Universe::callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsleInfo, const ShipInfo inShipInfo)
+void Universe::callInfoScreen(const InfoscreenPageEnum inPage, const IsleInfo inIsleInfo, const ShipInfo inShipInfo)
 {
-    if(inPage == InfoscreenPage::PAGE_ISLE)
+    if(inPage == InfoscreenPageEnum::PAGE_ISLE)
     {
         IsleInfo isleInfo;
         isleForId(inIsleInfo.id, isleInfo);
@@ -409,7 +409,7 @@ void Universe::callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsle
         else
             emit sigShowInfoIsle(isleInfo);
     }
-    else if(inPage == InfoscreenPage::PAGE_HUMAN_ISLE)
+    else if(inPage == InfoscreenPageEnum::PAGE_HUMAN_ISLE)
     {
         IsleInfo isleInfo;
         isleForId(inIsleInfo.id, isleInfo);
@@ -419,15 +419,15 @@ void Universe::callInfoScreen(const InfoscreenPage inPage, const IsleInfo inIsle
         else
             emit sigShowInfoIsle(isleInfo);
     }
-    else if(inPage == InfoscreenPage::PAGE_SHIP)
+    else if(inPage == InfoscreenPageEnum::PAGE_SHIP)
     {
         ShipInfo shipInfo;
         shipForId(inShipInfo.id, shipInfo);
         emit sigShowInfoShip(shipInfo);
     }
-    else if(inPage == InfoscreenPage::PAGE_WATER)
+    else if(inPage == InfoscreenPageEnum::PAGE_WATER)
         emit sigShowInfoWater();
-    else if(inPage == InfoscreenPage::PAGE_HUMAN_SHIP)
+    else if(inPage == InfoscreenPageEnum::PAGE_HUMAN_SHIP)
     {
         ShipInfo shipInfo;
         QVector<Target> targetList;
