@@ -90,7 +90,23 @@
    <bool>true</bool>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QHBoxLayout" name="centralLayout"/>
+   <layout class="QHBoxLayout" name="centralLayout">
+    <property name="spacing">
+     <number>5</number>
+    </property>
+    <property name="leftMargin">
+     <number>5</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>5</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -98,7 +114,7 @@
      <x>0</x>
      <y>0</y>
      <width>640</width>
-     <height>19</height>
+     <height>29</height>
     </rect>
    </property>
   </widget>

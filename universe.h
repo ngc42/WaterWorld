@@ -64,7 +64,7 @@ public:
     void nextRound(UniverseScene *& inOutUniverseScene);
 
     // update InfoScreen after MainWindow::nextRound()
-    void callInfoScreen(const InfoscreenPageEnum inPage, const IsleInfo inIsleInfo, const ShipInfo inShipInfo);
+    void callInfoScreen(const InfoscreenPageEnum inPage, const uint inId);
 
 
 private:

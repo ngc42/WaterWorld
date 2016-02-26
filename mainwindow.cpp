@@ -20,9 +20,6 @@ MainWindow::MainWindow(QWidget *inParent) :
 {
     m_ui->setupUi(this);
 
-    m_ui->centralLayout->setContentsMargins(5, 5, 5, 5);
-    m_ui->centralLayout->setSpacing(5);
-
     // the scene, where everything happens
     m_universeScene = new UniverseScene({0.0f, 0.0f, 1000.0f, 1000.0f}, this);
 
@@ -109,21 +106,27 @@ MainWindow::~MainWindow()
 
 void MainWindow::slotRecallInfoscreen()
 {
-    m_universe->callInfoScreen(m_waterObjectInfo->lastCalledPage(),
-                               m_waterObjectInfo->lastCalledIsleInfo(),
-                               m_waterObjectInfo->lastCalledShipInfo());
+    uint id = 0;
+    switch(m_waterObjectInfo->lastCalledPage())
+    {
+        case PAGE_HUMAN_ISLE:
+        case PAGE_ISLE:         // fall through
+
+            id = m_waterObjectInfo->lastCalledIsleInfo().id;
+        break;
+        case PAGE_HUMAN_SHIP:
+        case PAGE_SHIP:         // fall through
+            id = m_waterObjectInfo->lastCalledShipInfo().id;
+        default:
+            id = 0;
+    }
+    slotRecallInfoscreenById(id);
 }
 
 
 void MainWindow::slotRecallInfoscreenById(uint objectId)
 {
-    // @fixme: slotRecallInfoscreen and this here should be merged
-    // we don't know here, what to call
-    IsleInfo iInfo;
-    iInfo.id = objectId;
-    ShipInfo sInfo;
-    sInfo.id = objectId;
-    m_universe->callInfoScreen(m_waterObjectInfo->lastCalledPage(), iInfo, sInfo);
+    m_universe->callInfoScreen(m_waterObjectInfo->lastCalledPage(), objectId);
 }
 
 
@@ -160,7 +163,6 @@ void MainWindow::slotShowUniverseInfoShip(ShipInfo shipInfo)
 void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target> shipTargets)
 {
     m_universeView->hidePathItem();
-
     QVector<ExtendedTarget> extTargetList;
     for(Target t : shipTargets)
     {
@@ -199,8 +201,7 @@ void MainWindow::slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target
 
 void MainWindow::slotDeleteShip(uint shipId)
 {
-    // @fixme: we have ShipPositionEnum::S_TRASH, but this here really deletes the ship in place
-    // correct?
+    // this here instantly deletes a ship, because user wants this
     m_universe->deleteShipOnIsle(shipId);
 }
 
@@ -245,9 +246,7 @@ void MainWindow::slotSetNewTargetForIsle(uint isleId)
 void MainWindow::slotRemoveIsleTarget(uint isleId)
 {
     m_universe->removeDefaultIsleTarget(isleId);
-    m_universe->callInfoScreen(m_waterObjectInfo->lastCalledPage(),
-                               m_waterObjectInfo->lastCalledIsleInfo(),
-                               m_waterObjectInfo->lastCalledShipInfo());
+    slotRecallInfoscreen();
 }
 
 
@@ -270,9 +269,7 @@ void MainWindow::slotDeleteTarget(uint shipId, int index)
         m_universe->removeAllShipTargets(shipId);
     else
         m_universe->removeShipTargetByIndex(shipId, index);
-    m_universe->callInfoScreen(m_waterObjectInfo->lastCalledPage(),
-                               m_waterObjectInfo->lastCalledIsleInfo(),
-                               m_waterObjectInfo->lastCalledShipInfo());
+    slotRecallInfoscreen();
 }
 
 
@@ -281,9 +278,7 @@ void MainWindow::slotNextRound()
     m_universe->nextRound(m_universeScene);
     // call the infoscreen again. so there is a live update of ships and isles
     // during nextRound()
-    m_universe->callInfoScreen(m_waterObjectInfo->lastCalledPage(),
-                               m_waterObjectInfo->lastCalledIsleInfo(),
-                               m_waterObjectInfo->lastCalledShipInfo());
+    slotRecallInfoscreen();
 }
 
 

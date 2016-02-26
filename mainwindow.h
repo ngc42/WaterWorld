@@ -44,7 +44,7 @@ private:
     // Info about water objects, the infoscreen
     WaterObjectInfo *m_waterObjectInfo;
 
-    // Universe
+    // Universe where ships and isles live
     Universe *m_universe;
 
 private slots:
@@ -59,7 +59,6 @@ private slots:
     void slotShowUniverseInfoShip(ShipInfo shipInfo);
     void slotShowUniverseInfoHumanShip(ShipInfo shipInfo, QVector<Target> shipTargets);
 
-
     // user clicked a button on info view -> human isle
     void slotDeleteShip(uint shipId);
     void slotSetShipPartrol(uint shipId);
@@ -71,7 +70,6 @@ private slots:
     // user clicked a button on info view -> human ship
     void slotRepeatShipTargets(uint shipId, bool repeat);
     void slotDeleteTarget(uint shipId, int index);
-
 
     // nextround
     void slotNextRound();

@@ -394,12 +394,12 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 }
 
 
-void Universe::callInfoScreen(const InfoscreenPageEnum inPage, const IsleInfo inIsleInfo, const ShipInfo inShipInfo)
+void Universe::callInfoScreen(const InfoscreenPageEnum inPage, const uint inId)
 {
     if(inPage == InfoscreenPageEnum::PAGE_ISLE)
-    {
+    {   // inId means an isle-id
         IsleInfo isleInfo;
-        isleForId(inIsleInfo.id, isleInfo);
+        isleForId(inId, isleInfo);
         // owner may have changed
         if(isleInfo.owner == Player::PLAYER_HUMAN)
         {
@@ -410,9 +410,9 @@ void Universe::callInfoScreen(const InfoscreenPageEnum inPage, const IsleInfo in
             emit sigShowInfoIsle(isleInfo);
     }
     else if(inPage == InfoscreenPageEnum::PAGE_HUMAN_ISLE)
-    {
+    {   // inId means a human isle
         IsleInfo isleInfo;
-        isleForId(inIsleInfo.id, isleInfo);
+        isleForId(inId, isleInfo);
         // owner may have changed
         if(isleInfo.owner == Player::PLAYER_HUMAN)
             showHumanIsle(isleInfo);
@@ -420,18 +420,20 @@ void Universe::callInfoScreen(const InfoscreenPageEnum inPage, const IsleInfo in
             emit sigShowInfoIsle(isleInfo);
     }
     else if(inPage == InfoscreenPageEnum::PAGE_SHIP)
-    {
+    {   // inId means a enemy ship
         ShipInfo shipInfo;
-        shipForId(inShipInfo.id, shipInfo);
+        shipForId(inId, shipInfo);
         emit sigShowInfoShip(shipInfo);
     }
     else if(inPage == InfoscreenPageEnum::PAGE_WATER)
+    {   // inId has no meaning
         emit sigShowInfoWater();
+    }
     else if(inPage == InfoscreenPageEnum::PAGE_HUMAN_SHIP)
-    {
+    {   // inId means a human ship-id
         ShipInfo shipInfo;
         QVector<Target> targetList;
-        shipForId(inShipInfo.id, shipInfo, targetList);
+        shipForId(inId, shipInfo, targetList);
         if(shipInfo.owner == Player::PLAYER_HUMAN)
             emit sigShowInfoHumanShip(shipInfo, targetList);
         else
