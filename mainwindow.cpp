@@ -107,14 +107,6 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::paintEvent(QPaintEvent *inEvent)
-{
-     QMainWindow::paintEvent(inEvent);
-     QPainter painter(this);
-     painter.fillRect(inEvent->rect(), Qt::lightGray);
-}
-
-
 void MainWindow::slotRecallInfoscreen()
 {
     m_universe->callInfoScreen(m_waterObjectInfo->lastCalledPage(),

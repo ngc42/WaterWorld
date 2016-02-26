@@ -47,9 +47,6 @@ private:
     // Universe
     Universe *m_universe;
 
-protected:
-    void paintEvent(QPaintEvent *inEvent);
-
 private slots:
     // unverse or infoscreen wants us call infoscreen again
     void slotRecallInfoscreen();

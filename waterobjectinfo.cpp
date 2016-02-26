@@ -9,9 +9,7 @@
 #include <shiplistitem.h>
 #include <player.h>
 
-#include <QPaintEvent>
 #include <QTableWidget>
-#include <QTableWidgetItem>
 #include <QDebug>
 
 
