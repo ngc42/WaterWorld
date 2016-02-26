@@ -204,7 +204,7 @@
        <item>
         <widget class="QTabWidget" name="tabWidget">
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="pinfo">
           <attribute name="title">
@@ -245,7 +245,7 @@
                </widget>
               </item>
               <item row="0" column="2">
-               <widget class="QPushButton" name="pbClearDefaultTarget">
+               <widget class="QPushButton" name="pbRemoveDefaultTarget">
                 <property name="text">
                  <string>Clear Tgt</string>
                 </property>
@@ -342,28 +342,28 @@
             <number>0</number>
            </property>
            <item row="1" column="1">
-            <widget class="QPushButton" name="pbPatrol">
+            <widget class="QPushButton" name="pbSetShipPatrolIsle">
              <property name="text">
               <string>PAT</string>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QPushButton" name="pbDelete">
+            <widget class="QPushButton" name="pbDeleteShip">
              <property name="text">
               <string>DEL</string>
              </property>
             </widget>
            </item>
            <item row="1" column="2">
-            <widget class="QPushButton" name="pbTarget">
+            <widget class="QPushButton" name="pbSetShipTarget">
              <property name="text">
               <string>TGT</string>
              </property>
             </widget>
            </item>
            <item row="0" column="0" colspan="3">
-            <widget class="QTableWidget" name="tableWidget">
+            <widget class="QTableWidget" name="tblwHShipList">
              <property name="dragDropOverwriteMode">
               <bool>false</bool>
              </property>

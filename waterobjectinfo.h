@@ -17,13 +17,16 @@
 
 
 namespace Ui {
-class StackedWidget;
+    class StackedWidget;
 }
 
 
 enum InfoscreenPageEnum {PAGE_NOTHING = 0, PAGE_WATER = 1, PAGE_ISLE = 2, PAGE_HUMAN_ISLE = 3, PAGE_SHIP = 4, PAGE_HUMAN_SHIP = 5};
 
 
+/* Extended Target is a Target which knows the owner of the target.
+ * We need it here, because we want to draw the owner color of a target.
+ * For objects except isles or ships, the target_owner is 0 */
 struct ExtendedTarget
 {
     Target target;      // target of a ship
@@ -47,10 +50,6 @@ public:
     void showInfopageShip(const ShipInfo inShipInfo);
     void showInfopageHumanShip(const ShipInfo inShipInfo, const QVector<ExtendedTarget> inShipTargets);
 
-
-    // @fixme: remove this method
-    Ui::StackedWidget *ui() { return m_ui; }
-
     // getter for internal state
     InfoscreenPageEnum lastCalledPage() const { return m_lastCalledPage; }
     ShipInfo lastCalledShipInfo() const { return m_lastCalledShipInfo; }
@@ -59,11 +58,14 @@ public:
 private:
     Ui::StackedWidget *m_ui;
 
+    // saving state
     InfoscreenPageEnum m_lastCalledPage;
     ShipInfo m_lastCalledShipInfo;
     IsleInfo m_lastCalledIsleInfo;
 
 signals:
+    /* these signals are emitted after pressing buttons or selecting anything on this
+     * infoscreen, but first a shipId or isleId is calculated. */
     void signalDeleteShipById(uint shipId);
     void signalSetShipPatrolById(uint shipId);
     void signalCallInfoscreenById(uint objectId);
@@ -72,9 +74,7 @@ signals:
     void signalRemoveIsleTargetById(uint isleId);
     void signalSetBuildShipTypeById(uint isleId, ShipTypeEnum shipType);
     void signalSetRepeatTargetsById(uint shipId, bool repeat);
-    void signalDeleteTargetByIndex(uint ShipId, int index); // index == -1 means ALL targets
-
-
+    void signalDeleteTargetByIndex(uint shipId, int index); // index == -1 means ALL targets
 
 private slots:
     // user clicked a button on info view -> human isle
@@ -89,7 +89,6 @@ private slots:
     // user clicked a button on info view -> human ship
     void slotRepeatShipTargets(bool cycle);
     void slotDeleteTarget();
-
 };
 
 #endif // WATEROBJECTINFO_H

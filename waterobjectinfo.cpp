@@ -5,7 +5,6 @@
 
 
 #include <waterobjectinfo.h>
-#include <ship.h>
 #include <pathlistitem.h>
 #include <shiplistitem.h>
 #include <player.h>
@@ -25,17 +24,15 @@ WaterObjectInfo::WaterObjectInfo(QWidget *inParent)
     m_ui->cbHumanIsleShiptype->insertItem(ShipTypeEnum::ST_COLONY, Ship::shipTypeName(ShipTypeEnum::ST_COLONY));
     m_ui->cbHumanIsleShiptype->insertItem(ShipTypeEnum::ST_FLEET, Ship::shipTypeName(ShipTypeEnum::ST_FLEET));
 
-
     // Push buttons and more on Info -> human isle
-    connect(m_ui->pbDelete, SIGNAL(clicked()), this, SLOT(slotDeleteShip()));
-    connect(m_ui->pbPatrol, SIGNAL(clicked()), this, SLOT(slotSetShipPartrol()));
-    connect(m_ui->tableWidget, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
+    connect(m_ui->pbDeleteShip, SIGNAL(clicked()), this, SLOT(slotDeleteShip()));
+    connect(m_ui->pbSetShipPatrolIsle, SIGNAL(clicked()), this, SLOT(slotSetShipPartrol()));
+    connect(m_ui->tblwHShipList, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
             this, SLOT(slotSelectShipFromShipList(QTableWidgetItem*)));
-    connect(m_ui->pbTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForShip()));
+    connect(m_ui->pbSetShipTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForShip()));
     connect(m_ui->pbHumanShipSetTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForShip()));
-
     connect(m_ui->pbSetDefaultTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForIsle()));
-    connect(m_ui->pbClearDefaultTarget, SIGNAL(clicked()), this, SLOT(slotRemoveIsleTarget()));
+    connect(m_ui->pbRemoveDefaultTarget, SIGNAL(clicked()), this, SLOT(slotRemoveIsleTarget()));
     connect(m_ui->cbHumanIsleShiptype, SIGNAL(currentIndexChanged(int)),
             this, SLOT(slotBuildNewShipType(int)));
 
@@ -64,7 +61,11 @@ void WaterObjectInfo::showInfopageWater()
 
 void WaterObjectInfo::showInfopageIsle(const IsleInfo inIsleInfo)
 {
+    // save state
     m_lastCalledPage = PAGE_ISLE;
+    m_lastCalledIsleInfo = inIsleInfo;
+
+    // prepare page
     QPixmap pix(30, 20);
     pix.fill(inIsleInfo.color);
     m_ui->labelIsleId->setText(QString("%1").arg(inIsleInfo.id));
@@ -75,25 +76,27 @@ void WaterObjectInfo::showInfopageIsle(const IsleInfo inIsleInfo)
     s = QString("Technology: %1").arg(inIsleInfo.technology, 0, 'F', 0);
     m_ui->labelIsleTechnology->setText(s);
 
-    // set page and save last state
+    // show page
     setCurrentIndex(PAGE_ISLE);
-    m_lastCalledIsleInfo = inIsleInfo;
 }
 
 
 void WaterObjectInfo::showInfopageHumanIsle(const IsleInfo inIsleInfo, const QList<ShipInfo> inShipInfoList)
 {
+    // save state
     m_lastCalledPage = PAGE_HUMAN_ISLE;
+    m_lastCalledIsleInfo = inIsleInfo;
 
+    // prepare page
     QPixmap pix(30, 20);
     pix.fill(inIsleInfo.color);
     m_ui->labelHumanIsleId->setText(QString("%1").arg(inIsleInfo.id));
     m_ui->labelHumanIsleId->setProperty("ISLEID", QVariant(inIsleInfo.id));
     m_ui->labelHumanIsleColor->setPixmap(pix);
 
-    m_ui->tableWidget->setColumnCount(3);
-    m_ui->tableWidget->clearContents();
-    m_ui->tableWidget->setRowCount(0);
+    m_ui->tblwHShipList->setColumnCount(3);
+    m_ui->tblwHShipList->clearContents();
+    m_ui->tblwHShipList->setRowCount(0);
 
     QString s = QString("Population: %1").arg(inIsleInfo.population, 0, 'F', 0);
     m_ui->labelHumanIslePopulation->setText(s);
@@ -103,19 +106,19 @@ void WaterObjectInfo::showInfopageHumanIsle(const IsleInfo inIsleInfo, const QLi
 
     for(ShipInfo info : inShipInfoList)
     {
-        m_ui->tableWidget->insertRow(0);
+        m_ui->tblwHShipList->insertRow(0);
         QString shipName = QString("%1 %2").arg(Ship::typeName(info.shipType)).arg(info.id);
         ShipListItem *item1 = new ShipListItem(ShipListItem::SLIT_NAME, info, shipName);
-        m_ui->tableWidget->setItem(0, 0, item1);
+        m_ui->tblwHShipList->setItem(0, 0, item1);
 
         ShipListItem *item2 = new ShipListItem(ShipListItem::SLIT_STATUS, info, "");
-        m_ui->tableWidget->setItem(0, 1, item2);
+        m_ui->tblwHShipList->setItem(0, 1, item2);
 
         ShipListItem *item3 = new ShipListItem(ShipListItem::SLIT_TECHNOLOGY, info, "");
-        m_ui->tableWidget->setItem(0, 2, item3);
+        m_ui->tblwHShipList->setItem(0, 2, item3);
     }
 
-    m_ui->tableWidget->resizeColumnsToContents();
+    m_ui->tblwHShipList->resizeColumnsToContents();
 
     // default target
     switch(inIsleInfo.defaultTargetType)
@@ -151,16 +154,18 @@ void WaterObjectInfo::showInfopageHumanIsle(const IsleInfo inIsleInfo, const QLi
     s = QString("Build: %1%").arg(inIsleInfo.buildlevel * 100.0f, 0, 'F', 0);
     m_ui->labelHumanIsleBuildlevel->setText(s);
 
-    // set page and save last state
+    // show page
     setCurrentIndex(PAGE_HUMAN_ISLE);
-    m_lastCalledIsleInfo = inIsleInfo;
 }
 
 
 void WaterObjectInfo::showInfopageShip(const ShipInfo inShipInfo)
 {
+    // save state
     m_lastCalledPage = PAGE_SHIP;
+    m_lastCalledShipInfo = inShipInfo;
 
+    // prepare page
     QPixmap pix(30, 20);
     pix.fill(inShipInfo.color);
 
@@ -176,14 +181,18 @@ void WaterObjectInfo::showInfopageShip(const ShipInfo inShipInfo)
     // ship type
     m_ui->labelShiptype->setText(Ship::typeName(inShipInfo.shipType));
 
-    // set page and save last state
+    // show page
     setCurrentIndex(PAGE_SHIP);
-    m_lastCalledShipInfo = inShipInfo;
 }
 
 
 void WaterObjectInfo::showInfopageHumanShip(const ShipInfo inShipInfo, const QVector<ExtendedTarget> inShipTargets)
 {
+    // save state
+    m_lastCalledPage = PAGE_HUMAN_SHIP;
+    m_lastCalledShipInfo = inShipInfo;
+
+    // prepare page
     QPixmap pix(30, 20);
     pix.fill(inShipInfo.color);
     m_ui->labelHumanShipId->setText(QString("%1").arg(inShipInfo.id));
@@ -245,40 +254,34 @@ void WaterObjectInfo::showInfopageHumanShip(const ShipInfo inShipInfo, const QVe
 
     m_ui->tableHTargets->resizeColumnsToContents();
 
-    // set page and save last state
+    // show page
     setCurrentIndex(PAGE_HUMAN_SHIP);
-    m_lastCalledPage = PAGE_HUMAN_SHIP;
-    m_lastCalledShipInfo = inShipInfo;
 }
 
 
 void WaterObjectInfo::slotDeleteShip()
 {
-    if(m_ui->tableWidget->currentRow() < 0)
+    if(m_ui->tblwHShipList->currentRow() < 0)
         return;
-    ShipListItem *item = (ShipListItem* ) m_ui->tableWidget->currentItem();
+    ShipListItem *item = (ShipListItem* ) m_ui->tblwHShipList->currentItem();
     emit signalDeleteShipById(item->id());
 }
 
 
 void WaterObjectInfo::slotSetShipPartrol()
 {
-    if(m_ui->tableWidget->currentRow() < 0)
+    if(m_ui->tblwHShipList->currentRow() < 0)
         return;
-    ShipListItem *item = (ShipListItem* ) m_ui->tableWidget->currentItem();
+    ShipListItem *item = (ShipListItem* ) m_ui->tblwHShipList->currentItem();
     emit signalSetShipPatrolById(item->id());
 }
 
 
 void WaterObjectInfo::slotSelectShipFromShipList(QTableWidgetItem *item)
 {
-    // @fixme: should be Q_ASSERT
-    if(m_lastCalledPage != PAGE_HUMAN_ISLE)
-        return;
+    Q_ASSERT(m_lastCalledPage == PAGE_HUMAN_ISLE);
     ShipListItem *slItem = dynamic_cast<ShipListItem*>(item);
-    // @fixme: should be Q_ASSERT
-    if(slItem == 0)
-        return;
+    Q_ASSERT(slItem != 0);
     uint shipId = slItem->id();
     m_lastCalledPage = PAGE_HUMAN_SHIP;
     emit signalCallInfoscreenById(shipId);
@@ -289,16 +292,19 @@ void WaterObjectInfo::slotSetNewTargetForShip()
 {
     if(m_lastCalledPage == PAGE_HUMAN_ISLE)
     {
-        if(m_ui->tableWidget->currentRow() < 0)
+        if(m_ui->tblwHShipList->currentRow() < 0)
             return;
-        ShipListItem *item = (ShipListItem* ) m_ui->tableWidget->currentItem();
+        ShipListItem *item = (ShipListItem* ) m_ui->tblwHShipList->currentItem();
         uint id = item->id();
         emit signalSetNewTargetForShip(id);
+        return;
     }
-    else if(m_lastCalledPage == PAGE_HUMAN_SHIP)
+    if(m_lastCalledPage == PAGE_HUMAN_SHIP)
     {
         emit signalSetNewTargetForShip(0);
+        return;
     }
+    Q_ASSERT(false);    // anything else should crash
 }
 
 
