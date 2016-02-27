@@ -10,6 +10,8 @@
 #include <player.h>
 
 #include <QTableWidget>
+#include <QPalette>
+#include <QLineEdit>
 #include <QDebug>
 
 
@@ -39,8 +41,26 @@ WaterObjectInfo::WaterObjectInfo(QWidget *inParent)
             this, SLOT(slotRepeatShipTargets(bool)));
     connect(m_ui->pbHumanShipDelTarget, SIGNAL(clicked()), this, SLOT(slotDeleteTarget()));
 
-
     setCurrentIndex(PAGE_NOTHING);
+
+    setStyleSheet("QWidget { background-color : #666666; color : white;}");
+
+    QString stylesheetOwnIsleTab = "QTabBar::tab { background: #666666; color: #00cc00; padding: 10px; border: 1px solid #999999; } "
+                  "QTabWidget::pane { border-top: 1px solid #999999; } "
+          "QTabBar::tab:selected { color: #00ff00;} "
+          "QWidget { background: #666666; color: white; } ";
+    m_ui->tabWidget->setStyleSheet(stylesheetOwnIsleTab);
+
+    QString stylesheetOwnShipTargets = "QWidget { border: 1px solid #999999;} ";
+    m_ui->tableHTargets->setStyleSheet(stylesheetOwnShipTargets);
+
+    // this line edit is only needed because QComboBox does not support
+    // changing the text color of the display-part (a label?) for readonly
+    // comboboxes.
+    QLineEdit *le = new QLineEdit();
+    le->setReadOnly(true);
+    m_ui->cbHumanIsleShiptype->setLineEdit(le);
+    m_ui->cbHumanIsleShiptype->setStyleSheet("QComboBox:editable { color: #00ff00; } ");
 }
 
 
@@ -299,7 +319,7 @@ void WaterObjectInfo::slotSetNewTargetForShip()
     }
     if(m_lastCalledPage == PAGE_HUMAN_SHIP)
     {
-        emit signalSetNewTargetForShip(0);
+        emit signalSetNewTargetForShip(m_lastCalledShipInfo.id);
         return;
     }
     Q_ASSERT(false);    // anything else should crash

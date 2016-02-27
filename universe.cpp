@@ -1035,7 +1035,6 @@ void Universe::slotUniverseViewClickedFinishShipTarget(QPointF scenePos, uint sh
             sourceShip->setTargetWater(scenePos);
         }
     }
-
     // call the infoscreen again, as the reason for a new target is one of 2 infoscreen-buttons
     emit sigRecallInfoscreen();
 }

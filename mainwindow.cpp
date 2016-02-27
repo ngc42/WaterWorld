@@ -107,16 +107,17 @@ MainWindow::~MainWindow()
 void MainWindow::slotRecallInfoscreen()
 {
     uint id = 0;
+
     switch(m_waterObjectInfo->lastCalledPage())
     {
         case PAGE_HUMAN_ISLE:
         case PAGE_ISLE:         // fall through
-
             id = m_waterObjectInfo->lastCalledIsleInfo().id;
-        break;
+            break;
         case PAGE_HUMAN_SHIP:
         case PAGE_SHIP:         // fall through
             id = m_waterObjectInfo->lastCalledShipInfo().id;
+            break;
         default:
             id = 0;
     }
@@ -258,7 +259,6 @@ void MainWindow::slotBuildNewShipType(uint isleId, ShipTypeEnum newType)
 
 void MainWindow::slotRepeatShipTargets(uint shipId, bool repeat)
 {
-    qInfo() << "MainWindow::slotCycleShipTargets( " << repeat << " )";
     m_universe->shipSetCycleTargets(shipId, repeat);
 }
 
