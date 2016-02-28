@@ -904,13 +904,18 @@ void Universe::prepareStrategies()
         player->setIsles(isleInfosPublic, isleInfosPrivate);
 
         QList<ShipInfo> shipInfosPublic;
-        QList<ShipInfo> shipInfosPrivate;
+        QList<ExtendedShipInfo> shipInfosPrivate;
 
         for(Ship *ship : m_ships)
         {
             ShipInfo shipInfo = ship->info();
             if(shipInfo.owner == player->owner())
-                shipInfosPrivate.append(shipInfo);
+            {
+                ExtendedShipInfo fullInfo;
+                fullInfo.shipInfo = shipInfo;
+                fullInfo.targets = ship->targets();
+                shipInfosPrivate.append(fullInfo);
+            }
             else
             {
                 if(shipInfo.posType == ShipPositionEnum::S_OCEAN)
@@ -926,48 +931,120 @@ void Universe::prepareStrategies()
 
 void Universe::processStrategyCommands(const uint inOwner, const QList<ComputerMove> inComputerMoves)
 {
-    // @fixme: we really need to check, if strategy is cheating
     if(inComputerMoves.isEmpty())
         return;
     for(ComputerMove cmd : inComputerMoves)
     {
-        qDebug() << "cmd owner=" << inOwner <<  " wants to send ship " << cmd.shipId << " to id " << cmd.targetId;
-
-        int shipIndex = shipIndexForId(cmd.shipId);
-
-        // check nonexistent ships
-        if(shipIndex < 0)
-            return;
-        Ship *sourceShip = m_ships[shipIndex];
-        ShipInfo sourceShipInfo = sourceShip->info();
-
-        // check for ownership
-        if(sourceShipInfo.owner != inOwner)
-            return;
-
-        if(cmd.targetType == Target::TargetEnum::T_ISLE)
+        switch(cmd.moveType)
         {
-            IsleInfo isleInfo;
-            isleForId(cmd.targetId, isleInfo);
-            // check valid isle
-            if(isleInfo.id == 0)
-                return;
-            sourceShip->setTargetIsle(isleInfo.id, isleInfo.pos);
-        }
-        else if(cmd.targetType == Target::TargetEnum::T_SHIP)
-        {
-            ShipInfo shipInfo;
-            shipForId(cmd.targetId, shipInfo);
-            // check valid ship
-            if(shipInfo.id == 0)
-                return;
-            sourceShip->setTargetShip(shipInfo.id, shipInfo.pos);
-        }
-        else // must be water
-        {
-            sourceShip->setTargetWater(cmd.pos);
-        }
+            case ComputerMove::MT_ISLE_ALL_SHIPS_TO_PATROL:
+            {
+                qInfo() << "Strategy, MT_ISLE_ALL_SHIPS_TO_PATROL: " << cmd.sourceId;
+                IsleInfo isleInfo;
+                isleForId(cmd.sourceId, isleInfo);
+                if(isleInfo.id > 0 and isleInfo.owner == inOwner)
+                {
+                    // not cheating
+                    for(Ship *s : m_ships)
+                    {
+                        // @fixme: missing fleet
+                        if(s->positionType() == ShipPositionEnum::S_ONISLE and
+                                s->info().isleId == cmd.sourceId and
+                                s->info().shipType == ShipTypeEnum::ST_BATTLESHIP)
+                        {
+                            s->setPositionType(ShipPositionEnum::S_PATROL);
+                        }
+                    }
+                }
+                else
+                    qInfo() << ">REJECTED";
+            }
+                break;
+            case ComputerMove::MT_ISLE_BUILD_SHIPTYPE:
+            {
+                qInfo() << "Strategy, MT_ISLE_BUILD_SHIPTYPE: isle:" << cmd.sourceId << " type: " << cmd.shipTypeToBuild;
+                int isleIndex = isleIndexForId(cmd.sourceId);
+                if(isleIndex < 0)
+                    return;
+                IsleInfo isleInfo = m_isles[isleIndex]->info();
+                if(isleInfo.id > 0 and isleInfo.owner == inOwner)
+                {
+                    // not cheating
+                    if(isleInfo.shipToBuild != cmd.shipTypeToBuild)
+                        m_isles[isleIndex]->setShipToBuild(cmd.shipTypeToBuild);
+                }
+                else
+                    qInfo() << ">REJECTED";
+            }
+                break;
+            case ComputerMove::MT_SHIP_SET_PATROL:
+            {
+                qInfo() << "Strategy, MT_SHIP_SET_PATROL: isle:" << cmd.targetId << " source ship:" << cmd.sourceId;
+                IsleInfo isleInfo;
+                isleForId(cmd.targetId, isleInfo);
+                if(isleInfo.id > 0 and isleInfo.owner == inOwner)
+                {
+                    // not cheating
+                    int shipIndex = shipIndexForId(cmd.sourceId);
+                    if(shipIndex < 0)
+                        return;
+                    Ship *s = m_ships[shipIndex];
+                    ShipInfo shipInfo = s->info();
 
+                    // if the ship is on target isle...
+                    if(s->positionType() == ShipPositionEnum::S_ONISLE and
+                            shipInfo.isleId == cmd.targetId)
+                    {
+                        s->setPositionType(ShipPositionEnum::S_PATROL);
+                    }
+                }
+                else
+                    qInfo() << ">REJECTED";
+            }
+                break;
+            case ComputerMove::MT_SHIP_SET_TARGET:
+            {
+                qInfo() << "Strategy, MT_SHIP_SET_PATROL: ship:" << cmd.sourceId << " has target:" << cmd.targetType
+                        << " with target id: " << cmd.targetId;
+                int sourceShipIndex = shipIndexForId(cmd.sourceId);
+                if(sourceShipIndex < 0)
+                    return;
+                ShipInfo sourceShipInfo = m_ships[sourceShipIndex]->info();
+                if(sourceShipInfo.owner == inOwner)
+                {
+                    switch(cmd.targetType)
+                    {
+                        case Target::T_SHIP:
+                        {
+                            ShipInfo otherShipInfo;
+                            shipForId(cmd.targetId, otherShipInfo);
+                            if(otherShipInfo.id > 0)
+                            {
+                                m_ships[sourceShipIndex]->setTargetShip(otherShipInfo.id, otherShipInfo.pos);
+                            }
+                        }
+                            break;
+                        case Target::T_ISLE:
+                        {
+                            IsleInfo otherIsleInfo;
+                            isleForId(cmd.targetId, otherIsleInfo);
+                            if(otherIsleInfo.id > 0)
+                            {
+                                m_ships[sourceShipIndex]->setTargetIsle(otherIsleInfo.id, otherIsleInfo.pos);
+                            }
+                        }
+                        case Target::T_WATER:
+                            m_ships[sourceShipIndex]->setTargetWater(cmd.pos);
+                            break;
+                        default:
+                            Q_ASSERT(false);
+                    }
+                }
+                else
+                    qInfo() << ">REJECTED";
+            }
+                break;
+        }
     }
 }
 

@@ -13,14 +13,28 @@
 #include <ship.h>
 #include <QColor>
 #include <QList>
+#include <QPair>
+
+
+struct ExtendedShipInfo
+{
+    ShipInfo shipInfo;
+    QVector<Target> targets;
+};
 
 
 struct ComputerMove
 {
-    uint owner;
-    uint shipId;
+    // @fixme: "add to fleet" and "multitargets" (repeatable) are missing
+    enum MoveTypeEnum { MT_ISLE_BUILD_SHIPTYPE,
+                        MT_ISLE_ALL_SHIPS_TO_PATROL,
+                        MT_SHIP_SET_TARGET,
+                        MT_SHIP_SET_PATROL};
+    MoveTypeEnum moveType;
+    ShipTypeEnum shipTypeToBuild;   // sourceId must build this shiptype
+    uint sourceId;  // ship or isle, the waterobject we talk about
     Target::TargetEnum targetType;
-    uint targetId;      //  for ship or isle target
+    uint targetId;      //  for ship or isle target, target isle if ship goes patrol
     QPointF pos;        // for water target
 };
 
@@ -42,7 +56,7 @@ public:
      * @param inPublicShipInfos - list of public visible enemy ships (ShipPositionEnum::S_OCEAN)
      * @param inPrivateShipInfos - list of own ships
      */
-    void setShips(const QList<ShipInfo> inPublicShipInfos, const QList<ShipInfo> inPrivateShipInfos);
+    void setShips(const QList<ShipInfo> inPublicShipInfos, const QList<ExtendedShipInfo> inPrivateShipInfos);
 
     /**
      * @brief nextRound - processes the strategy and returns a list of moves to the caller
@@ -50,9 +64,21 @@ public:
      */
     void nextRound(QList<ComputerMove> & outMoves);
 
+
 private:
 
 protected:
+
+    // make a move and append it to the list
+    void makeMoveIsleBuildShiptype(QList<ComputerMove> & outMoves, const uint inIsleId, const ShipTypeEnum inShipType);
+    void makeMoveIsleAllShipsToPatrol(QList<ComputerMove> & outMoves, const uint inIsleId);
+    void makeMoveShipSetTargetShip(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetShipId);
+    void makeMoveShipSetTargetIsle(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetIsleId);
+    void makeMoveShipSetTargetWater(QList<ComputerMove> & outMoves, const uint inSourceShipId, const QPointF inWaterPos);
+    void makeMoveShipSetPatrol(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetIsleId);
+
+
+
     /**
      * @brief orderedUnsettledOrEnemyIsleFromCenter
      * @param inSetUnsettled - true: return a list of unsettled isles, false: enemy isles
@@ -60,11 +86,13 @@ protected:
      */
     QList<uint> orderedUnsettledOrEnemyIsleFromCenter(const bool inSetUnsettled) const;
 
+    void closestHomeIsleFromEnemyIsle(const uint inEnemyIsleId, IsleInfo & outHomeIsleInfo);
+
     QList<IsleInfo> m_publicIsles;
     QList<IsleInfo> m_privateIsles;
 
     QList<ShipInfo> m_publicShips;
-    QList<ShipInfo> m_privateShips;
+    QList<ExtendedShipInfo> m_privateShips;
 
     bool m_thereAreUnownedIsles;
     QPointF m_centerOfMyIsles;

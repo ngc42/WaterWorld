@@ -4,7 +4,8 @@
  */
 
 
-#include "computerplayer.h"
+#include <computerplayer.h>
+
 #include <QPair>
 #include <QSet>
 #include <QDebug>
@@ -13,7 +14,6 @@
 ComputerPlayer::ComputerPlayer(const uint inOwner)
     : Player(inOwner)
 {
-
 }
 
 
@@ -39,7 +39,7 @@ void ComputerPlayer::setIsles(const QList<IsleInfo> inPublicIsleInfos, const QLi
 }
 
 
-void ComputerPlayer::setShips(const QList<ShipInfo> inPublicShipInfos, const QList<ShipInfo> inPrivateShipInfos)
+void ComputerPlayer::setShips(const QList<ShipInfo> inPublicShipInfos, const QList<ExtendedShipInfo> inPrivateShipInfos)
 {
     m_publicShips = inPublicShipInfos;
     m_privateShips = inPrivateShipInfos;
@@ -48,61 +48,88 @@ void ComputerPlayer::setShips(const QList<ShipInfo> inPublicShipInfos, const QLi
 
 void ComputerPlayer::nextRound(QList<ComputerMove> & outMoves)
 {
-    QSet<uint> shipsAlreadyProcessed;
+    uint numMyIsles = m_privateIsles.count();
 
-    if(m_thereAreUnownedIsles)
-    {
-        QList<uint> unownedIds = orderedUnsettledOrEnemyIsleFromCenter(true);
-        for(uint isleId : unownedIds)
-        {
-            bool shipsAvailable = false;
-            for(ShipInfo shipInfo : m_privateShips)
-            {
-                if(shipInfo.posType == ShipPositionEnum::S_ONISLE and !shipsAlreadyProcessed.contains(shipInfo.id))
-                {
-                    shipsAlreadyProcessed.insert(shipInfo.id);
-                    shipsAvailable = true;
-                    ComputerMove cmd;
-                    cmd.owner = owner();
-                    cmd.shipId = shipInfo.id;
-                    cmd.targetType = Target::TargetEnum::T_ISLE;
-                    cmd.targetId = isleId;
-                    outMoves.append(cmd);
+    if(numMyIsles == 0)
+    {   // stage 0, no isles, we are close to lose the game
 
-                    break;
-                }
-            }
-            if(! shipsAvailable)
-                break;
-        }
+        return;
     }
-    else
-    {
-        QList<uint> enemyIds = orderedUnsettledOrEnemyIsleFromCenter(false);
-        for(uint isleId : enemyIds )
-        {
-            int sendNumShips = 0;
-            for(ShipInfo shipInfo : m_privateShips)
-            {
-                if(shipInfo.posType == ShipPositionEnum::S_ONISLE and !shipsAlreadyProcessed.contains(shipInfo.id))
-                {
-                    shipsAlreadyProcessed.insert(shipInfo.id);
-                    ComputerMove cmd;
-                    cmd.owner = owner();
-                    cmd.shipId = shipInfo.id;
-                    cmd.targetType = Target::TargetEnum::T_ISLE;
-                    cmd.targetId = isleId;
-                    outMoves.append(cmd);
+    if(numMyIsles == 1)
+    {   // stage 1: try to get a second isle
 
-                    sendNumShips++;
-                }
-                if(sendNumShips > 10)
-                    break;
-            }
-            if(sendNumShips > 10)
-                break;
-        }
+        return;
     }
+    if(m_thereAreUnownedIsles and numMyIsles < 10)
+    {   // stage 2: try to get 10 or more isles
+
+        return;
+    }
+
+    // stage 3, shoot them down
+
+}
+
+
+void ComputerPlayer::makeMoveIsleBuildShiptype(QList<ComputerMove> & outMoves, const uint inIsleId, const ShipTypeEnum inShipType)
+{
+    ComputerMove cmd;
+    cmd.moveType = ComputerMove::MT_ISLE_BUILD_SHIPTYPE;
+    cmd.sourceId = inIsleId;
+    cmd.shipTypeToBuild = inShipType;
+    outMoves.append(cmd);
+}
+
+
+void ComputerPlayer::makeMoveIsleAllShipsToPatrol(QList<ComputerMove> & outMoves, const uint inIsleId)
+{
+    ComputerMove cmd;
+    cmd.moveType = ComputerMove::MT_ISLE_ALL_SHIPS_TO_PATROL;
+    cmd.sourceId = inIsleId;
+    outMoves.append(cmd);
+}
+
+
+void ComputerPlayer::makeMoveShipSetTargetShip(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetShipId)
+{
+    ComputerMove cmd;
+    cmd.moveType = ComputerMove::MT_SHIP_SET_TARGET;
+    cmd.sourceId = inSourceShipId;
+    cmd.targetType = Target::T_SHIP;
+    cmd.targetId = inTargetShipId;
+    outMoves.append(cmd);
+}
+
+
+void ComputerPlayer::makeMoveShipSetTargetIsle(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetIsleId)
+{
+    ComputerMove cmd;
+    cmd.moveType = ComputerMove::MT_SHIP_SET_TARGET;
+    cmd.sourceId = inSourceShipId;
+    cmd.targetType = Target::T_ISLE;
+    cmd.targetId = inTargetIsleId;
+    outMoves.append(cmd);
+}
+
+
+void ComputerPlayer::makeMoveShipSetTargetWater(QList<ComputerMove> & outMoves, const uint inSourceShipId, const QPointF inWaterPos)
+{
+    ComputerMove cmd;
+    cmd.moveType = ComputerMove::MT_SHIP_SET_TARGET;
+    cmd.sourceId = inSourceShipId;
+    cmd.targetType = Target::T_WATER;
+    cmd.pos = inWaterPos;
+    outMoves.append(cmd);
+}
+
+
+void ComputerPlayer::makeMoveShipSetPatrol(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetIsleId)
+{
+    ComputerMove cmd;
+    cmd.moveType = ComputerMove::MT_SHIP_SET_PATROL;
+    cmd.sourceId = inSourceShipId;
+    cmd.targetId = inTargetIsleId;
+    outMoves.append(cmd);
 }
 
 
@@ -144,4 +171,30 @@ QList<uint> ComputerPlayer::orderedUnsettledOrEnemyIsleFromCenter(const bool inS
     for(QPair<qreal, uint> item : uList)
         unsettledList.append(item.second);
     return unsettledList;
+}
+
+
+void ComputerPlayer::closestHomeIsleFromEnemyIsle(const uint inEnemyIsleId, IsleInfo & outHomeIsleInfo)
+{
+    QPointF enemyPos(0, 0);
+    for(IsleInfo ii : m_publicIsles)
+    {
+        if(ii.id == inEnemyIsleId)
+        {
+            enemyPos = ii.pos;
+            break;
+        }
+    }
+    float min_dist = -1;
+    outHomeIsleInfo.id = 0;
+    for(IsleInfo ii : m_privateIsles)
+    {
+        QPointF homePos = ii.pos;
+        float dist = (homePos - enemyPos).manhattanLength();
+        if(dist < min_dist or min_dist < 0)
+        {
+            min_dist = dist;
+            outHomeIsleInfo = ii;
+        }
+    }
 }
