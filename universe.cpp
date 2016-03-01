@@ -261,6 +261,10 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                     {
                         setIsleOwnerById(isleInfo.id, shipInfo.owner, shipInfo.color);
                         shipLandOnIsle(ship);
+                        // colony ships get destroyed as they land, because
+                        // the ship's material is urgently needed for housing and
+                        // such things
+                        ship->addDamage(2.0);
                     }
                     else
                     {
@@ -276,8 +280,11 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                 else
                 {   // enemy isle -> fight
 
+                    qInfo() << "ship fights... id= " << ship->id();
                     // 1. fight isles patrol
                     shipFightIslePatol(ship, target.id);
+
+
 
                     // 2. fight isle
                     if( shipFightIsle(ship, target.id) )
@@ -303,6 +310,14 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                                     m_isles[isleIndex]->setMaxTechnology(local_tech_max);
                             }
                         }
+                    }
+                    else
+                    {
+                        qInfo()  << "ship lost id = " << ship->id();
+                        ShipInfo info = ship->info();
+                        qInfo()  << "ship lost id = " << ship->id() << " damage: " << info.damage <<
+                                    " delete: " << (info.posType == ShipPositionEnum::S_TRASH);
+
                     }
                 }
             }
@@ -598,7 +613,10 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
     // then only Battelships and fleets have something to fight. Colony ships and couriers
     // don't have something to fight.
     if(info1.shipType == ShipTypeEnum::ST_COLONY or info1.shipType == ShipTypeEnum::ST_COURIER)
+    {
+        inOutAttacker->addDamage(2.0);
         return false;
+    }
 
     if(info2.owner == Player::PLAYER_UNSETTLED or info2.owner == info1.owner)
     {
@@ -1002,9 +1020,11 @@ void Universe::processStrategyCommands(const uint inOwner, const QList<ComputerM
                     qInfo() << ">REJECTED";
             }
                 break;
+            case ComputerMove::MT_SHIP_SET_TARGET_IMMEDIATELY:
+                qInfo() << "Strategy, MT_SHIP_SET_TARGET_IMMEDIATELY..."; // fall through
             case ComputerMove::MT_SHIP_SET_TARGET:
             {
-                qInfo() << "Strategy, MT_SHIP_SET_PATROL: ship:" << cmd.sourceId << " has target:" << cmd.targetType
+                qInfo() << "Strategy, MT_SHIP_SET_TARGET: ship:" << cmd.sourceId << " has target:" << cmd.targetType
                         << " with target id: " << cmd.targetId;
                 int sourceShipIndex = shipIndexForId(cmd.sourceId);
                 if(sourceShipIndex < 0)
@@ -1012,6 +1032,10 @@ void Universe::processStrategyCommands(const uint inOwner, const QList<ComputerM
                 ShipInfo sourceShipInfo = m_ships[sourceShipIndex]->info();
                 if(sourceShipInfo.owner == inOwner)
                 {
+                    if(cmd.moveType == ComputerMove::MT_SHIP_SET_TARGET_IMMEDIATELY)
+                    {
+                        m_ships[sourceShipIndex]->removeTargets();
+                    }
                     switch(cmd.targetType)
                     {
                         case Target::T_SHIP:

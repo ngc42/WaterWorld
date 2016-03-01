@@ -12,8 +12,9 @@
 
 
 ComputerPlayer::ComputerPlayer(const uint inOwner)
-    : Player(inOwner)
+    : Player(inOwner), m_homeIsleId(0)
 {
+
 }
 
 
@@ -36,6 +37,13 @@ void ComputerPlayer::setIsles(const QList<IsleInfo> inPublicIsleInfos, const QLi
     for(IsleInfo isleInfo : m_privateIsles)
         m_centerOfMyIsles += isleInfo.pos;
     m_centerOfMyIsles /= m_privateIsles.count();
+
+    // set the home isle
+    // @fixme: we should do this once at start, not each time we call this method (every turn)
+    if(m_homeIsleId == 0 and m_privateIsles.count() == 1)
+    {
+        m_homeIsleId = m_privateIsles.at(0).id;
+    }
 }
 
 
@@ -53,10 +61,59 @@ void ComputerPlayer::nextRound(QList<ComputerMove> & outMoves)
     if(numMyIsles == 0)
     {   // stage 0, no isles, we are close to lose the game
 
+        // send every ship we have to out home isle
+        for(ExtendedShipInfo esi : m_privateShips)
+        {
+            uint shipId = esi.shipInfo.id;
+            makeMoveShipSetTargetIsle(outMoves, shipId, m_homeIsleId, true);
+        }
         return;
     }
-    if(numMyIsles == 1)
+    if(m_thereAreUnownedIsles and numMyIsles == 1)
     {   // stage 1: try to get a second isle
+
+
+        QList<uint> unownedIsles = orderedUnsettledOrEnemyIsleFromCenter(true);
+        // remove from unowned isles every already set target
+        for(ExtendedShipInfo esi : m_privateShips)
+        {
+            ShipInfo si = esi.shipInfo;
+            if(si.hasTarget and si.shipType == ShipTypeEnum::ST_COLONY)
+            {
+                for(Target t : esi.targets)
+                {
+                    if(t.tType == Target::T_ISLE)
+                    {
+                        unownedIsles.removeOne(t.id);
+                    }
+                }
+            }
+        }
+
+        // every new colony ship should now get a target
+        if(unownedIsles.count() > 0)
+        {
+            IsleInfo isleInfo = m_privateIsles.at(0);
+            // make sure, we build colony ships
+            if(isleInfo.shipToBuild != ShipTypeEnum::ST_COLONY)
+            {
+                makeMoveIsleBuildShiptype(outMoves, isleInfo.id, ShipTypeEnum::ST_COLONY);
+            }
+
+            for(ExtendedShipInfo esi : m_privateShips)
+            {
+                ShipInfo si = esi.shipInfo;
+                if(!si.hasTarget and si.shipType == ShipTypeEnum::ST_COLONY)
+                {
+                    makeMoveShipSetTargetIsle(outMoves, si.id, unownedIsles.at(0), true);
+                    unownedIsles.removeFirst();
+                }
+                if(unownedIsles.count() < 1)
+                    break;
+
+            }
+        }
+
 
         return;
     }
@@ -90,10 +147,10 @@ void ComputerPlayer::makeMoveIsleAllShipsToPatrol(QList<ComputerMove> & outMoves
 }
 
 
-void ComputerPlayer::makeMoveShipSetTargetShip(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetShipId)
+void ComputerPlayer::makeMoveShipSetTargetShip(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetShipId, bool inImmediately)
 {
     ComputerMove cmd;
-    cmd.moveType = ComputerMove::MT_SHIP_SET_TARGET;
+    cmd.moveType = inImmediately ? ComputerMove::MT_SHIP_SET_TARGET_IMMEDIATELY : ComputerMove::MT_SHIP_SET_TARGET;
     cmd.sourceId = inSourceShipId;
     cmd.targetType = Target::T_SHIP;
     cmd.targetId = inTargetShipId;
@@ -101,10 +158,10 @@ void ComputerPlayer::makeMoveShipSetTargetShip(QList<ComputerMove> & outMoves, c
 }
 
 
-void ComputerPlayer::makeMoveShipSetTargetIsle(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetIsleId)
+void ComputerPlayer::makeMoveShipSetTargetIsle(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetIsleId, bool inImmediately)
 {
     ComputerMove cmd;
-    cmd.moveType = ComputerMove::MT_SHIP_SET_TARGET;
+    cmd.moveType = inImmediately ? ComputerMove::MT_SHIP_SET_TARGET_IMMEDIATELY : ComputerMove::MT_SHIP_SET_TARGET;
     cmd.sourceId = inSourceShipId;
     cmd.targetType = Target::T_ISLE;
     cmd.targetId = inTargetIsleId;
@@ -112,10 +169,10 @@ void ComputerPlayer::makeMoveShipSetTargetIsle(QList<ComputerMove> & outMoves, c
 }
 
 
-void ComputerPlayer::makeMoveShipSetTargetWater(QList<ComputerMove> & outMoves, const uint inSourceShipId, const QPointF inWaterPos)
+void ComputerPlayer::makeMoveShipSetTargetWater(QList<ComputerMove> & outMoves, const uint inSourceShipId, const QPointF inWaterPos, bool inImmediately)
 {
     ComputerMove cmd;
-    cmd.moveType = ComputerMove::MT_SHIP_SET_TARGET;
+    cmd.moveType = inImmediately ? ComputerMove::MT_SHIP_SET_TARGET_IMMEDIATELY : ComputerMove::MT_SHIP_SET_TARGET;
     cmd.sourceId = inSourceShipId;
     cmd.targetType = Target::T_WATER;
     cmd.pos = inWaterPos;

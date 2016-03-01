@@ -28,7 +28,8 @@ struct ComputerMove
     // @fixme: "add to fleet" and "multitargets" (repeatable) are missing
     enum MoveTypeEnum { MT_ISLE_BUILD_SHIPTYPE,
                         MT_ISLE_ALL_SHIPS_TO_PATROL,
-                        MT_SHIP_SET_TARGET,
+                        MT_SHIP_SET_TARGET_IMMEDIATELY, // clear targets, then set target
+                        MT_SHIP_SET_TARGET,             // set target
                         MT_SHIP_SET_PATROL};
     MoveTypeEnum moveType;
     ShipTypeEnum shipTypeToBuild;   // sourceId must build this shiptype
@@ -72,9 +73,9 @@ protected:
     // make a move and append it to the list
     void makeMoveIsleBuildShiptype(QList<ComputerMove> & outMoves, const uint inIsleId, const ShipTypeEnum inShipType);
     void makeMoveIsleAllShipsToPatrol(QList<ComputerMove> & outMoves, const uint inIsleId);
-    void makeMoveShipSetTargetShip(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetShipId);
-    void makeMoveShipSetTargetIsle(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetIsleId);
-    void makeMoveShipSetTargetWater(QList<ComputerMove> & outMoves, const uint inSourceShipId, const QPointF inWaterPos);
+    void makeMoveShipSetTargetShip(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetShipId, bool inImmediately);
+    void makeMoveShipSetTargetIsle(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetIsleId, bool inImmediately);
+    void makeMoveShipSetTargetWater(QList<ComputerMove> & outMoves, const uint inSourceShipId, const QPointF inWaterPos, bool inImmediately);
     void makeMoveShipSetPatrol(QList<ComputerMove> & outMoves, const uint inSourceShipId, const uint inTargetIsleId);
 
 
@@ -90,6 +91,8 @@ protected:
 
     QList<IsleInfo> m_publicIsles;
     QList<IsleInfo> m_privateIsles;
+
+    uint m_homeIsleId;
 
     QList<ShipInfo> m_publicShips;
     QList<ExtendedShipInfo> m_privateShips;
