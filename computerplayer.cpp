@@ -113,17 +113,45 @@ void ComputerPlayer::nextRound(QList<ComputerMove> & outMoves)
 
             }
         }
-
-
         return;
     }
-    if(m_thereAreUnownedIsles and numMyIsles < 10)
-    {   // stage 2: try to get 10 or more isles
-
-        return;
-    }
-
     // stage 3, shoot them down
+    if(m_careList.count() == m_privateIsles.count())
+    {
+        for(QPair<uint, uint> p : m_careList)
+        {
+            uint myIsle = p.first;
+            uint targetIsle = p.second;
+            // myisle is still our isle
+            bool deleteEntry = true;
+            bool targetIsOur = false;
+            for(IsleInfo isleInfo : m_privateIsles)
+            {
+                if(isleInfo.id == myIsle)
+                {
+                    deleteEntry = false;
+                }
+                if(isleInfo.id == targetIsle)
+                {
+                    targetIsOur = true;
+                }
+            }
+            if(deleteEntry)
+                // we have lost the source isle
+                m_careList.removeOne(p);
+            else
+            {
+                if(targetIsOur)
+                {
+                    ...
+
+                }
+            }
+        }
+
+    }
+
+
 
 }
 

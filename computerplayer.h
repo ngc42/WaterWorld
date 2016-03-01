@@ -68,6 +68,9 @@ public:
 
 private:
 
+    // isle (1) cares for another isle (2)
+    QVector< QPair<uint, uint> > m_careList;
+
 protected:
 
     // make a move and append it to the list
