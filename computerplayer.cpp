@@ -116,7 +116,9 @@ void ComputerPlayer::nextRound(QList<ComputerMove> & outMoves)
         return;
     }
     // stage 3, shoot them down
-    if(m_careList.count() == m_privateIsles.count())
+
+    // check, if carelist is still up-to-date
+    if(m_careList.count() > 0)
     {
         for(QPair<uint, uint> p : m_careList)
         {
@@ -134,6 +136,9 @@ void ComputerPlayer::nextRound(QList<ComputerMove> & outMoves)
                 if(isleInfo.id == targetIsle)
                 {
                     targetIsOur = true;
+                    // target isle should build battleships!
+                    if(isleInfo.shipToBuild != ShipTypeEnum::ST_BATTLESHIP)
+                        makeMoveIsleBuildShiptype(outMoves, targetIsle, ShipTypeEnum::ST_BATTLESHIP);
                 }
             }
             if(deleteEntry)
@@ -143,10 +148,110 @@ void ComputerPlayer::nextRound(QList<ComputerMove> & outMoves)
             {
                 if(targetIsOur)
                 {
-                    ...
+                    // find out, if the new isle is protected enough
+                    uint countBattleshipsOnTarge = 0;
+                    for(ExtendedShipInfo esi : m_privateShips)
+                    {
+                        ShipInfo shipInfo = esi.shipInfo;
+                        if(shipInfo.shipType == ShipTypeEnum::ST_BATTLESHIP and shipInfo.isleId == targetIsle)
+                        {
+                            if(shipInfo.posType == ShipPositionEnum::S_ONISLE)
+                            {
+                                makeMoveShipSetPatrol(outMoves, shipInfo.id, targetIsle);
+                                countBattleshipsOnTarge++;
+                            }
+                            else if(shipInfo.posType == ShipPositionEnum::S_PATROL)
+                            {
+                                countBattleshipsOnTarge++;
+                            }
+                        }
+                    }
+                    // this is just a number of ships to protect the new isle
+                    if(countBattleshipsOnTarge >= 6)
+                    {   // protected enough
+                        m_careList.removeOne(p);
+                    }
+                }
+                else    // the target is not our
+                {
+                    bool needColonyForTarget;
+                    for(IsleInfo targetIsleInfo : m_publicIsles)
+                    {
+                        if(targetIsleInfo.id == targetIsle)
+                        {
+                            if(targetIsleInfo.owner == 0)
+                                needColonyForTarget = true;
+                            break;
+                        }
+                    }
+
+                    if(needColonyForTarget)
+                    {
+                        // colony underway?
+
+                    }
+                    else
+                    {
+                        // need battleships for target
+                    }
 
                 }
             }
+        }
+    }
+
+    // fill up carelist, one at a time
+    QList<uint> enemyIsles = orderedUnsettledOrEnemyIsleFromCenter(false);
+
+    // remove all enemy isles we already care about
+    for(QPair<uint, uint> p : m_careList)
+    {
+        uint targetIsle = p.second;
+        enemyIsles.removeOne(targetIsle);
+    }
+
+    if(enemyIsles.count() == 0)
+        return;
+    uint newTargetIsle = enemyIsles.at(0);
+
+    for(IsleInfo isleInfo : m_privateIsles)
+    {
+        bool foundPair = false;
+
+        for(QPair<uint, uint> p : m_careList)
+        {
+            uint myIsle = p.first;
+            if(myIsle == isleInfo.id)
+            {
+                foundPair = true;
+                break;
+            }
+        }
+
+        if(! foundPair)
+        {
+            // isleInfo.id does not care for an target
+            QPair<uint, uint> p(isleInfo.id, newTargetIsle);
+
+            // unsettled or enemy?
+            for(IsleInfo targetIsleInfo : m_publicIsles)
+            {
+                if(targetIsleInfo.id == newTargetIsle)
+                {
+                    if(targetIsleInfo.owner == 0)
+                    {
+                        makeMoveIsleBuildShiptype(outMoves, isleInfo.id, ShipTypeEnum::ST_COLONY);
+                    }
+                    else
+                    {   // enemy isle
+                        makeMoveIsleBuildShiptype(outMoves, isleInfo.id, ShipTypeEnum::ST_BATTLESHIP);
+
+                    }
+                    m_careList.append(p);
+                    break;
+                }
+            }
+            break;
         }
 
     }
