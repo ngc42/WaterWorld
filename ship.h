@@ -69,6 +69,8 @@ public:
 
     ~Ship();
 
+    void debugReport();
+
     // getter
 
     static QString shipTypeName(const ShipTypeEnum inShipType);

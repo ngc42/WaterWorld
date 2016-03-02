@@ -41,6 +41,18 @@ Ship::~Ship()
 }
 
 
+void Ship::debugReport()
+{
+    qInfo() << "Hello, i'm ship " << id() << " " << shipTypeName(m_shipType);
+    qInfo() << " > Targets: ";
+    for(Target t : m_targetList)
+    {
+        qInfo() << "  - " << t.id << " pos: " << t.pos << " " << t.tType;
+    }
+
+}
+
+
 QString Ship::shipTypeName(const ShipTypeEnum inShipType)
 {
     switch(inShipType)
@@ -355,6 +367,7 @@ void Ship::addCurrentPosToTarget()
                 t.tType = Target::T_ISLE;
                 break;
             default:
+                qInfo() << "?? Ship::addCurrentPosToTarget()";
                 t.id = 0;
                 t.tType = Target::T_WATER;
                 break;

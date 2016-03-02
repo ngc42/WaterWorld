@@ -188,11 +188,70 @@ void ComputerPlayer::nextRound(QList<ComputerMove> & outMoves)
                     if(needColonyForTarget)
                     {
                         // colony underway?
-
+                        bool colonyUnderway = false;
+                        for(ExtendedShipInfo esi : m_privateShips)
+                        {
+                            ShipInfo shipInfo = esi.shipInfo;
+                            if(shipInfo.shipType == ShipTypeEnum::ST_COLONY)
+                            {
+                               if(shipInfo.isleId == myIsle and shipInfo.posType == ShipPositionEnum::S_ONISLE)
+                               {
+                                   // send it to target
+                                   makeMoveShipSetTargetIsle(outMoves, shipInfo.id, targetIsle, true);
+                                   colonyUnderway = true;
+                                   break;
+                               }
+                               if(shipInfo.posType == ShipPositionEnum::S_OCEAN)
+                               {
+                                   for(Target t : esi.targets)
+                                   {
+                                       if(t.tType == Target::T_ISLE and t.id == targetIsle)
+                                       {
+                                           colonyUnderway = true;
+                                           break;
+                                       }
+                                   }
+                               }
+                            }
+                            if(colonyUnderway)
+                                break;   // break outer for-loop
+                        }
+                        // make sure we build a colony ship on source isle if we have not
+                        // or a Battleship, if we already have
+                        for(IsleInfo ii : m_privateIsles)
+                        {
+                            if(ii.id == myIsle)
+                            {
+                                if((!colonyUnderway) and ii.shipToBuild != ShipTypeEnum::ST_COLONY)
+                                    makeMoveIsleBuildShiptype(outMoves, ii.id, ShipTypeEnum::ST_COLONY);
+                                else if (colonyUnderway and ii.shipToBuild != ShipTypeEnum::ST_BATTLESHIP)
+                                    makeMoveIsleBuildShiptype(outMoves, ii.id, ShipTypeEnum::ST_BATTLESHIP);
+                                break;
+                            }
+                        }
                     }
                     else
                     {
                         // need battleships for target
+                        // make sure we build battle ships
+                        for(IsleInfo ii : m_privateIsles)
+                        {
+                            if(ii.id == myIsle)
+                            {
+                                if (ii.shipToBuild != ShipTypeEnum::ST_BATTLESHIP)
+                                    makeMoveIsleBuildShiptype(outMoves, ii.id, ShipTypeEnum::ST_BATTLESHIP);
+                                break;
+                            }
+                        }
+                        // send all battleships on source isle to target isle
+                        for(ExtendedShipInfo esi : m_privateShips)
+                        {
+                            ShipInfo shipInfo = esi.shipInfo;
+                            if(shipInfo.isleId == myIsle and
+                               (shipInfo.posType == ShipPositionEnum::S_ONISLE or shipInfo.posType == ShipPositionEnum::S_PATROL) and
+                               shipInfo.shipType == ShipTypeEnum::ST_BATTLESHIP)
+                                makeMoveShipSetTargetIsle(outMoves, shipInfo.id, targetIsle, true);
+                        }
                     }
 
                 }

@@ -822,8 +822,7 @@ int Universe::shipIndexForId(const uint inShipId) const
     int upperIndex = m_ships.count() - 1;
     int midIndex = upperIndex / 2;
     int lowerIndex = 0;
-    bool found = false;
-    while(! found)
+    while(lowerIndex <= upperIndex)
     {
         uint id = m_ships.at(midIndex)->id();
         if(id < inShipId)
@@ -838,19 +837,10 @@ int Universe::shipIndexForId(const uint inShipId) const
         }
         else
         {   // equal
-            found = true;
+            return midIndex;
         }
-        if(lowerIndex > upperIndex)
-            break;
     }
-    if(found)
-        return midIndex;
-    else
-    {
-        // this did not happen during lots of tests, so everything looks good here
-        Q_ASSERT(false);
-        return -1;
-    }
+    return -1;
 }
 
 
@@ -1057,6 +1047,7 @@ void Universe::processStrategyCommands(const uint inOwner, const QList<ComputerM
                                 m_ships[sourceShipIndex]->setTargetIsle(otherIsleInfo.id, otherIsleInfo.pos);
                             }
                         }
+                            break;
                         case Target::T_WATER:
                             m_ships[sourceShipIndex]->setTargetWater(cmd.pos);
                             break;
@@ -1095,6 +1086,12 @@ void Universe::slotUniverseViewClicked(QPointF scenePos)
         shipForPoint(scenePos, shipInfo, targets);
         if(shipInfo.id > 0)
         {   // human or enemy ship?
+
+            // @fixme: debug
+            for(Ship *ds : m_ships)
+                if(shipInfo.id == ds->id())
+                    ds->debugReport();
+
             if(shipInfo.owner == Player::PLAYER_HUMAN)
                 emit sigShowInfoHumanShip(shipInfo, targets);
             else
