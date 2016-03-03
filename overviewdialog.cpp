@@ -7,10 +7,13 @@
 #include "overviewdialog.h"
 #include "ui_overviewdialog.h"
 #include <player.h>
+
 #include <QStringList>
 #include <QVector>
 #include <QDebug>
 #include <QTableWidgetItem>
+#include <QPixmap>
+#include <QIcon>
 
 
 OverviewDialog::OverviewDialog(const uint inNumPlayer, QWidget *inParent) :
@@ -40,14 +43,25 @@ OverviewDialog::OverviewDialog(const uint inNumPlayer, QWidget *inParent) :
     {
         // column isles
         QTableWidgetItem *it_0 = new QTableWidgetItem;
+        it_0->setTextAlignment(Qt::AlignHCenter);
+        if(i <= m_numPlayer)
+        {
+            // icon in the color of player
+            QPixmap p(20, 20);
+            p.fill(Player::colorForOwner(i));
+            QIcon icon(p);
+            m_ui->tableWidget->verticalHeaderItem(i)->setIcon(icon);
+        }
         m_ui->tableWidget->setItem(i, TC_ISLES, it_0);
 
         // column population
         QTableWidgetItem *it_1 = new QTableWidgetItem;
+        it_1->setTextAlignment(Qt::AlignHCenter);
         m_ui->tableWidget->setItem(i, TC_POPULATION, it_1);
 
         // column ships
         QTableWidgetItem *it_2 = new QTableWidgetItem;
+        it_2->setTextAlignment(Qt::AlignHCenter);
         m_ui->tableWidget->setItem(i, TC_SHIPS, it_2);
     }
 }

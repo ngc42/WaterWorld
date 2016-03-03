@@ -215,7 +215,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
             continue;
         QList<ComputerMove> computerMoves;
         player->nextRound(computerMoves);
-        //processStrategyCommands(player->owner(), computerMoves);
+        processStrategyCommands(player->owner(), computerMoves);
     }
 
     for(Isle *isle : m_isles)
