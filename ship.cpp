@@ -25,13 +25,14 @@ Ship::Ship(UniverseScene *& inOutRefScene, const ShipTypeEnum inShipType, const 
            const uint inIsleId, const float inTechnology)
     :  WaterObject(inId, inOwner, inPos, inColor, inTechnology),
       m_shipType(inShipType), m_positionType(inPosType), m_onIsleById(inIsleId),
-      m_damage(0.0f), m_cycleTargetList(false), m_currentTargetIndex(-1)
+      m_damage(0.0f), m_carryTechnology(0.0f), m_cycleTargetList(false), m_currentTargetIndex(-1)
 {
     m_shape = new QGraphicsRectItem(-7.0f, -7.0f, 14.0f, 14.0f);
     m_shape->setPos(inPos.x(), inPos.y());
     m_shape->hide();
     inOutRefScene->addItem(m_shape);
     m_shape->setBrush(QBrush(inColor));
+    setCarryTechnology(inTechnology);   // for ST_COURIER
 }
 
 
@@ -49,7 +50,6 @@ void Ship::debugReport()
     {
         qInfo() << "  - " << t.id << " pos: " << t.pos << " " << t.tType;
     }
-
 }
 
 
@@ -94,6 +94,7 @@ ShipInfo Ship::info() const
     {
         outInfo.attachPos = m_pos;
     }
+    outInfo.carryTechnology = m_carryTechnology;
     return outInfo;
 }
 
@@ -112,6 +113,14 @@ void Ship::setOwner(const uint inOwner, const QColor inColor)
 void Ship::setPositionType(ShipPositionEnum inType)
 {
     m_positionType = inType;
+}
+
+
+void Ship::setCarryTechnology(const float inTechlevel)
+{
+    // courier ships taking the maximum
+    if( (m_shipType == ShipTypeEnum::ST_COURIER) and  (inTechlevel > m_carryTechnology))
+        m_carryTechnology = inTechlevel;
 }
 
 

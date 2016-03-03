@@ -47,7 +47,7 @@
    <enum>QFrame::StyledPanel</enum>
   </property>
   <property name="currentIndex">
-   <number>3</number>
+   <number>5</number>
   </property>
   <widget class="QWidget" name="pageReallyNothing"/>
   <widget class="QWidget" name="pageWater">
@@ -807,6 +807,13 @@
     </item>
     <item row="3" column="0" colspan="2">
      <widget class="QLabel" name="labelHumanShipShiptype">
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="2">
+     <widget class="QLabel" name="labelHumanShipCarryTech">
       <property name="text">
        <string>TextLabel</string>
       </property>

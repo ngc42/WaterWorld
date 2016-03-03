@@ -215,7 +215,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
             continue;
         QList<ComputerMove> computerMoves;
         player->nextRound(computerMoves);
-        processStrategyCommands(player->owner(), computerMoves);
+        //processStrategyCommands(player->owner(), computerMoves);
     }
 
     for(Isle *isle : m_isles)
@@ -275,6 +275,8 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                 }
                 else if(isleInfo.owner == shipInfo.owner)
                 {   // own isle
+                    // courier takes tech first
+                    ship->setCarryTechnology(isleInfo.technology);
                     shipLandOnIsle(ship);
                 }
                 else
@@ -675,6 +677,8 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
 void Universe::shipLandOnIsle(Ship *& inOutShipToLand)
 {   // This method is only called, whenever a ship lands on its own isle.
 
+    // @fixme: second parameter should be ID of isle
+
     ShipInfo shipInfo = inOutShipToLand->info();
     if(! shipInfo.hasTarget)
     {   // we don'd have a target but are forced to land on an target isle, stange!
@@ -706,7 +710,10 @@ void Universe::shipLandOnIsle(Ship *& inOutShipToLand)
     }
 
     // transfer technology to the isle
-    targetIsle->setMaxTechnology(shipInfo.technology);
+    if(shipInfo.shipType == ShipTypeEnum::ST_COURIER)
+        targetIsle->setMaxTechnology(shipInfo.carryTechnology);
+    else
+        targetIsle->setMaxTechnology(shipInfo.technology);
 
     // and realy land
     inOutShipToLand->landOnIsle(isleInfo.id, isleInfo.pos);

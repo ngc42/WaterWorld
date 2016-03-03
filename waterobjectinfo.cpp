@@ -222,6 +222,14 @@ void WaterObjectInfo::showInfopageHumanShip(const ShipInfo inShipInfo, const QVe
 
     // ship type
     m_ui->labelHumanShipShiptype->setText(Ship::typeName(inShipInfo.shipType));
+    // carry tech for ST_COURIER
+    s = "";
+    if(inShipInfo.shipType == ShipTypeEnum::ST_COURIER)
+    {
+        s = QString("%1").arg(inShipInfo.carryTechnology, 2, 'F', 1);
+    }
+    m_ui->labelHumanShipCarryTech->setText(s);
+
 
     m_ui->tableHTargets->clearContents();
     m_ui->tableHTargets->setRowCount(inShipTargets.count());

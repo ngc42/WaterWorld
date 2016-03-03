@@ -53,6 +53,7 @@ struct ShipInfo
     float damage;
     float technology;
     QPointF attachPos;  // pos of last target (or this pos) to attach rubber band line for next target
+    float carryTechnology;  // for ST_COURIER, which can carry tech papers from one isle to another
 };
 
 
@@ -90,6 +91,13 @@ public:
     void setOwner(const uint inOwner, const QColor inColor);
 
     void setPositionType(ShipPositionEnum inType);
+
+    /**
+     * @brief setCarryTechnology - ST_COURIER can carry technology papers and send them to other isles
+     * @param inTechlevel - take this techlevel and compare with current. carry maximum.
+     *
+     */
+    void setCarryTechnology(const float inTechlevel);
 
 
     // -- Targets --
@@ -137,6 +145,7 @@ private:
     uint m_onIsleById;
     float m_damage;         // sailing arround, patroling, and fighting increases damage. Repair on isle,
     float m_halfWidth;
+    float m_carryTechnology;
 
     // all about targets
     QVector<Target> m_targetList;
