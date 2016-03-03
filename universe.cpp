@@ -260,7 +260,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                     if(shipInfo.shipType == ShipTypeEnum::ST_COLONY)
                     {
                         setIsleOwnerById(isleInfo.id, shipInfo.owner, shipInfo.color);
-                        shipLandOnIsle(ship);
+                        shipLandOnIsle(ship, isleInfo.id);
                         // colony ships get destroyed as they land, because
                         // the ship's material is urgently needed for housing and
                         // such things
@@ -277,7 +277,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                 {   // own isle
                     // courier takes tech first
                     ship->setCarryTechnology(isleInfo.technology);
-                    shipLandOnIsle(ship);
+                    shipLandOnIsle(ship, isleInfo.id);
                 }
                 else
                 {   // enemy isle -> fight
@@ -291,7 +291,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                     // 2. fight isle
                     if( shipFightIsle(ship, target.id) )
                     {   // ship has won
-                        shipLandOnIsle(ship);
+                        shipLandOnIsle(ship, target.id);
 
                         // every other enemy ship on this isle is now owned by the winner
                         float local_tech_max = 0.1f;
@@ -674,40 +674,24 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
 }
 
 
-void Universe::shipLandOnIsle(Ship *& inOutShipToLand)
+void Universe::shipLandOnIsle(Ship *& inOutShipToLand, const uint inIsleId)
 {   // This method is only called, whenever a ship lands on its own isle.
 
-    // @fixme: second parameter should be ID of isle
-
     ShipInfo shipInfo = inOutShipToLand->info();
-    if(! shipInfo.hasTarget)
-    {   // we don'd have a target but are forced to land on an target isle, stange!
-        qInfo() << "ERR 1002 in Universe::shipLandOnIsle()";
-        return;
-    }
+    Q_ASSERT(shipInfo.hasTarget);
     Target targetInfo = inOutShipToLand->currentTarget();
-    if(targetInfo.tType != Target::TargetEnum::T_ISLE)
-    {   // just to get sure
-        qDebug() << "ERR 1 in Universe::shipLandOnIsle()";
-        return;
-    }
+    Q_ASSERT(targetInfo.tType == Target::TargetEnum::T_ISLE);
 
     Isle *targetIsle = 0;
     IsleInfo isleInfo;
     isleInfo.id = 0;
 
-    int isleIndex = isleIndexForId(targetInfo.id);
-    if(isleIndex >= 0)
-    {
-        targetIsle = m_isles[isleIndex];
-        isleInfo = targetIsle->info();
-    }
+    int isleIndex = isleIndexForId(inIsleId);
+    Q_ASSERT(isleIndex >= 0);
+    targetIsle = m_isles[isleIndex];
+    isleInfo = targetIsle->info();
 
-    if(isleInfo.id == 0 or shipInfo.owner != isleInfo.owner)
-    {   // just to get sure
-        qDebug() << "ERR 2 in Universe::shipLandOnIsle()";
-        return;
-    }
+    Q_ASSERT(isleInfo.id != 0 and shipInfo.owner == isleInfo.owner);
 
     // transfer technology to the isle
     if(shipInfo.shipType == ShipTypeEnum::ST_COURIER)
