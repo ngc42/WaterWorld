@@ -18,12 +18,20 @@ public:
     explicit WaterObject(const uint inId, const uint inOwner, const QPointF inPos,
                          const QColor inColor, const float inTechnology);
 
+    ~WaterObject() {};
+
     // getter
     uint id() const { return m_id; }
 
     QPointF pos() const { return m_pos; }
 
+    // Force: subclass must implement these method
+
+    virtual float force() const = 0;
+    virtual void takeDamage(const float inOpponentForce) = 0;
+
 protected:
+
     uint m_id;
     uint m_owner;
     QPointF m_pos;

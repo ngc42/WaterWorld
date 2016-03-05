@@ -127,3 +127,20 @@ bool Isle::nextRound()
     }
     return false;
 }
+
+
+float Isle::force() const
+{
+    return m_technology * m_population / 1000.0f;
+}
+
+
+void Isle::takeDamage(const float inOpponentForce)
+{
+    m_population = m_population - inOpponentForce * 1000 / m_technology;
+    if(m_population < 100.0f)
+    {
+        // die on too much damage
+        setOwner(Player::PLAYER_UNSETTLED, Player::colorForOwner(Player::PLAYER_UNSETTLED));
+    }
+}

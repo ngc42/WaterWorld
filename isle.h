@@ -79,6 +79,10 @@ public:
     // nextround, returns true if we finished a new ship
     bool nextRound();
 
+    // all about fighting
+    float force() const;
+    void takeDamage(const float inOpponentForce);
+
 private:
     QGraphicsEllipseItem *m_shape;      // display of the isle
     float m_population;                 // number of people on island

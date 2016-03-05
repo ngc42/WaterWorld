@@ -264,7 +264,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                         // colony ships get destroyed as they land, because
                         // the ship's material is urgently needed for housing and
                         // such things
-                        ship->addDamage(2.0);
+                        ship->setDead();
                     }
                     else
                     {
@@ -356,10 +356,9 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
         else
         {
             // repair ships on isle
-            if(shipInfo.posType == ShipPositionEnum::S_ONISLE and shipInfo.damage > 0 and shipInfo.damage < 1.0f)
+            if(shipInfo.posType == ShipPositionEnum::S_ONISLE and (!ship->isDead()))
             {
-                // 5%
-                ship->addDamage(shipInfo.damage > 0.05f ? -0.05f : -shipInfo.damage );
+                ship->repair();
             }
         }
     }
@@ -535,52 +534,38 @@ void Universe::shipFightShip(Ship *& inOutAttacker, Ship *& inOutDefender)
     if(info2.posType == ShipPositionEnum::S_TRASH)
         return;
 
-    // Battleship (attack) against colony or courier
-    if(info1.shipType == ShipTypeEnum::ST_BATTLESHIP and
-       (info2.shipType == ShipTypeEnum::ST_COLONY or info2.shipType == ShipTypeEnum::ST_COURIER))
-        inOutDefender->addDamage(2.0);
-
-    // Battleship (defender) against colony or courier
-    if(info2.shipType == ShipTypeEnum::ST_BATTLESHIP and
-       (info1.shipType == ShipTypeEnum::ST_COLONY or info1.shipType == ShipTypeEnum::ST_COURIER))
-        inOutAttacker->addDamage(2.0);
-
-    // both ships are courier or colony -> both die
-    if((info1.shipType == ShipTypeEnum::ST_COLONY or info1.shipType == ShipTypeEnum::ST_COURIER) and
-        (info2.shipType == ShipTypeEnum::ST_COLONY or info2.shipType == ShipTypeEnum::ST_COURIER))
+    if(info1.shipType == ShipTypeEnum::ST_COLONY or
+            info1.shipType == ShipTypeEnum::ST_COURIER)
     {
-        inOutAttacker->addDamage(2.0);
-        inOutAttacker->setPositionType(ShipPositionEnum::S_TRASH);
-        inOutDefender->addDamage(2.0);
-        inOutDefender->setPositionType(ShipPositionEnum::S_TRASH);
-        return;
+        inOutAttacker->setDead();
+        return; // just attacker dies
+    }
+    if(info2.shipType == ShipTypeEnum::ST_COLONY or
+            info2.shipType == ShipTypeEnum::ST_COURIER)
+    {
+        inOutDefender->setDead();
+        return; // just defender dies
     }
 
-    // the rest is about Battleships and/or fleets
-    // @fixme: make sure, fleets have something like a force !!!
-
     // ship 1 is in advantage, as this is the attacker
-    float force1 = (1.0f - info1.damage) * info1.technology * 1.1f;
-    float force2 = (1.0f - info2.damage) * info2.technology;
-
-    qDebug() << "Ship fight ship, forces: " << force1 << " " << force2;
+    float force1 = inOutAttacker->force() * 1.01f;
+    float force2 = inOutDefender->force();
 
     if(force1 > force2)
     {   // Attacker has won
-        inOutAttacker->addDamage(force2 / force1);
-        inOutDefender->setPositionType(ShipPositionEnum::S_TRASH);
+        inOutAttacker->takeDamage(force2);
+        inOutDefender->setDead();
     }
     else if(force2 > force1)
     {   // defender has won
-        inOutDefender->addDamage(force1 / force2);
-        inOutAttacker->setPositionType(ShipPositionEnum::S_TRASH);
+        inOutDefender->takeDamage(force1);
+        inOutAttacker->setDead();
     }
     else
     {
         // both forces are the same --> both die
-        // should not happen with floats, but i better check
-        inOutAttacker->setPositionType(ShipPositionEnum::S_TRASH);
-        inOutDefender->setPositionType(ShipPositionEnum::S_TRASH);
+        inOutAttacker->setDead();
+        inOutDefender->setDead();
     }
 }
 
@@ -605,18 +590,20 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
 {
     // @fixme: Fleets unsupported
 
-    ShipInfo info1 = inOutAttacker->info();
-    IsleInfo info2;
-    isleForId(inIsleId, info2);
-    if(info1.posType == ShipPositionEnum::S_TRASH)
+    if(inOutAttacker->isDead())
         return false;
+
+    ShipInfo info1 = inOutAttacker->info();
+    int isleIndex = isleIndexForId(inIsleId);
+    Q_ASSERT(isleIndex >= 0);
+    IsleInfo info2 = m_isles[isleIndex]->info();
 
     // if it is really a fight (the reason for this method)
     // then only Battelships and fleets have something to fight. Colony ships and couriers
     // don't have something to fight.
     if(info1.shipType == ShipTypeEnum::ST_COLONY or info1.shipType == ShipTypeEnum::ST_COURIER)
     {
-        inOutAttacker->addDamage(2.0);
+        inOutAttacker->setDead();
         return false;
     }
 
@@ -625,22 +612,18 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
         //qInfo() << "BUG: unsettled or own isle, automatic won, no damage added";
         return true;
     }
-    if(info1.damage > 0.999f)
-    {
-        //qInfo() << "BUG: A totally damaged ship wants to conquer an isle --> rejected";
-        return false;
-    }
 
-    float force1 = 2.0f * info1.technology * (1.0 - info1.damage) * 10.0f;
-    float force2 = info2.technology * (1.0f + info2.population / 1000.0f);
+
+
+    float force1 = inOutAttacker->force();
+    float force2 = m_isles[isleIndex]->force();
 
     if(force1 > force2)
     {   // attacker (ship) has won
-        float damage_to_add = force2 / force1;
-        inOutAttacker->addDamage(damage_to_add);
+        inOutAttacker->takeDamage(force2);
         info1 = inOutAttacker->info();
 
-        if(info1.posType == ShipPositionEnum::S_TRASH)
+        if(inOutAttacker->isDead())
         {   // isle is now empty without owner
             setIsleOwnerById(info2.id, Player::PLAYER_UNSETTLED, Player::colorForOwner(Player::PLAYER_UNSETTLED));
             return false;   // ship is too damaged
@@ -654,19 +637,12 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
     }
     else if(force1 < force2)
     {   // isle has won
-        inOutAttacker->setPositionType(ShipPositionEnum::S_TRASH);
-        float new_population = info2.population * (force2 - force1) / (force1 + force2);
-
-        if(new_population > 100.0)
-            // reduce population, this is similar to damage on ships
-            setIslePopulationById(info2.id, new_population);
-        else
-            // want to buy a new isle?
-            setIsleOwnerById(info2.id, Player::PLAYER_UNSETTLED, Player::colorForOwner(Player::PLAYER_UNSETTLED));
+        inOutAttacker->setDead();
+        m_isles[isleIndex]->takeDamage(force1);
     }
     else
     {   // magic, if this happens: both forces are the same
-        inOutAttacker->setPositionType(ShipPositionEnum::S_TRASH);
+        inOutAttacker->setDead();
         setIsleOwnerById(info2.id, Player::PLAYER_UNSETTLED, Player::colorForOwner(Player::PLAYER_UNSETTLED));
     }
 

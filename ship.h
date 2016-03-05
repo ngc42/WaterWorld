@@ -68,7 +68,7 @@ public:
          const QPointF inPos, const QColor inColor, const ShipPositionEnum inPosType,
          const uint inIsleId, const float inTechnology);
 
-    ~Ship();
+    virtual ~Ship();
 
     void debugReport();
 
@@ -133,10 +133,20 @@ public:
 
     bool nextRound();
 
+    // all about fighting, damage and repair
+    float force() const;
+    void takeDamage(const float inOpponentForce);
+    bool isDead() const;
+    void setDead();
+    void repair();
+
+
     // tester
     bool pointInShip(const QPointF inPos);
 
     static QString typeName(const ShipTypeEnum inShipType);
+
+
 
 private:
     ShipTypeEnum m_shipType;

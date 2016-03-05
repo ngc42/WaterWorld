@@ -247,7 +247,7 @@ void Ship::landOnIsle(const uint inIsleId, const QPointF inPos)
     setTargetFinished();
 }
 
-
+/*
 void Ship::addDamage(const float inDamageToAdd)
 {
     // Courier and Colony ships cannot defend themselves
@@ -259,7 +259,7 @@ void Ship::addDamage(const float inDamageToAdd)
         removeTargets();
     }
 }
-
+*/
 
 bool Ship::nextRound()
 {
@@ -289,6 +289,54 @@ bool Ship::nextRound()
     m_pos = QPointF{m_pos.x() + m_technology * ex, m_pos.y() + m_technology * ey};
     m_shape->setPos(m_pos);
     return false;
+}
+
+
+float Ship::force() const
+{
+    // @fixme: missing: ST_FLEET
+
+    if(isDead())
+        return 0.0f;
+    if(m_shipType == ShipTypeEnum::ST_BATTLESHIP)
+        return (1.0 - m_damage) * m_technology;
+    return 0.0f;
+}
+
+
+void Ship::takeDamage(const float inOpponentForce)
+{
+    // @fixme: missing: ST_FLEET
+    if(m_shipType == ShipTypeEnum::ST_BATTLESHIP)
+    {
+        m_damage  =  m_damage  + inOpponentForce/m_technology;
+        if(m_damage < 0.99f)
+            return;
+    }
+    setDead();
+}
+
+
+bool Ship::isDead() const
+{
+    return m_positionType == ShipPositionEnum::S_TRASH or m_damage >= 1.0f;
+}
+
+
+void Ship::setDead()
+{
+    setPositionType(ShipPositionEnum::S_TRASH);
+    removeTargets();
+}
+
+
+void Ship::repair()
+{
+    if(isDead())
+        return;
+    m_damage = m_damage - 0.05;
+    if(m_damage < 0)
+        m_damage = 0.0;
 }
 
 
