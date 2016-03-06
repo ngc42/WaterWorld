@@ -230,12 +230,8 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
     {
         ShipInfo shipInfo = ship->info();
 
-        if(shipInfo.posType == ShipPositionEnum::S_TRASH or shipInfo.damage >= 1.0f)
-        {
-            if(shipInfo.posType != ShipPositionEnum::S_TRASH)
-                qDebug() << " -- WRONG: id:" << shipInfo.id  << " owner:" << shipInfo.owner << shipInfo.damage;
+        if(ship->isDead())
             continue;
-        }
 
         if( ship->nextRound() ) // ship->nextRound() returns true on arrive
         {   // arrived
@@ -254,7 +250,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                 {   // isle has no inhabitants
 
                     shipFightIslePatol(ship, target.id);
-                    if(ship->positionType() == ShipPositionEnum::S_TRASH)
+                    if(ship->isDead())
                         continue;   // ship is destroyed
 
                     if(shipInfo.shipType == ShipTypeEnum::ST_COLONY)
@@ -285,8 +281,6 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                     qInfo() << "ship fights... id= " << ship->id();
                     // 1. fight isles patrol
                     shipFightIslePatol(ship, target.id);
-
-
 
                     // 2. fight isle
                     if( shipFightIsle(ship, target.id) )
@@ -319,7 +313,6 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                         ShipInfo info = ship->info();
                         qInfo()  << "ship lost id = " << ship->id() << " damage: " << info.damage <<
                                     " delete: " << (info.posType == ShipPositionEnum::S_TRASH);
-
                     }
                 }
             }
@@ -353,7 +346,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                 ship->setTargetFinished();
             }
         }
-        else
+        else    // ship's nextround() returned false
         {
             // repair ships on isle
             if(shipInfo.posType == ShipPositionEnum::S_ONISLE and (!ship->isDead()))
@@ -367,14 +360,21 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
     for(Ship *deleteThatShip : m_ships)
     {
         ShipInfo dmgShipInfo = deleteThatShip->info();
-        if(dmgShipInfo.posType == ShipPositionEnum::S_TRASH or dmgShipInfo.damage >= 1.0f)
+        bool shouldDelete = false;
+        bool doDelete = false;
+        if(deleteThatShip->isDead())
+        {
             qDebug() << " -- should delete: " << dmgShipInfo.id;
+            shouldDelete = true;
 
+        }
         if(deleteThatShip->positionType() == ShipPositionEnum::S_TRASH)
         {
             qDebug() << " -- delete " << dmgShipInfo.id;
             deleteShip(deleteThatShip->id());
+            doDelete = true;
         }
+        Q_ASSERT(shouldDelete == doDelete);
     }
 
 
@@ -529,9 +529,8 @@ void Universe::shipFightShip(Ship *& inOutAttacker, Ship *& inOutDefender)
     ShipInfo info1 = inOutAttacker->info();
     ShipInfo info2 = inOutDefender->info();
 
-    if(info1.posType == ShipPositionEnum::S_TRASH)
-        return;
-    if(info2.posType == ShipPositionEnum::S_TRASH)
+    // one of them is already dead
+    if(inOutAttacker->isDead() or inOutDefender->isDead())
         return;
 
     if(info1.shipType == ShipTypeEnum::ST_COLONY or
@@ -548,7 +547,7 @@ void Universe::shipFightShip(Ship *& inOutAttacker, Ship *& inOutDefender)
     }
 
     // ship 1 is in advantage, as this is the attacker
-    float force1 = inOutAttacker->force() * 1.01f;
+    float force1 = inOutAttacker->force() * 1.001f;
     float force2 = inOutDefender->force();
 
     if(force1 > force2)
@@ -609,11 +608,9 @@ bool Universe::shipFightIsle(Ship *& inOutAttacker, const uint inIsleId)
 
     if(info2.owner == Player::PLAYER_UNSETTLED or info2.owner == info1.owner)
     {
-        //qInfo() << "BUG: unsettled or own isle, automatic won, no damage added";
+        Q_ASSERT(false);
         return true;
     }
-
-
 
     float force1 = inOutAttacker->force();
     float force2 = m_isles[isleIndex]->force();
@@ -834,7 +831,6 @@ void Universe::deleteShip(const uint inShipId)
     // now, no other ship has target ship with id inShipId
     m_ships.removeOne(shipToDelete);
     delete shipToDelete;
-
 }
 
 
