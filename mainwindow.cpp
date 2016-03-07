@@ -279,6 +279,8 @@ void MainWindow::slotNextRound()
     // call the infoscreen again. so there is a live update of ships and isles
     // during nextRound()
     slotRecallInfoscreen();
+    // remove artefacts of moving ships
+    m_universeScene->update(m_universeScene->sceneRect());
 }
 
 
