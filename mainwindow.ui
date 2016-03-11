@@ -10,13 +10,13 @@
     <x>0</x>
     <y>0</y>
     <width>640</width>
-    <height>480</height>
+    <height>580</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>640</width>
-    <height>480</height>
+    <height>580</height>
    </size>
   </property>
   <property name="palette">
@@ -114,7 +114,7 @@
      <x>0</x>
      <y>0</y>
      <width>640</width>
-     <height>29</height>
+     <height>19</height>
     </rect>
    </property>
   </widget>
