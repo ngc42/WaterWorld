@@ -68,7 +68,7 @@ signals:
      * infoscreen, but first a shipId or isleId is calculated. */
     void signalDeleteShipById(uint shipId);
     void signalSetShipPatrolById(uint shipId);
-    void signalAddShipToFleet(uint fleetId, uint shipId);   // fleet id can be 0 -> new fleet
+    void signalAddShipToFleet(uint isleId, uint fleetId, uint shipId);   // fleet id can be 0 -> new fleet
     void signalCallInfoscreenById(uint objectId);
     void signalSetNewTargetForShip(uint shipId);
     void signalSetNewTargetForIsle(uint isleId);

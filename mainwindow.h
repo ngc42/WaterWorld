@@ -62,7 +62,7 @@ private slots:
     // user clicked a button on info view -> human isle
     void slotDeleteShip(uint shipId);
     void slotSetShipPartrol(uint shipId);
-    void slotAddShipToFleet(uint fleetId, uint shipId);
+    void slotAddShipToFleet(uint isleId, uint fleetId, uint shipId);
     void slotSetNewTargetForShip(uint shipId);
     void slotSetNewTargetForIsle(uint isleId);
     void slotRemoveIsleTarget(uint isleId);

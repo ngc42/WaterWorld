@@ -79,11 +79,10 @@ MainWindow::MainWindow(QWidget *inParent) :
             this, SLOT(slotShowUniverseInfoHumanShip(ShipInfo, QVector<Target>)));
     connect(m_universe, SIGNAL(sigRecallInfoscreen()), this, SLOT(slotRecallInfoscreen()));
 
-
     // Infoscreen (WaterObjectInfo) -> human isle
     connect(m_waterObjectInfo, SIGNAL(signalDeleteShipById(uint)), this, SLOT(slotDeleteShip(uint)));
     connect(m_waterObjectInfo, SIGNAL(signalSetShipPatrolById(uint)), this, SLOT(slotSetShipPartrol(uint)));
-    connect(m_waterObjectInfo, SIGNAL(signalAddShipToFleet(uint,uint)), this, SLOT(slotAddShipToFleet(uint,uint)));
+    connect(m_waterObjectInfo, SIGNAL(signalAddShipToFleet(uint, uint,uint)), this, SLOT(slotAddShipToFleet(uint, uint,uint)));
     connect(m_waterObjectInfo, SIGNAL(signalCallInfoscreenById(uint)), this, SLOT(slotRecallInfoscreenById(uint)));
     connect(m_waterObjectInfo, SIGNAL(signalSetNewTargetForShip(uint)), this, SLOT(slotSetNewTargetForShip(uint)));
     connect(m_waterObjectInfo, SIGNAL(signalSetNewTargetForIsle(uint)), this, SLOT(slotSetNewTargetForIsle(uint)));
@@ -214,9 +213,9 @@ void MainWindow::slotSetShipPartrol(uint shipId)
 }
 
 
-void MainWindow::slotAddShipToFleet(uint fleetId, uint shipId)
+void MainWindow::slotAddShipToFleet(uint isleId, uint fleetId, uint shipId)
 {
-    qInfo() << "slotAddShipToFleet() -> implementation ?? ";
+    m_universe->shipAddToFleet(m_universeScene, isleId, fleetId, shipId);
 }
 
 

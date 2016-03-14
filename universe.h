@@ -27,7 +27,6 @@ public:
     explicit Universe(QObject *inParent, UniverseScene *& inOutUniverseScene, const qreal inUniverseWidth,
                       const qreal inUniverseHeight, const uint inNumIsles, const uint numEnemies);
 
-
     uint numberOfEnemies() const { return m_computerPlayers.count(); }
 
     // delete a ship and reshow the human isle
@@ -60,6 +59,8 @@ public:
     void removeShipTargetByIndex(const uint inShipId, const int inIndex);
 
     void shipSetCycleTargets(const uint inShipId, const uint inCycle);
+
+    void shipAddToFleet(UniverseScene *& inOutUniverseScene, const uint inIsleId, const uint inFleetId, const uint inShipId);
 
     void nextRound(UniverseScene *& inOutUniverseScene);
 

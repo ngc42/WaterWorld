@@ -23,7 +23,6 @@ WaterObjectInfo::WaterObjectInfo(QWidget *inParent)
     m_ui->cbHumanIsleShiptype->insertItem(ShipTypeEnum::ST_COURIER, Ship::shipTypeName(ShipTypeEnum::ST_COURIER));
     m_ui->cbHumanIsleShiptype->insertItem(ShipTypeEnum::ST_COLONY, Ship::shipTypeName(ShipTypeEnum::ST_COLONY));
 
-
     // Push buttons and more on Info -> human isle
     connect(m_ui->pbDeleteShip, SIGNAL(clicked()), this, SLOT(slotDeleteShip()));
     connect(m_ui->pbSetShipPatrolIsle, SIGNAL(clicked()), this, SLOT(slotSetShipPartrol()));
@@ -366,8 +365,8 @@ void WaterObjectInfo::slotAddShipToFleet()
     }
 
     // lets add to / create a fleet
-    // fleetId == 0 means: create a new fleet
-    emit signalAddShipToFleet(fleetId, shipId);
+    // fleetId == 0 means: create a new fleet on the isle by that isle id.
+    emit signalAddShipToFleet(m_lastCalledIsleInfo.id, fleetId, shipId);
 }
 
 

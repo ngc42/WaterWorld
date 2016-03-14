@@ -205,6 +205,50 @@ void Universe::shipSetCycleTargets(const uint inShipId, const uint inCycle)
 }
 
 
+void Universe::shipAddToFleet(UniverseScene *& inOutUniverseScene, const uint inIsleId, const uint inFleetId, const uint inShipId)
+{
+    // cannot assign a ship to itself
+    Q_ASSERT(inFleetId != inShipId);
+    // inShipId cannot be 0
+    Q_ASSERT(inShipId != 0);
+    // inIsleId cannot be 0
+    Q_ASSERT(inIsleId != 0);
+
+
+    Ship *fleetShip;
+    Ship *shipToAdd;
+
+    IsleInfo isleInfo;
+    isleForId(inIsleId, isleInfo);
+
+    int shipIndex = shipIndexForId(inShipId);
+    Q_ASSERT(shipIndex >= 0);   // ship must exist
+    shipToAdd = m_ships[shipIndex];
+    ShipInfo shipToAddInfo;
+    shipToAddInfo = shipToAdd->info();
+    Q_ASSERT(shipToAddInfo.owner == isleInfo.owner);    // don't add enemy ships to fleet
+
+    if(inFleetId == 0)
+    {   // create a new fleet, which is just a ship representing all other ships
+        fleetShip = new Ship(inOutUniverseScene, ShipTypeEnum::ST_FLEET, m_lastInsertedId++, isleInfo.owner,
+                           isleInfo.pos, isleInfo.color, ShipPositionEnum::S_ONISLE,
+                           isleInfo.id, isleInfo.technology);
+        m_ships.push_back(fleetShip);
+
+    }
+    else
+    {
+        int fleetIndex = shipIndexForId(inFleetId);
+        Q_ASSERT(fleetIndex >= 0);
+        fleetShip = m_ships[fleetIndex];
+    }
+
+
+
+    qInfo() << "Universe::shipAddToFleet() -> implementation ?? ";
+}
+
+
 void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 {
     qInfo() << "BEGIN NEXTROUND ==================";
