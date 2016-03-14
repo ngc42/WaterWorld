@@ -84,7 +84,7 @@ private slots:
     void slotSelectShipFromShipList(QTableWidgetItem *item);    // double click on ship list on human isle
     void slotSetNewTargetForShip();
     void slotSetNewTargetForIsle();
-    void slotAddToFleet();
+    void slotAddShipToFleet();
     void slotRemoveIsleTarget();
     void slotBuildNewShipType(int newType);
 

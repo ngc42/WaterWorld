@@ -590,7 +590,7 @@
             </widget>
            </item>
            <item row="4" column="3">
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="pbAddShipToFleet">
              <property name="text">
               <string>+Flt</string>
              </property>

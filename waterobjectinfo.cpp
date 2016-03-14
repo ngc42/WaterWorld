@@ -30,6 +30,7 @@ WaterObjectInfo::WaterObjectInfo(QWidget *inParent)
     connect(m_ui->tblwHShipList, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
             this, SLOT(slotSelectShipFromShipList(QTableWidgetItem*)));
     connect(m_ui->pbSetShipTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForShip()));
+    connect(m_ui->pbAddShipToFleet, SIGNAL(clicked()), this, SLOT(slotAddShipToFleet()));
     connect(m_ui->pbHumanShipSetTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForShip()));
     connect(m_ui->pbSetDefaultTarget, SIGNAL(clicked()), this, SLOT(slotSetNewTargetForIsle()));
     connect(m_ui->pbRemoveDefaultTarget, SIGNAL(clicked()), this, SLOT(slotRemoveIsleTarget()));
@@ -165,7 +166,7 @@ void WaterObjectInfo::showInfopageHumanIsle(const IsleInfo inIsleInfo, const QLi
         case ShipTypeEnum::ST_COLONY:
             m_ui->cbHumanIsleShiptype->setCurrentIndex(ShipTypeEnum::ST_COLONY);
             break;
-        default:    // fleets cannot built that way!
+        default:    // fleets cannot be built that way!
             Q_ASSERT(false);
             break;
     }
@@ -346,7 +347,7 @@ void WaterObjectInfo::slotSetNewTargetForIsle()
 }
 
 
-void WaterObjectInfo::slotAddToFleet()
+void WaterObjectInfo::slotAddShipToFleet()
 {
     // first the ship id...
     int shipRow = m_ui->tblwHShipList->currentRow();
