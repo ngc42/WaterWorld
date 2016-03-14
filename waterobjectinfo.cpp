@@ -22,7 +22,7 @@ WaterObjectInfo::WaterObjectInfo(QWidget *inParent)
     m_ui->cbHumanIsleShiptype->insertItem(ShipTypeEnum::ST_BATTLESHIP, Ship::shipTypeName(ShipTypeEnum::ST_BATTLESHIP));
     m_ui->cbHumanIsleShiptype->insertItem(ShipTypeEnum::ST_COURIER, Ship::shipTypeName(ShipTypeEnum::ST_COURIER));
     m_ui->cbHumanIsleShiptype->insertItem(ShipTypeEnum::ST_COLONY, Ship::shipTypeName(ShipTypeEnum::ST_COLONY));
-    m_ui->cbHumanIsleShiptype->insertItem(ShipTypeEnum::ST_FLEET, Ship::shipTypeName(ShipTypeEnum::ST_FLEET));
+
 
     // Push buttons and more on Info -> human isle
     connect(m_ui->pbDeleteShip, SIGNAL(clicked()), this, SLOT(slotDeleteShip()));
@@ -165,8 +165,8 @@ void WaterObjectInfo::showInfopageHumanIsle(const IsleInfo inIsleInfo, const QLi
         case ShipTypeEnum::ST_COLONY:
             m_ui->cbHumanIsleShiptype->setCurrentIndex(ShipTypeEnum::ST_COLONY);
             break;
-        case ShipTypeEnum::ST_FLEET:
-            m_ui->cbHumanIsleShiptype->setCurrentIndex(ShipTypeEnum::ST_FLEET);
+        default:    // fleets cannot built that way!
+            Q_ASSERT(false);
             break;
     }
     s = QString("Build: %1%").arg(inIsleInfo.buildlevel * 100.0f, 0, 'F', 0);
@@ -343,6 +343,30 @@ void WaterObjectInfo::slotSetNewTargetForIsle()
     uint id = id_v.toUInt(&ok);
     Q_ASSERT(ok);
     emit signalSetNewTargetForIsle(id);
+}
+
+
+void WaterObjectInfo::slotAddToFleet()
+{
+    // first the ship id...
+    int shipRow = m_ui->tblwHShipList->currentRow();
+    if(shipRow < 0) // well, at least one ship has to be selected
+        return;
+    ShipListItem *shipListItem = (ShipListItem* ) m_ui->tblwHShipList->currentItem();
+    uint shipId = shipListItem->id();
+
+    // ...then the fleet id...
+    int fleetRow = m_ui->tblwHFleetList->currentRow();
+    uint fleetId = 0;
+    if(fleetRow >= 0)
+    {
+        ShipListItem *fleetListItem = (ShipListItem* ) m_ui->tblwHFleetList->currentItem();
+        fleetId = fleetListItem->id();
+    }
+
+    // lets add to / create a fleet
+    // fleetId == 0 means: create a new fleet
+    emit signalAddShipToFleet(fleetId, shipId);
 }
 
 

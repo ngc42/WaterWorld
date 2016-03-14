@@ -68,6 +68,7 @@ signals:
      * infoscreen, but first a shipId or isleId is calculated. */
     void signalDeleteShipById(uint shipId);
     void signalSetShipPatrolById(uint shipId);
+    void signalAddShipToFleet(uint fleetId, uint shipId);   // fleet id can be 0 -> new fleet
     void signalCallInfoscreenById(uint objectId);
     void signalSetNewTargetForShip(uint shipId);
     void signalSetNewTargetForIsle(uint isleId);
@@ -83,6 +84,7 @@ private slots:
     void slotSelectShipFromShipList(QTableWidgetItem *item);    // double click on ship list on human isle
     void slotSetNewTargetForShip();
     void slotSetNewTargetForIsle();
+    void slotAddToFleet();
     void slotRemoveIsleTarget();
     void slotBuildNewShipType(int newType);
 
