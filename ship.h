@@ -28,7 +28,7 @@ struct Target
 };
 
 
-enum ShipPositionEnum {S_ONISLE, S_PATROL, S_OCEAN, S_TRASH};
+enum ShipPositionEnum {SP_ONISLE, SP_PATROL, SP_OCEAN, SP_IN_FLEET, SP_TRASH};
 
 
 /**
@@ -47,13 +47,15 @@ struct ShipInfo
     QColor color;
     QPointF pos;
     ShipPositionEnum posType;
-    uint isleId;        // if not on ocean
+    uint isleId;            // if not on ocean
     bool hasTarget;
     bool cycleTargetList;   // true, if repeat the list of targets over and over
     float damage;
     float technology;
     QPointF attachPos;  // pos of last target (or this pos) to attach rubber band line for next target
     float carryTechnology;  // for ST_COURIER, which can carry tech papers from one isle to another
+
+    uint fleetId;           // for posType == SP_IN_FLEET
 };
 
 
@@ -147,6 +149,26 @@ public:
     static QString typeName(const ShipTypeEnum inShipType);
 
 
+    // --- Fleet things ---
+
+    /*
+     * add an other ship to this ship, which must be of fleet type
+     */
+    void addShipToFleet(const ShipInfo inOtherShip);
+    /*
+     * remove other ship from this fleet
+     */
+    void removeShipFromFleet(const uint inShipId);
+    /*
+     * this ship becomes part of a fleet
+     */
+    void addToFleet(const uint inFleetId);
+    /*
+     * this ship is no longer part of a fleet
+     * we need to know, where we are
+     */
+    void removeFromFleet(const ShipInfo inFleetInfo);
+
 
 private:
     ShipTypeEnum m_shipType;
@@ -169,6 +191,12 @@ private:
      * case there are no targets, this shows up a better path
      */
     void addCurrentPosToTarget();
+
+
+    // Fleet things
+    QVector<ShipInfo> m_fleetShips; // if we are a fleet, these are our members
+    uint m_fleetId;                 // pointer to the fleet, if we are member of a fleet (SP_IN_FLEET)
+
 };
 
 #endif // SHIP_H

@@ -18,7 +18,7 @@ public:
     explicit WaterObject(const uint inId, const uint inOwner, const QPointF inPos,
                          const QColor inColor, const float inTechnology);
 
-    ~WaterObject() {};
+    ~WaterObject() {}
 
     // getter
     uint id() const { return m_id; }

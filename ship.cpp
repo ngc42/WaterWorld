@@ -33,6 +33,7 @@ Ship::Ship(UniverseScene *& inOutRefScene, const ShipTypeEnum inShipType, const 
     inOutRefScene->addItem(m_shape);
     m_shape->setBrush(QBrush(inColor));
     setCarryTechnology(inTechnology);   // for ST_COURIER
+    m_fleetId = 0;                      // not part of fleet
 }
 
 
@@ -95,6 +96,7 @@ ShipInfo Ship::info() const
         outInfo.attachPos = m_pos;
     }
     outInfo.carryTechnology = m_carryTechnology;
+    outInfo.fleetId == m_fleetId;
     return outInfo;
 }
 
@@ -112,6 +114,10 @@ void Ship::setOwner(const uint inOwner, const QColor inColor)
 
 void Ship::setPositionType(ShipPositionEnum inType)
 {
+    if(inType == ShipPositionEnum::SP_OCEAN)
+        m_shape->show();
+    else
+        m_shape->hide();
     m_positionType = inType;
 }
 
@@ -241,31 +247,18 @@ void Ship::updateTargetPos(const uint inShipId, const QPointF inPos)
 void Ship::landOnIsle(const uint inIsleId, const QPointF inPos)
 {
     m_onIsleById = inIsleId;
-    m_positionType = ShipPositionEnum::S_ONISLE;
+    setPositionType(ShipPositionEnum::SP_ONISLE);
     m_pos = inPos;
-    m_shape->hide();
     setTargetFinished();
 }
 
-/*
-void Ship::addDamage(const float inDamageToAdd)
-{
-    // Courier and Colony ships cannot defend themselves
-    m_damage = m_damage + inDamageToAdd;
-    if(m_damage > 0.999f or
-       (m_shipType == ShipTypeEnum::ST_COURIER) or (m_shipType == ShipTypeEnum::ST_COLONY))
-    {
-        setPositionType(ShipPositionEnum::S_TRASH);
-        removeTargets();
-    }
-}
-*/
 
 bool Ship::nextRound()
 {
-    if(m_positionType == ShipPositionEnum::S_TRASH)
+    if(m_positionType == ShipPositionEnum::SP_TRASH or
+       m_positionType == ShipPositionEnum::SP_IN_FLEET)
     {
-        return true;    // arrived in heaven;
+        return false;    // we don't care, because universe/fleet does
     }
 
     if(m_targetList.count() == 0)
@@ -273,8 +266,7 @@ bool Ship::nextRound()
 
     // Rod_Steward::Sailing, YouTube::DyIw0gcgfik
     Target currentTarget = m_targetList[m_currentTargetIndex];
-    m_positionType = ShipPositionEnum::S_OCEAN;
-    m_shape->show();
+    setPositionType(ShipPositionEnum::SP_OCEAN);
     float dx = currentTarget.pos.x() - m_pos.x();
     float dy = currentTarget.pos.y() - m_pos.y();
 
@@ -418,11 +410,14 @@ void Ship::addCurrentPosToTarget()
         Target t;
         switch(m_positionType)
         {
-            case ShipPositionEnum::S_ONISLE:
-            case ShipPositionEnum::S_PATROL:    // fall trough
+            case ShipPositionEnum::SP_ONISLE:
+            case ShipPositionEnum::SP_PATROL:    // fall trough
                 t.id = m_onIsleById;
                 t.tType = Target::T_ISLE;
                 break;
+            case ShipPositionEnum::SP_IN_FLEET:
+                // there is nothing we should do here
+                return;
             default:
                 qInfo() << "?? Ship::addCurrentPosToTarget()";
                 t.id = 0;
@@ -433,4 +428,35 @@ void Ship::addCurrentPosToTarget()
         t.visited = true;
         m_targetList.append(t);
     }
+}
+
+
+void Ship::addShipToFleet(const ShipInfo inOtherShip)
+{
+
+}
+
+
+void Ship::removeShipFromFleet(const uint inShipId)
+{
+
+}
+
+
+void Ship::addToFleet(const uint inFleetId)
+{
+    // we don't have own targets
+    removeTargets();
+    setPositionType(ShipPositionEnum::SP_IN_FLEET);
+    m_fleetId = inFleetId;
+}
+
+
+void Ship::removeFromFleet(const ShipInfo inFleetInfo)
+{
+    setPositionType(inFleetInfo.posType);
+    m_onIsleById = inFleetInfo.isleId;
+    m_carryTechnology = inFleetInfo.carryTechnology;
+    m_pos = inFleetInfo.pos;
+    m_fleetId = 0;
 }
