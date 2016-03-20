@@ -52,7 +52,7 @@ struct ShipInfo
     bool cycleTargetList;   // true, if repeat the list of targets over and over
     float damage;
     float technology;
-    QPointF attachPos;  // pos of last target (or this pos) to attach rubber band line for next target
+    QPointF attachPos;      // pos of last target (or this pos) to attach rubber band line for next target
     float carryTechnology;  // for ST_COURIER, which can carry tech papers from one isle to another
 
     uint fleetId;           // for posType == SP_IN_FLEET
@@ -154,20 +154,28 @@ public:
     /*
      * add an other ship to this ship, which must be of fleet type
      */
-    void addShipToFleet(const ShipInfo inOtherShip);
+    void addShipToFleet(const Ship* &inShip);
+
     /*
      * remove other ship from this fleet
      */
-    void removeShipFromFleet(const uint inShipId);
+    Ship* removeShipFromFleet(const uint inShipId);
+
     /*
      * this ship becomes part of a fleet
      */
     void addToFleet(const uint inFleetId);
+
     /*
      * this ship is no longer part of a fleet
      * we need to know, where we are
      */
     void removeFromFleet(const ShipInfo inFleetInfo);
+
+    /*
+     * calc fleet's damage, techlevel and damaged ships
+     */
+    void updateFleet();
 
 
 private:
@@ -194,7 +202,7 @@ private:
 
 
     // Fleet things
-    QVector<ShipInfo> m_fleetShips; // if we are a fleet, these are our members
+    QVector<Ship*> m_fleetShips;    // if we are a fleet, these are our members
     uint m_fleetId;                 // pointer to the fleet, if we are member of a fleet (SP_IN_FLEET)
 
 };

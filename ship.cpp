@@ -39,6 +39,9 @@ Ship::Ship(UniverseScene *& inOutRefScene, const ShipTypeEnum inShipType, const 
 
 Ship::~Ship()
 {
+    if(m_shipType == ShipTypeEnum::ST_FLEET)
+        for(Ship * &s : m_fleetShips)
+            delete s;
     delete m_shape;
 }
 
@@ -96,7 +99,7 @@ ShipInfo Ship::info() const
         outInfo.attachPos = m_pos;
     }
     outInfo.carryTechnology = m_carryTechnology;
-    outInfo.fleetId == m_fleetId;
+    outInfo.fleetId = m_fleetId;
     return outInfo;
 }
 
@@ -108,7 +111,10 @@ void Ship::setOwner(const uint inOwner, const QColor inColor)
     m_shape->setBrush(QBrush(Player::colorForOwner(inOwner)));
     removeTargets();
     m_cycleTargetList = false;
-    m_damage = 0.0f;        // @fixme: really?
+    // if this is a fleet, do the same for all members
+    if(m_shipType == ShipTypeEnum::ST_FLEET)
+        for(Ship *s : m_fleetShips)
+            s->setOwner(inOwner, inColor);
 }
 
 
@@ -125,8 +131,9 @@ void Ship::setPositionType(ShipPositionEnum inType)
 void Ship::setCarryTechnology(const float inTechlevel)
 {
     // courier ships taking the maximum
-    if( (m_shipType == ShipTypeEnum::ST_COURIER) and  (inTechlevel > m_carryTechnology))
+    if( (m_shipType == ShipTypeEnum::ST_COURIER) and (inTechlevel > m_carryTechnology))
         m_carryTechnology = inTechlevel;
+    // @fixme: fleets may contain a courier
 }
 
 
@@ -286,25 +293,57 @@ bool Ship::nextRound()
 
 float Ship::force() const
 {
-    // @fixme: missing: ST_FLEET
-
     if(isDead())
         return 0.0f;
     if(m_shipType == ShipTypeEnum::ST_BATTLESHIP)
         return (1.0 - m_damage) * m_technology;
+    if(m_shipType == ShipTypeEnum::ST_FLEET)
+    {
+        float f = 0.0;
+        for(Ship *s : m_fleetShips)
+            f = f + s->force();
+        return f;
+    }
     return 0.0f;
 }
 
 
 void Ship::takeDamage(const float inOpponentForce)
 {
-    // @fixme: missing: ST_FLEET
     if(m_shipType == ShipTypeEnum::ST_BATTLESHIP)
     {
         m_damage  =  m_damage  + inOpponentForce/m_technology;
         if(m_damage < 0.99f)
             return;
     }
+    else if(m_shipType == ShipTypeEnum::ST_FLEET)
+    {
+        // count battleships and fleets in this fleet
+        uint numMember = 0;
+        for(Ship *s : m_fleetShips)
+        {
+            ShipTypeEnum memberType = s->info().shipType;
+            if(memberType == ShipTypeEnum::ST_FLEET or memberType == ShipTypeEnum::ST_BATTLESHIP)
+                numMember++;
+        }
+        if(numMember == 0)
+        {
+            setDead();
+            return;
+        }
+        // every battleship/fleet member gets a part of the damage
+        float opponentForcePart = inOpponentForce / numMember;
+        for(Ship *s : m_fleetShips)
+        {
+            ShipTypeEnum memberType = s->info().shipType;
+            if(memberType == ShipTypeEnum::ST_FLEET or memberType == ShipTypeEnum::ST_BATTLESHIP)
+                s->takeDamage(opponentForcePart);
+        }
+        updateFleet();
+        return;
+    }
+
+    // every other shiptype:
     setDead();
 }
 
@@ -317,8 +356,14 @@ bool Ship::isDead() const
 
 void Ship::setDead()
 {
-    setPositionType(ShipPositionEnum::S_TRASH);
+    setPositionType(ShipPositionEnum::SP_TRASH);
     removeTargets();
+    if(m_shipType == ShipTypeEnum::ST_FLEET)
+    {
+        for(Ship *s : m_fleetShips)
+            s->setDead();
+        updateFleet();
+    }
 }
 
 
@@ -326,15 +371,24 @@ void Ship::repair()
 {
     if(isDead())
         return;
-    m_damage = m_damage - 0.05;
-    if(m_damage < 0)
-        m_damage = 0.0;
+    if(m_shipType == ShipTypeEnum::ST_FLEET)
+    {
+        for(Ship *s : m_fleetShips)
+            s->repair();
+        updateFleet();
+    }
+    else
+    {
+        m_damage = m_damage - 0.05;
+        if(m_damage < 0)
+            m_damage = 0.0;
+    }
 }
 
 
 bool Ship::pointInShip(const QPointF inPos)
 {
-    if(m_positionType != ShipPositionEnum::S_OCEAN)
+    if(m_positionType != ShipPositionEnum::SP_OCEAN)
         return false;
     QPointF myPos = pos();
     return inPos.x() > (myPos.x() - 7.0f) and
@@ -431,15 +485,42 @@ void Ship::addCurrentPosToTarget()
 }
 
 
-void Ship::addShipToFleet(const ShipInfo inOtherShip)
+void Ship::addShipToFleet(const Ship* & inOtherShip)
 {
-
+    Q_ASSERT(m_shipType == ShipTypeEnum::ST_FLEET);
+    m_fleetShips.append(inOtherShip);
+    updateFleet();
 }
 
 
-void Ship::removeShipFromFleet(const uint inShipId)
+Ship* Ship::removeShipFromFleet(const uint inShipId)
 {
+    Q_ASSERT(m_shipType == ShipTypeEnum::ST_FLEET);
+    Ship* shipToRemove = 0;
+    for(int i = 0; i < m_fleetShips.count(); i++)
+    {
+        if(m_fleetShips.at(i)->id() == inShipId)
+        {
+            shipToRemove = m_fleetShips[i];
+            m_fleetShips.remove(i);
+            break;
+        }
+    }
 
+    Q_ASSERT(shipToRemove);
+
+    // tell shipToRemove to be removed from fleet
+    ShipInfo fleetInfo = info();
+    shipToRemove->removeFromFleet(fleetInfo);
+
+    // fleet is empty
+    if(m_fleetShips.count() == 0)
+    {   // we removed the last one
+        setDead();
+    }
+
+    updateFleet();
+    return shipToRemove;
 }
 
 
@@ -447,6 +528,8 @@ void Ship::addToFleet(const uint inFleetId)
 {
     // we don't have own targets
     removeTargets();
+    if(m_positionType == ShipPositionEnum::SP_TRASH)
+        return;
     setPositionType(ShipPositionEnum::SP_IN_FLEET);
     m_fleetId = inFleetId;
 }
@@ -454,9 +537,42 @@ void Ship::addToFleet(const uint inFleetId)
 
 void Ship::removeFromFleet(const ShipInfo inFleetInfo)
 {
+    if(m_positionType == ShipPositionEnum::SP_TRASH)
+        return;
     setPositionType(inFleetInfo.posType);
     m_onIsleById = inFleetInfo.isleId;
     m_carryTechnology = inFleetInfo.carryTechnology;
     m_pos = inFleetInfo.pos;
     m_fleetId = 0;
+}
+
+
+void Ship::updateFleet()
+{
+    Q_ASSERT(m_shipType == ShipTypeEnum::ST_FLEET);
+    float techlevel = 0.0;
+    float maxTech = 0.0;
+    float damage = 0.0;
+    for(Ship * &s : m_fleetShips)
+    {
+        ShipInfo shipInfo = s->info();
+        if(shipInfo.shipType == ShipTypeEnum::ST_FLEET)
+        {
+            s->updateFleet();
+            // update info
+            shipInfo = s->info();
+        }
+        if(s->isDead())
+        {
+            m_fleetShips.removeOne(s);
+            delete s;
+        }
+        else
+        {
+            if(shipInfo.shipType == ShipTypeEnum::ST_BATTLESHIP or shipInfo.shipType == ShipTypeEnum::ST_FLEET)
+            maxTech = shipInfo.technology
+                    xxxx ???
+        }
+    }
+
 }
