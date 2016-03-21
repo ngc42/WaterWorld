@@ -155,12 +155,12 @@ void ComputerPlayer::nextRound(QList<ComputerMove> & outMoves)
                         ShipInfo shipInfo = esi.shipInfo;
                         if(shipInfo.shipType == ShipTypeEnum::ST_BATTLESHIP and shipInfo.isleId == targetIsle)
                         {
-                            if(shipInfo.posType == ShipPositionEnum::S_ONISLE)
+                            if(shipInfo.posType == ShipPositionEnum::SP_ONISLE)
                             {
                                 makeMoveShipSetPatrol(outMoves, shipInfo.id, targetIsle);
                                 countBattleshipsOnTarge++;
                             }
-                            else if(shipInfo.posType == ShipPositionEnum::S_PATROL)
+                            else if(shipInfo.posType == ShipPositionEnum::SP_PATROL)
                             {
                                 countBattleshipsOnTarge++;
                             }
@@ -194,14 +194,14 @@ void ComputerPlayer::nextRound(QList<ComputerMove> & outMoves)
                             ShipInfo shipInfo = esi.shipInfo;
                             if(shipInfo.shipType == ShipTypeEnum::ST_COLONY)
                             {
-                               if(shipInfo.isleId == myIsle and shipInfo.posType == ShipPositionEnum::S_ONISLE)
+                               if(shipInfo.isleId == myIsle and shipInfo.posType == ShipPositionEnum::SP_ONISLE)
                                {
                                    // send it to target
                                    makeMoveShipSetTargetIsle(outMoves, shipInfo.id, targetIsle, true);
                                    colonyUnderway = true;
                                    break;
                                }
-                               if(shipInfo.posType == ShipPositionEnum::S_OCEAN)
+                               if(shipInfo.posType == ShipPositionEnum::SP_OCEAN)
                                {
                                    for(Target t : esi.targets)
                                    {
@@ -248,7 +248,7 @@ void ComputerPlayer::nextRound(QList<ComputerMove> & outMoves)
                         {
                             ShipInfo shipInfo = esi.shipInfo;
                             if(shipInfo.isleId == myIsle and
-                               (shipInfo.posType == ShipPositionEnum::S_ONISLE or shipInfo.posType == ShipPositionEnum::S_PATROL) and
+                               (shipInfo.posType == ShipPositionEnum::SP_ONISLE or shipInfo.posType == ShipPositionEnum::SP_PATROL) and
                                shipInfo.shipType == ShipTypeEnum::ST_BATTLESHIP)
                                 makeMoveShipSetTargetIsle(outMoves, shipInfo.id, targetIsle, true);
                         }

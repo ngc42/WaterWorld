@@ -917,7 +917,7 @@ void Universe::showHumanIsle(const IsleInfo inIsleInfo)
     {
         ShipInfo info = ship->info();
         if(info.owner == Player::PLAYER_HUMAN and
-                (info.posType != ShipPositionEnum::S_OCEAN) and
+                (info.posType != ShipPositionEnum::SP_OCEAN) and
                 info.isleId == inIsleInfo.id)
             sList.append(info);
     }
@@ -964,7 +964,7 @@ void Universe::prepareStrategies()
             }
             else
             {
-                if(shipInfo.posType == ShipPositionEnum::S_OCEAN)
+                if(shipInfo.posType == ShipPositionEnum::SP_OCEAN)
                     // just append if visible to everyone
                     shipInfosPublic.append(shipInfo);
             }
@@ -999,7 +999,7 @@ void Universe::processStrategyCommands(const uint inOwner, const QList<ComputerM
                                 (sInfo.shipType == ShipTypeEnum::ST_BATTLESHIP or
                                  (sInfo.shipType == ShipTypeEnum::ST_FLEET and s->force() >= 1.0)))
                         {
-                            s->setPositionType(ShipPositionEnum::S_PATROL);
+                            s->setPositionType(ShipPositionEnum::SP_PATROL);
                         }
                     }
                 }
@@ -1039,10 +1039,10 @@ void Universe::processStrategyCommands(const uint inOwner, const QList<ComputerM
                     ShipInfo shipInfo = s->info();
 
                     // if the ship is on target isle...
-                    if(s->positionType() == ShipPositionEnum::S_ONISLE and
+                    if(s->positionType() == ShipPositionEnum::SP_ONISLE and
                             shipInfo.isleId == cmd.targetId)
                     {
-                        s->setPositionType(ShipPositionEnum::S_PATROL);
+                        s->setPositionType(ShipPositionEnum::SP_PATROL);
                     }
                 }
                 else

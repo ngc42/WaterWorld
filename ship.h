@@ -154,7 +154,7 @@ public:
     /*
      * add an other ship to this ship, which must be of fleet type
      */
-    void addShipToFleet(const Ship* &inShip);
+    void addShipToFleet(Ship* &inShip);
 
     /*
      * remove other ship from this fleet

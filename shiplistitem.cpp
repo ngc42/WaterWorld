@@ -33,12 +33,12 @@ ShipListItem::ShipListItem(const ShipListItemType inType, const ShipInfo inShipI
             p.drawEllipse(10, 10, 5, 5);
             p.end();
         }
-        else if(inShipInfo.posType == ShipPositionEnum::S_ONISLE)
+        else if(inShipInfo.posType == ShipPositionEnum::SP_ONISLE)
         {
             // ships sits arround on isle
             circle.fill(Player::colorForOwner(inShipInfo.owner));
         }
-        else if(inShipInfo.posType == ShipPositionEnum::S_PATROL)
+        else if(inShipInfo.posType == ShipPositionEnum::SP_PATROL)
         {
             // ship on patruille
             circle.fill(Qt::black);

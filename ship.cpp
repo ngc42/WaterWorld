@@ -350,7 +350,7 @@ void Ship::takeDamage(const float inOpponentForce)
 
 bool Ship::isDead() const
 {
-    return m_positionType == ShipPositionEnum::S_TRASH or m_damage >= 1.0f;
+    return m_positionType == ShipPositionEnum::SP_TRASH or m_damage >= 1.0f;
 }
 
 
@@ -485,7 +485,7 @@ void Ship::addCurrentPosToTarget()
 }
 
 
-void Ship::addShipToFleet(const Ship* & inOtherShip)
+void Ship::addShipToFleet(Ship* & inOtherShip)
 {
     Q_ASSERT(m_shipType == ShipTypeEnum::ST_FLEET);
     m_fleetShips.append(inOtherShip);
