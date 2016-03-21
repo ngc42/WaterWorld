@@ -62,7 +62,7 @@ void Universe::deleteShipOnIsle(const uint inShipId)
         {
             isleId = sInfo.isleId;
             // just to get sure
-            if((sInfo.posType != ShipPositionEnum::S_OCEAN) and isleId > 0)
+            if((sInfo.posType != ShipPositionEnum::SP_OCEAN) and isleId > 0)
             {
                 deleteShip(inShipId);
                 IsleInfo iInfo;
@@ -82,14 +82,14 @@ void Universe::setShipPatrolsIsle(const uint inShipId)
     {
         Ship *s = m_ships[shipIndex];
         ShipInfo sInfo = s->info();
-        if(sInfo.posType == ShipPositionEnum::S_OCEAN)
+        if(sInfo.posType == ShipPositionEnum::SP_OCEAN or sInfo.posType == ShipPositionEnum::SP_IN_FLEET)
             return;
         s->removeTargets();
         // toggle Patruille status:
-        if(sInfo.posType == ShipPositionEnum::S_ONISLE)
-            s->setPositionType(ShipPositionEnum::S_PATROL);
+        if(sInfo.posType == ShipPositionEnum::SP_ONISLE)
+            s->setPositionType(ShipPositionEnum::SP_PATROL);
         else
-            s->setPositionType(ShipPositionEnum::S_ONISLE);
+            s->setPositionType(ShipPositionEnum::SP_ONISLE);
         // redraw isle info
         IsleInfo iInfo;
         isleForId(sInfo.isleId, iInfo);
@@ -231,7 +231,7 @@ void Universe::shipAddToFleet(UniverseScene *& inOutUniverseScene, const uint in
     if(inFleetId == 0)
     {   // create a new fleet, which is just a ship representing all other ships
         fleetShip = new Ship(inOutUniverseScene, ShipTypeEnum::ST_FLEET, m_lastInsertedId++, isleInfo.owner,
-                           isleInfo.pos, isleInfo.color, ShipPositionEnum::S_ONISLE,
+                           isleInfo.pos, isleInfo.color, ShipPositionEnum::SP_ONISLE,
                            isleInfo.id, isleInfo.technology);
         m_ships.push_back(fleetShip);
 
@@ -306,11 +306,27 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                         // such things
                         ship->setDead();
                     }
+                    else if(shipInfo.shipType == ShipTypeEnum::ST_FLEET)
+                    {
+                        // does it contain a colony?
+                        if(ship->fleetContainsShipType(ShipTypeEnum::ST_COLONY))
+                        {
+                            setIsleOwnerById(isleInfo.id, shipInfo.owner, shipInfo.color);
+                            shipLandOnIsle(ship, isleInfo.id);
+                            // delete the first colony ship in the fleet
+                            ship->fleetRemoveFirstColonyShip();
+                        }
+                        else
+                        {
+                            ship->landOnIsle(target.id, target.pos);
+                            ship->setPositionType(ShipPositionEnum::SP_PATROL);
+                        }
+                    }
                     else
                     {
                         // send to orbit
                         ship->landOnIsle(target.id, target.pos);
-                        ship->setPositionType(ShipPositionEnum::S_PATROL);
+                        ship->setPositionType(ShipPositionEnum::SP_PATROL);
                     }
                 }
                 else if(isleInfo.owner == shipInfo.owner)
@@ -328,7 +344,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 
                     // 2. fight isle
                     if( shipFightIsle(ship, target.id) )
-                    {   // ship has won
+                    {   // ship has won, isle is now owned by ship's owner
                         shipLandOnIsle(ship, target.id);
 
                         // every other enemy ship on this isle is now owned by the winner
@@ -336,7 +352,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                         for(Ship *isleShip : m_ships)
                         {
                             ShipInfo isleShipInfo = isleShip->info();
-                            if(isleShipInfo.posType == ShipPositionEnum::S_ONISLE and
+                            if(isleShipInfo.posType == ShipPositionEnum::SP_ONISLE and
                                isleShipInfo.isleId == target.id)
                             {   // set new owner
                                 isleShip->setOwner(shipInfo.owner, shipInfo.color);
@@ -356,7 +372,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
                         qInfo()  << "ship lost id = " << ship->id();
                         ShipInfo info = ship->info();
                         qInfo()  << "ship lost id = " << ship->id() << " damage: " << info.damage <<
-                                    " delete: " << (info.posType == ShipPositionEnum::S_TRASH);
+                                    " delete: " << (info.posType == ShipPositionEnum::SP_TRASH);
                     }
                 }
             }
@@ -374,13 +390,14 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
 
                 if(shipInfo.owner == otherShipInfo.owner)
                 {   // same owner: just rendez vous
+                    // @fixme: maybe add to fleet?
                     ship->setTargetFinished();
                 }
                 else
                 {   // different owner -> fight
                     shipFightShip(ship, otherShip);
                     shipInfo = ship->info();    // update info
-                    if(shipInfo.posType != ShipPositionEnum::S_TRASH)
+                    if(shipInfo.posType != ShipPositionEnum::SP_TRASH)
                         ship->setTargetFinished();
                 }
             }
@@ -393,7 +410,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
         else    // ship's nextround() returned false
         {
             // repair ships on isle
-            if(shipInfo.posType == ShipPositionEnum::S_ONISLE and (!ship->isDead()))
+            if(shipInfo.posType == ShipPositionEnum::SP_ONISLE and (!ship->isDead()))
             {
                 ship->repair();
             }
@@ -404,6 +421,10 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
     for(Ship *deleteThatShip : m_ships)
     {
         ShipInfo dmgShipInfo = deleteThatShip->info();
+
+        if(dmgShipInfo.shipType == ShipTypeEnum::ST_FLEET)
+            deleteThatShip->updateFleet();
+
         bool shouldDelete = false;
         bool doDelete = false;
         if(deleteThatShip->isDead())
@@ -412,7 +433,7 @@ void Universe::nextRound(UniverseScene *& inOutUniverseScene)
             shouldDelete = true;
 
         }
-        if(deleteThatShip->positionType() == ShipPositionEnum::S_TRASH)
+        if(deleteThatShip->positionType() == ShipPositionEnum::SP_TRASH)
         {
             qDebug() << " -- delete " << dmgShipInfo.id;
             deleteShip(deleteThatShip->id());
@@ -550,7 +571,7 @@ void Universe::createIsles(const qreal inUniverseWidth, const qreal inUniverseHe
 void Universe::createShipOnIsle(UniverseScene *& inOutUniverseScene, const IsleInfo isleInfo)
 {
     Ship *s = new Ship(inOutUniverseScene, isleInfo.shipToBuild, m_lastInsertedId++, isleInfo.owner,
-                       isleInfo.pos, isleInfo.color, ShipPositionEnum::S_ONISLE,
+                       isleInfo.pos, isleInfo.color, ShipPositionEnum::SP_ONISLE,
                        isleInfo.id, isleInfo.technology);
     // default target
     switch(isleInfo.defaultTargetType)
@@ -621,7 +642,7 @@ void Universe::shipFightIslePatol(Ship *& inOutAttacker, const uint inIsleId)
 
         // for unowned isles we check, that there is no friendly fire
         ShipInfo attackerInfo = inOutAttacker->info();
-        if(defenderInfo.posType == ShipPositionEnum::S_PATROL and
+        if(defenderInfo.posType == ShipPositionEnum::SP_PATROL and
                 defenderInfo.isleId == inIsleId and
            attackerInfo.owner != defenderInfo.owner)
             shipFightShip(inOutAttacker, defender);
@@ -713,6 +734,12 @@ void Universe::shipLandOnIsle(Ship *& inOutShipToLand, const uint inIsleId)
     // transfer technology to the isle
     if(shipInfo.shipType == ShipTypeEnum::ST_COURIER)
         targetIsle->setMaxTechnology(shipInfo.carryTechnology);
+    else if(shipInfo.shipType == ShipTypeEnum::ST_FLEET)
+    {
+        targetIsle->setMaxTechnology(shipInfo.technology > shipInfo.carryTechnology ?
+                                         shipInfo.technology :
+                                         shipInfo.carryTechnology);
+    }
     else
         targetIsle->setMaxTechnology(shipInfo.technology);
 
@@ -872,6 +899,10 @@ void Universe::deleteShip(const uint inShipId)
             shipToDelete = s;
     }
 
+    Q_ASSERT(shipToDelete);
+    if(shipToDelete->info().shipType == ShipTypeEnum::ST_FLEET)
+        shipToDelete->deleteFleetContent(shipToDelete); // delete your content
+
     // now, no other ship has target ship with id inShipId
     m_ships.removeOne(shipToDelete);
     delete shipToDelete;
@@ -962,10 +993,11 @@ void Universe::processStrategyCommands(const uint inOwner, const QList<ComputerM
                     // not cheating
                     for(Ship *s : m_ships)
                     {
-                        // @fixme: missing fleet
-                        if(s->positionType() == ShipPositionEnum::S_ONISLE and
-                                s->info().isleId == cmd.sourceId and
-                                s->info().shipType == ShipTypeEnum::ST_BATTLESHIP)
+                        ShipInfo sInfo = s->info();
+                        if(s->positionType() == ShipPositionEnum::SP_ONISLE and
+                                sInfo.isleId == cmd.sourceId and
+                                (sInfo.shipType == ShipTypeEnum::ST_BATTLESHIP or
+                                 (sInfo.shipType == ShipTypeEnum::ST_FLEET and s->force() >= 1.0)))
                         {
                             s->setPositionType(ShipPositionEnum::S_PATROL);
                         }

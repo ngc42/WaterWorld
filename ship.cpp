@@ -553,6 +553,7 @@ void Ship::updateFleet()
     float techlevel = 0.0;
     float maxTech = 0.0;
     float damage = 0.0;
+    m_carryTechnology = 0.0;
     for(Ship * &s : m_fleetShips)
     {
         ShipInfo shipInfo = s->info();
@@ -561,18 +562,84 @@ void Ship::updateFleet()
             s->updateFleet();
             // update info
             shipInfo = s->info();
+
         }
         if(s->isDead())
         {
             m_fleetShips.removeOne(s);
+            // delete all elements, if s is a fleet
+            deleteFleetContent(s);
             delete s;
         }
         else
         {
-            if(shipInfo.shipType == ShipTypeEnum::ST_BATTLESHIP or shipInfo.shipType == ShipTypeEnum::ST_FLEET)
-            maxTech = shipInfo.technology
-                    xxxx ???
+            // @fixme: I'm not sure, if this is all correct
+            maxTech = shipInfo.technology > maxTech ? shipInfo.technology : maxTech;
+            techlevel += shipInfo.technology;
+            damage = damage + shipInfo.technology * shipInfo.damage;
+            if(shipInfo.carryTechnology > m_carryTechnology)
+                m_carryTechnology = shipInfo.carryTechnology;
         }
     }
+    m_technology = maxTech;
+    m_damage = damage / techlevel;
 
+    if(m_damage >= 0.99f or m_fleetShips.count() == 0)
+        setPositionType(ShipPositionEnum::SP_TRASH);
+}
+
+
+void Ship::deleteFleetContent(Ship * &inDeleteShip)
+{
+    if(inDeleteShip->info().shipType == ShipTypeEnum::ST_FLEET)
+    {
+        Ship *elementShip;
+        while( ! m_fleetShips.isEmpty() )
+        {
+            // delete the content of this fleet recursive
+            elementShip = m_fleetShips.takeFirst();
+            deleteFleetContent(elementShip);
+            delete elementShip;
+        }
+    }
+}
+
+
+bool Ship::fleetContainsShipType(const ShipTypeEnum shipType)
+{
+    Q_ASSERT(m_shipType == ShipTypeEnum::ST_FLEET);
+
+    for(Ship *s : m_fleetShips)
+    {
+        ShipInfo sInfo = s->info();
+        if(sInfo.shipType == shipType)
+            return true;
+        if(sInfo.shipType == ShipTypeEnum::ST_FLEET)
+            if(s->fleetContainsShipType(shipType))
+                return true;
+    }
+    return false;
+}
+
+
+bool Ship::fleetRemoveFirstColonyShip()
+{
+    Q_ASSERT(m_shipType == ShipTypeEnum::ST_FLEET);
+    for(Ship * &s : m_fleetShips)
+    {
+        ShipInfo sInfo = s->info();
+        if(sInfo.shipType == ShipTypeEnum::ST_COLONY)
+        {
+            s->setDead();
+            return true;
+        }
+        if(sInfo.shipType == ShipTypeEnum::ST_FLEET)
+        {
+            bool killed = s->fleetRemoveFirstColonyShip();
+            if(killed)
+                return true;
+        }
+
+    }
+    return false;
 }

@@ -177,6 +177,21 @@ public:
      */
     void updateFleet();
 
+    /*
+     * Delete a part of a fleet
+     */
+    void deleteFleetContent(Ship * &inDeleteShip);
+
+    /*
+     * True, if fleet contains ship of that type
+     */
+    bool fleetContainsShipType(const ShipTypeEnum shipType);
+
+    /*
+     * remove the first colony from a fleet, because we land on unsettled isle
+     */
+    bool fleetRemoveFirstColonyShip();
+
 
 private:
     ShipTypeEnum m_shipType;
